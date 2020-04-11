@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module fritzingVersion="0.9.4.2019-12-01.CD-498-0-a1ffcea" icon="Mine.png">
+    <title>My Parts</title>
+    <instances>
+        <instance moduleIdRef="prefix0000_8e9a39990b1424b76fa971aaa1d001a6_1" modelIndex="6337" path="C:/Users/James/Documents/Fritzing/parts/user/prefix0000_8e9a39990b1424b76fa971aaa1d001a6_1.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="96dbe71554ce3f1d1ef42d1960e0069c" modelIndex="6543" path="C:/Users/James/Documents/Fritzing/parts/user/2.1mm_DC_Barrel_Jack__0d81611f192da410c39c2b4301ccb3cb.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="adafruit_c404f22dad39e4aca1e41367d00ec04a_13" modelIndex="6583" path="C:/Users/James/Documents/Fritzing/parts/user/adafruit_c404f22dad39e4aca1e41367d00ec04a_13.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="T Cobbler Plus Cable" modelIndex="6614" path="C:/Users/James/Documents/Fritzing/parts/user/T Cobbler Plus Cable.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="TXB0104_ac06c1d31a374a15446155061db47984_1" modelIndex="7251" path="C:/Users/James/Documents/Fritzing/parts/user/TXB0104_ac06c1d31a374a15446155061db47984_1.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="RPiHeader40p_cbf1dcd1fd1adf2d32ff5e77f7135209_3" modelIndex="85410590" path="C:/Users/James/Documents/Fritzing/parts/user/RPiHeader40p_cbf1dcd1fd1adf2d32ff5e77f7135209_3.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="TracoPower_TSR-1_316049d9633aaf8c9b7c430cf8457aed_6" modelIndex="85410843" path="C:/Users/James/Documents/Fritzing/parts/user/TracoPower_TSR-1_316049d9633aaf8c9b7c430cf8457aed_6.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="zero_ea47bc8663b7eda73dcd09c4f1ef5d55_1" modelIndex="85410854" path="C:/Users/James/Documents/Fritzing/parts/user/zero_ea47bc8663b7eda73dcd09c4f1ef5d55_1.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="adafruit_13ee4463ea39b8ad5334d5c37833dcc3_1" modelIndex="85411077" path="C:/Users/James/Documents/Fritzing/parts/user/adafruit_13ee4463ea39b8ad5334d5c37833dcc3_1.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="LLC_4_X_5_3_92769fe4f2b722cfe4c436a5bdea4552_3" modelIndex="85411082" path="C:/Users/James/Documents/Fritzing/parts/user/LLC_4_X_5_3_92769fe4f2b722cfe4c436a5bdea4552_3.fzp">
+            <views/>
+        </instance>
+        <instance moduleIdRef="RPiHeader40p_1" modelIndex="85426737" path="C:/Users/James/Documents/Fritzing/parts/user/RPiHeader40p_1.fzp">
+            <views/>
+        </instance>
+    </instances>
+</module>

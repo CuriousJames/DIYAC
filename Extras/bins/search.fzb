@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module fritzingVersion="0.9.4.2019-12-01.CD-498-0-a1ffcea" icon="Search.png" search="led indicator">
+    <title>Search</title>
+    <instances>
+        <instance moduleIdRef="805ColorLEDModuleID" modelIndex="85425500" path="C:/Program Files/Fritzing/fritzing-parts/core/SMD_LED_generic_0805.fzp" flippedSMD="true">
+            <property name="color" value="Red (633nm)"/>
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="CathodeLEDRGBSuperfluxModuleID" modelIndex="85425502" path="C:/Program Files/Fritzing/fritzing-parts/core/led_flux_rgb_cathode.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="0d35715c371dab9d8b52b3c09444f755" modelIndex="85425504" path="C:/Program Files/Fritzing/fritzing-parts/core/led-rgb-4pin-anode_rbg.fzp">
+            <views>
+                <iconView layer="icon">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="AnodeLEDRGBSuperfluxModuleID" modelIndex="85425506" path="C:/Program Files/Fritzing/fritzing-parts/core/led_flux_rgb_anode.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="canbus_shield-v12" modelIndex="85425508" path="C:/Program Files/Fritzing/fritzing-parts/core/canbus_shield-v12.fzp">
+            <views>
+                <iconView layer="icon">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="DUO_LED_RG" modelIndex="85425510" path="C:/Program Files/Fritzing/fritzing-parts/core/DUO_LED_RG.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="d4d5af9700923b8a114f57961f29a8a0" modelIndex="5638" path="C:/Program Files/Fritzing/fritzing-parts/core/led-rgb-4pin-cathode.fzp">
+            <views>
+                <iconView layer="icon">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="1206ColorLEDModuleID" modelIndex="85425513" path="C:/Program Files/Fritzing/fritzing-parts/core/SMD_LED_generic_1206.fzp" flippedSMD="true">
+            <property name="color" value="Red (633nm)"/>
+            <views>
+                <iconView layer="breadboardbreadboard">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="CathodeLEDSuperfluxModuleID" modelIndex="85425515" path="C:/Program Files/Fritzing/fritzing-parts/core/led_flux_blue_cathode.fzp">
+            <property name="color" value="Blue"/>
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="xbeeshield-v13" modelIndex="85425428" path="C:/Program Files/Fritzing/fritzing-parts/core/xbeeshield-v13.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="Tricolor-LED v16" modelIndex="85425518" path="C:/Program Files/Fritzing/fritzing-parts/core/Tricolor-LED v16.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="XBee-Regulated-v12" modelIndex="85425520" path="C:/Program Files/Fritzing/fritzing-parts/core/XBee-Regulated-v12.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="3mmColorLEDModuleID" modelIndex="85425522" path="C:/Program Files/Fritzing/fritzing-parts/core/LED-generic-3mm.fzp">
+            <property name="color" value="Red (633nm)"/>
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="atlas-sientific_FLO-30 Circuit" modelIndex="85425524" path="C:/Program Files/Fritzing/fritzing-parts/core/atlas-sientific_FLO-30 Circuit.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="74f3591ccbd4ba20730577a93d0aeda9" modelIndex="85425526" path="C:/Program Files/Fritzing/fritzing-parts/core/led-rgb-4pin-cathode_rbg.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="IRF520_mos_module_7115327c8b8b62b1ba195a98bd66e077_5" modelIndex="85425408" path="C:/Program Files/Fritzing/fritzing-parts/core/IFR520_MOS_module.fzp">
+            <views>
+                <iconView layer="icon">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="AnodeLEDSuperfluxModuleID" modelIndex="5639" path="C:/Program Files/Fritzing/fritzing-parts/core/led_flux_blue_anode.fzp">
+            <property name="color" value="Blue"/>
+            <views>
+                <iconView layer="icon">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="603ColorLEDModuleID" modelIndex="85425532" path="C:/Program Files/Fritzing/fritzing-parts/core/SMD_LED_generic_0603.fzp" flippedSMD="true">
+            <property name="color" value="Red (633nm)"/>
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="microSD_Shield-v13" modelIndex="85425534" path="C:/Program Files/Fritzing/fritzing-parts/core/microSD_Shield-v13.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="5mmColorLEDModuleID" modelIndex="5637" path="C:/Program Files/Fritzing/fritzing-parts/core/LED-generic-5mm.fzp">
+            <property name="color" value="Red (633nm)"/>
+            <views>
+                <iconView layer="icon">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+        <instance moduleIdRef="f5sadfcefde5f807268983b38d37da5dLEDModuleID" modelIndex="85425530" path="C:/Program Files/Fritzing/fritzing-parts/core/led-rgb-4pin-anode.fzp">
+            <views>
+                <iconView layer="">
+                    <geometry z="0" x="-1" y="-1"/>
+                </iconView>
+            </views>
+        </instance>
+    </instances>
+</module>
