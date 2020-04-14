@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<svg xmlns="http://www.w3.org/2000/svg" height="15.556445mm" width="14.056445mm" gorn="0"  version="1.1" id="svg2" viewBox="0 0 49.806301 55.121262">
+    <desc >
+        <referenceFile >Logic Level Converter 4 x 5V - 3_3V_Breadboard.svg</referenceFile>
+    </desc>
+    <defs  id="defs4"/>
+    <metadata  id="metadata7">
+        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <cc:Work xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:about="">
+                <dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format>
+                <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"/>
+                <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/>
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <g transform="translate(-265.50001,-465.34095)" >
+        <g >
+            <g >
+                <g gorn="0.3.0.0.0"  id="layer1">
+                    <g gorn="0.3.0.0.0.0"  id="breadboard">
+                        <rect height="54.921261" stroke="#000000" fill-opacity="1" stroke-width="0.2" y="465.44095" width="49.6063" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none;" x="265.60001" stroke-opacity="1" fill="#ff0000" gorn="0.3.0.0.0.0.0"  id="rect4136"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.1" cy="470.58463"  id="connector0pin" cx="272.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.2" cy="470.6022"  id="connector12pin" cx="308.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.3" cy="479.6022"  id="connector1pin" cx="272.20102" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.4" cy="488.6022"  id="connector2pin" cx="272.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.5" cy="497.6022"  id="connector3pin" cx="272.20102" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.6" cy="506.6022"  id="connector4pin" cx="272.20102" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.7" cy="515.60217"  id="connector5pin" cx="272.20102" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.8" cy="479.6022"  id="connector11pin" cx="308.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.9" cy="488.6022"  id="connector10pin" cx="308.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.10" cy="497.6022"  id="connector9pin" cx="308.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.11" cy="506.6022"  id="connector7pin" cx="308.16" r="1.584"/>
+                        <circle stroke="#9a916c" fill-opacity="1" stroke-width="1.15199995" style="display:inline;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.12" cy="515.60217"  id="connector6pin" cx="308.16" r="1.584"/>
+          id="parts">
+        <rect height="9.1128302" stroke="#000000" fill-opacity="1" stroke-width="0.2" y="468.11292" width="2.52057" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none;" x="289.70294" stroke-opacity="1" fill="#000000" gorn="0.3.0.0.0.0.13"  id="rect4998"/>
+                        <rect height="9.1128302" stroke="#000000" fill-opacity="1" stroke-width="0.2" y="481.81937" width="2.52057" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none;" x="289.70294" stroke-opacity="1" fill="#000000" gorn="0.3.0.0.0.0.14"  id="rect4998-4"/>
+                        <rect height="9.1128302" stroke="#000000" fill-opacity="1" stroke-width="0.2" y="495.49936" width="2.52057" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none;" x="289.72" stroke-opacity="1" fill="#000000" gorn="0.3.0.0.0.0.15"  id="rect4998-3"/>
+                        <rect height="9.1128302" stroke="#000000" fill-opacity="1" stroke-width="0.2" y="508.61548" width="2.52057" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none;" x="289.72" stroke-opacity="1" fill="#000000" gorn="0.3.0.0.0.0.16"  id="rect4998-1"/>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.17.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223">
+                                        <text y="277.42499" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-474.62595" gorn="0.3.0.0.0.0.17.0.0.0.0"  id="tspan4225">LV1</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.18.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9">
+                                        <text y="277.42499" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-483.58646" gorn="0.3.0.0.0.0.18.0.0.0.0"  id="tspan4225-1">LV2</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.19.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-8">
+                                        <text y="277.42499" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-491.32962" gorn="0.3.0.0.0.0.19.0.0.0.0"  id="tspan4225-1-5">LV</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.20.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-2">
+                                        <text y="277.38617" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-501.60419" gorn="0.3.0.0.0.0.20.0.0.0.0"  id="tspan4225-1-6">GND</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.21.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4">
+                                        <text y="277.42499" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-510.68747" gorn="0.3.0.0.0.0.21.0.0.0.0"  id="tspan4225-1-7">LV3</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.22.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-2">
+                                        <text y="277.3862" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-519.47296" gorn="0.3.0.0.0.0.22.0.0.0.0"  id="tspan4225-1-7-5">LV4</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.23.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-5">
+                                        <text y="305.67844" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-474.6521" gorn="0.3.0.0.0.0.23.0.0.0.0"  id="tspan4225-1-7-2">HV1</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.24.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-5-0">
+                                        <text y="305.67841" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-483.62595" gorn="0.3.0.0.0.0.24.0.0.0.0"  id="tspan4225-1-7-2-2">HV2</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.25.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-5-06">
+                                        <text y="305.67841" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-491.32959" gorn="0.3.0.0.0.0.25.0.0.0.0"  id="tspan4225-1-7-2-6">HV</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.26.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-5-3">
+                                        <text y="305.685" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-501.60416" gorn="0.3.0.0.0.0.26.0.0.0.0"  id="tspan4225-1-7-2-7">GND</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.27.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-5-2">
+                                        <text y="305.685" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-510.71594" gorn="0.3.0.0.0.0.27.0.0.0.0"  id="tspan4225-1-7-2-1">HV3</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                        <g transform="matrix(0,-1,1,0,0,0)" >
+                            <g >
+                                <g >
+                                    <g font-size="3.75" stroke="none" fill-opacity="1" stroke-width="1" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-family:OCRA;-inkscape-font-specification:OCRA;letter-spacing:0px;word-spacing:0px;stroke-linecap:butt;stroke-linejoin:miter;" stroke-opacity="1" fill="#ffffff" gorn="0.3.0.0.0.0.28.0.0.0" xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:space="preserve"  id="text4223-9-4-5-37">
+                                        <text y="305.685" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.75px;font-family:OCRA;-inkscape-font-specification:OCRA;fill:#ffffff;fill-opacity:1" x="-519.44592" gorn="0.3.0.0.0.0.28.0.0.0.0"  id="tspan4225-1-7-2-10">HV4</text>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

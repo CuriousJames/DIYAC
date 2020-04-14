@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="20.5mm" viewBox="0 0 44.08333 58.11024" width="15.55162mm"  id="breadboard" gorn="0">
+    <desc >
+        <referenceFile >omron_gv5_2_12vdc_relay_breadboard.svg</referenceFile>
+    </desc>
+    <title >omron_gv5_2_12vdc_relay_breadboard</title>
+    <g  id="pins" gorn="0.2">
+        <line x2="7.70252" style="stroke-linecap:round;stroke-linejoin:round;" x1="0.50534" data-name="Set/Reset" stroke="#555" fill="none" y2="54.15456" stroke-width="0.790152" y1="54.15456"  id="connector90pin" gorn="0.2.0"/>
+        <line x2="43.60372" style="stroke-linecap:round;stroke-linejoin:round;" x1="36.40372" data-name="Set/Reset" stroke="#555" fill="none" y2="54.28864" stroke-width="0.790152" y1="54.28864"  id="connector89pin" gorn="0.2.1"/>
+        <line x2="7.70252" style="stroke-linecap:round;stroke-linejoin:round;" x1="0.50393" data-name="Common Vcc/GND" stroke="#555" fill="none" y2="32.6216" stroke-width="0.790152" y1="32.6216"  id="connector88pin" gorn="0.2.2"/>
+        <line x2="36.40372" style="stroke-linecap:round;stroke-linejoin:round;" x1="43.60443" data-name="Common GND/Vcc" stroke="#555" fill="none" y2="32.6216" stroke-width="0.790152" y1="32.6216"  id="connector5pin" gorn="0.2.3"/>
+        <line x2="7.70252" style="stroke-linecap:round;stroke-linejoin:round;" x1="0.50534" data-name="Out 2 - 2" stroke="#555" fill="none" y2="18.2216" stroke-width="0.790152" y1="18.2216"  id="connector4pin" gorn="0.2.4"/>
+        <line x2="7.70252" style="stroke-linecap:round;stroke-linejoin:round;" x1="0.50534" data-name="Out 1 - 2" stroke="#555" fill="none" y2="3.8216" stroke-width="0.790152" y1="3.8216"  id="connector2pin" gorn="0.2.5"/>
+        <line x2="43.60372" style="stroke-linecap:round;stroke-linejoin:round;" x1="36.40372" data-name="Out 2 - 1" stroke="#555" fill="none" y2="18.2216" stroke-width="0.790152" y1="18.2216"  id="connector1pin" gorn="0.2.6"/>
+        <line x2="43.60372" style="stroke-linecap:round;stroke-linejoin:round;" x1="36.40372" data-name="Out 1 - 1" stroke="#555" fill="none" y2="3.8216" stroke-width="0.790152" y1="3.8216"  id="connector0pin" gorn="0.2.7"/>
+    </g>
+    <g transform="translate(-7.00094 51.1093) rotate(-90)" >
+        <g >
+            <g >
+                <rect style="fill:#303030" x="-7.00094" height="28.6624" ry="0.85039" rx="0.85039" width="58.11024"  y="14.72392"/>
+            </g>
+        </g>
+    </g>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.4"  points="16.846 5.619 9.033 5.619 9.033 13.677"/>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.4"  points="35.075 13.432 35.075 5.619 27.018 5.619"/>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.4"  points="27.263 55.015 35.075 55.015 35.075 46.958"/>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.4"  points="9.033 47.203 9.033 55.015 17.091 55.015"/>
+    <line x2="9.03335" style="stroke-miterlimit:10;" x1="9.03335" stroke="#fff" fill="none" y2="36.43173" stroke-width="0.4" y1="24.18173" />
+    <line x2="9.03335" style="stroke-miterlimit:10;" x1="9.03335" stroke="#fff" fill="none" y2="17.98859" stroke-width="0.4" y1="15.49447" />
+    <line x2="18.66415" style="stroke-miterlimit:10;" x1="21.15827" stroke="#fff" fill="none" y2="5.59839" stroke-width="0.4" y1="5.59839" />
+    <line x2="23.06365" style="stroke-miterlimit:10;" x1="25.55776" stroke="#fff" fill="none" y2="5.59839" stroke-width="0.4" y1="5.59839" />
+    <line x2="18.66415" style="stroke-miterlimit:10;" x1="21.15827" stroke="#fff" fill="none" y2="55.01506" stroke-width="0.4" y1="55.01506" />
+    <line x2="23.06365" style="stroke-miterlimit:10;" x1="25.55776" stroke="#fff" fill="none" y2="55.01506" stroke-width="0.4" y1="55.01506" />
+    <line x2="9.03335" style="stroke-miterlimit:10;" x1="9.03335" stroke="#fff" fill="none" y2="22.36231" stroke-width="0.4" y1="19.8682" />
+    <line x2="35.07501" style="stroke-miterlimit:10;" x1="35.07501" stroke="#fff" fill="none" y2="17.98859" stroke-width="0.4" y1="15.49447" />
+    <line x2="35.07501" style="stroke-miterlimit:10;" x1="35.07501" stroke="#fff" fill="none" y2="22.36231" stroke-width="0.4" y1="19.8682" />
+    <line x2="9.03335" style="stroke-miterlimit:10;" x1="9.03335" stroke="#fff" fill="none" y2="40.83195" stroke-width="0.4" y1="38.33783" />
+    <line x2="9.03335" style="stroke-miterlimit:10;" x1="9.03335" stroke="#fff" fill="none" y2="45.20567" stroke-width="0.4" y1="42.71155" />
+    <line x2="35.07501" style="stroke-miterlimit:10;" x1="35.07501" stroke="#fff" fill="none" y2="40.83195" stroke-width="0.4" y1="38.33783" />
+    <line x2="35.07501" style="stroke-miterlimit:10;" x1="35.07501" stroke="#fff" fill="none" y2="45.20567" stroke-width="0.4" y1="42.71155" />
+    <line x2="35.07501" style="stroke-miterlimit:10;" x1="35.07501" stroke="#fff" fill="none" y2="36.43173" stroke-width="0.4" y1="24.18173" />
+    <rect style="fill:#fff" x="14.74168" height="3.6301" width="1.5"  y="13.67663"/>
+    <rect style="fill:#fff" x="27.71922" height="3.6301" width="1.5"  y="13.67663"/>
+    <rect style="fill:#fff" x="14.74168" height="3.6301" width="1.5"  y="22.36668"/>
+    <rect style="fill:#fff" x="27.71922" height="3.6301" width="1.5"  y="22.36668"/>
+    <rect style="fill:#fff" x="14.74168" height="3.6301" width="1.5"  y="30.99119"/>
+    <rect style="fill:#fff" x="27.71922" height="3.6301" width="1.5"  y="30.99119"/>
+    <rect style="fill:#fff" x="14.74168" height="3.6301" width="1.5"  y="44.55369"/>
+    <rect style="fill:#fff" x="27.71922" height="3.6301" width="1.5"  y="44.55369"/>
+    <path style="fill:#fff" d="M23.18959,43.4838v5.6875H20.78334V43.4838h2.40625m.25-.25H20.53334v6.1875h2.90625V43.2338Z" />
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.2"  points="16.242 15.492 18.783 15.492 18.783 16.612"/>
+    <polygon style="fill:#fff"  points="17.799 16.324 18.783 18.029 19.768 16.324 17.799 16.324"/>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.2"  points="27.719 24.182 25.178 24.182 25.178 23.061"/>
+    <polygon style="fill:#fff"  points="26.162 23.349 25.178 21.644 24.193 23.349 26.162 23.349"/>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.2"  points="16.242 24.182 18.783 24.182 18.783 23.061"/>
+    <polygon style="fill:#fff"  points="19.768 23.349 18.783 21.644 17.799 23.349 19.768 23.349"/>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.2"  points="27.719 15.492 25.178 15.492 25.178 16.612"/>
+    <polygon style="fill:#fff"  points="24.193 16.324 25.178 18.029 26.162 16.324 24.193 16.324"/>
+    <line x2="20.53335" style="stroke-miterlimit:10;" x1="16.24168" stroke="#fff" fill="none" y2="46.35881" stroke-width="0.4" y1="46.35881" />
+    <line x2="27.71922" style="stroke-miterlimit:10;" x1="23.42756" stroke="#fff" fill="none" y2="46.35881" stroke-width="0.4" y1="46.35881" />
+    <path style="fill:#fff" d="M24.275,51.12754v2.30624H19.47917V51.12754H24.275m.3-.3H19.17918V53.7338H24.575V50.82755Z" />
+    <line x2="22.09975" style="stroke-miterlimit:10;" x1="19.51251" stroke="#fff" fill="none" y2="53.57365" stroke-width="0.24" y1="50.98642" />
+    <line x2="23.92918" style="stroke-miterlimit:10;" x1="21.34194" stroke="#fff" fill="none" y2="53.57365" stroke-width="0.24" y1="50.98642" />
+    <line x2="24.38751" style="stroke-miterlimit:10;" x1="23.28139" stroke="#fff" fill="none" y2="52.09253" stroke-width="0.24" y1="50.98642" />
+    <line x2="20.46427" style="stroke-miterlimit:10;" x1="19.35815" stroke="#fff" fill="none" y2="53.68441" stroke-width="0.24" y1="52.57829" />
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.4"  points="13.825 19.868 11.7 19.868 11.7 32.806 14.742 32.806"/>
+    <line x2="13.87129" style="stroke-miterlimit:10;" x1="20.29215" stroke="#fff" fill="none" y2="19.80936" stroke-width="0.6" y1="21.5239" />
+    <g transform="translate(-8.84602 28.10082) rotate(-75.05006)" >
+        <g >
+            <g >
+                <circle r="0.62035" style="fill:#fff" cy="19.80938"  cx="13.87129"/>
+            </g>
+        </g>
+    </g>
+    <polyline style="stroke-miterlimit:10;" stroke="#fff" fill="none" stroke-width="0.4"  points="30.14 19.868 32.265 19.868 32.265 32.806 29.224 32.806"/>
+    <line x2="30.09403" style="stroke-miterlimit:10;" x1="23.67314" stroke="#fff" fill="none" y2="19.80936" stroke-width="0.6" y1="21.5239" />
+    <g transform="translate(-4.09196 8.43483) rotate(-14.9513)" >
+        <g >
+            <g >
+                <circle r="0.62037" style="fill:#fff" cy="19.80938"  cx="30.09403"/>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(13.97426 16.79338) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >8</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(33.41176 16.7936) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >9</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(31.52523 30.4753) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >11</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(17.08191 29.37386) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >6</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(16.8457 38.3374) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >4</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(33.41211 39.43848) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >13</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(33.41163 48.99194) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >16</text>
+            </g>
+        </g>
+    </g>
+    <g transform="translate(13.97412 47.89038) rotate(-90)" >
+        <g >
+            <g >
+                <text style="font-size:4px;fill:#fff;font-family:Droid Sans" >1</text>
+            </g>
+        </g>
+    </g>
+    <g data-name="Part Name"  id="Part_Name" gorn="0.60">
+        <g transform="translate(8.61082 3.26378)" >
+            <g >
+                <g >
+                    <text style="isolation:isolate;font-size:2.212022066116333px;fill:#fff;font-family:Droid Sans" >Omron 12VDC GV5-2</text>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<module moduleId="96dbe71554ce3f1d1ef42d1960e0069c" fritzingVersion="0.7.5b.07.02.6130" referenceFile="2.1mm_DC_Barrel_Jack__0d81611f192da410c39c2b4301ccb3cb.fzp">
+ <author>John De Cristofaro</author>
+ <title>2.1mm DC Barrel Jack</title>
+ <label>JACK</label>
+ <date>Sun Mar 22 2020</date>
+ <url>http://adafruit.com/products/373</url>
+ <tags>
+  <tag>dc</tag>
+  <tag>barrel</tag>
+  <tag>jack</tag>
+  <tag>pin</tag>
+  <tag>breadboard</tag>
+  <tag>adafruit</tag>
+ </tags>
+ <properties>
+  <property name="variant">variant 1</property>
+  <property name="layer"></property>
+  <property name="family">DC Barrel Connector</property>
+  <property name="part number"></property>
+ </properties>
+ <description>2.1mm DC Barrel Jack with Thru-Hole Connectors (breadboardable)</description>
+ <views>
+  <iconView>
+   <layers image="icon/prefix0000_28b1575e3e3eb17a8cc6d6b42fa5ed8f_1_icon.svg">
+    <layer layerId="icon"/>
+   </layers>
+  </iconView>
+  <breadboardView>
+   <layers image="breadboard/prefix0000_28b1575e3e3eb17a8cc6d6b42fa5ed8f_1_breadboard.svg">
+    <layer layerId="breadboard"/>
+   </layers>
+  </breadboardView>
+  <schematicView>
+   <layers image="schematic/prefix0000_28b1575e3e3eb17a8cc6d6b42fa5ed8f_1_schematic.svg">
+    <layer layerId="schematic"/>
+   </layers>
+  </schematicView>
+  <pcbView>
+   <layers image="pcb/prefix0000_28b1575e3e3eb17a8cc6d6b42fa5ed8f_1_pcb.svg">
+    <layer layerId="copper0"/>
+    <layer layerId="copper1"/>
+    <layer layerId="silkscreen"/>
+   </layers>
+  </pcbView>
+ </views>
+ <connectors>
+  <connector type="male" id="connector3" name="sleeve">
+   <description>no description yet</description>
+   <views>
+    <breadboardView>
+     <p svgId="connector3pin" layer="breadboard"/>
+    </breadboardView>
+    <schematicView>
+     <p svgId="connector3pin" layer="schematic"/>
+    </schematicView>
+    <pcbView>
+     <p svgId="connector3pin" layer="copper1"/>
+     <p svgId="connector3pin" layer="copper0"/>
+    </pcbView>
+   </views>
+  </connector>
+  <connector type="male" id="connector1" name="center (V+)">
+   <description/>
+   <views>
+    <breadboardView>
+     <p svgId="connector1pin" layer="breadboard"/>
+    </breadboardView>
+    <schematicView>
+     <p svgId="connector1pin" layer="schematic"/>
+    </schematicView>
+    <pcbView>
+     <p svgId="connector1pin" layer="copper1"/>
+     <p svgId="connector1pin" layer="copper0"/>
+    </pcbView>
+   </views>
+  </connector>
+  <connector type="male" id="connector2" name="GND">
+   <description>no description yet</description>
+   <views>
+    <breadboardView>
+     <p svgId="connector2pin" layer="breadboard"/>
+    </breadboardView>
+    <schematicView>
+     <p svgId="connector2pin" layer="schematic"/>
+    </schematicView>
+    <pcbView>
+     <p svgId="connector2pin" layer="copper1"/>
+     <p svgId="connector2pin" layer="copper0"/>
+    </pcbView>
+   </views>
+  </connector>
+ </connectors>
+</module>
