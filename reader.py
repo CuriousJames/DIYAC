@@ -6,9 +6,10 @@ import atexit
 import threading
 
 def cleanup():
+	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
 	#pi.write(4,0)
 	pi.stop()
-	print "cleanly shutdown"
+	print("cleanly shutdown")
 
 atexit.register(cleanup)
 
@@ -23,17 +24,17 @@ def init():
 	doorRinging=False
 
 def openDoor():
-	print "opening door"
+	print("opening door")
 	pi.write(4,1)
 	time.sleep(5)
 	pi.write(4,0)
-	print "door closed"
+	print("door closed")
 
 def ringDoorbell():
 	global doorRinging
 	if doorRinging == False:
 		doorRinging=True
-		print "ringing doorbell"
+		print("ringing doorbell")
 		pi.write(17,1)
 		time.sleep(2)
 		pi.write(17,0)
@@ -51,11 +52,9 @@ def ringDoorbell():
 		pi.write(17,0)
 
 		doorRinging=False
-		print "stopping doorbell"
+		print("stopping doorbell")
 	else:
-		print "NOT Ringing doorbell - it's already ringing"
-
-#openDoorThread=threading.Thread(target=openDoor)
+		print("NOT Ringing doorbell - it's already ringing")
 
 def callback(bits, code):
 	print("bits={} code={}".format(bits, code))
@@ -65,17 +64,13 @@ def callback(bits, code):
 	elif code == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
-	#	if pi.read(17)==0:
-	#		pi.write(17,1)
-	#	else:
-	#		pi.write(17,0)
 
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
 
 init()
 
-cb1 = pi.callback(04, pigpio.EITHER_EDGE, cbf)
+cb1 = pi.callback(4, pigpio.EITHER_EDGE, cbf)
 cb2 = pi.callback(17, pigpio.EITHER_EDGE, cbf)
 
 w = wiegand.decoder(pi, 14, 15, callback)
@@ -83,4 +78,4 @@ w = wiegand.decoder(pi, 14, 15, callback)
 while True:
 	time.sleep(9999)
 	#Just keeping the python fed (slithering)
-	print "boppity"
+	print("boppity")
