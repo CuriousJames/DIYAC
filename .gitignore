@@ -1,4 +1,4 @@
 wiegand.py
-allowedCards.csv
+allowedCards.json
 Experimental/
 .vscode/
