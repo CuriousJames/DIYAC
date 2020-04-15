@@ -1,3 +1,9 @@
 {
-
+    root:'/',
+    allowedCards: {
+	path:'allowedCards.json'
+    }
+    modules: {
+	dir:'code/includes/'
+    }
 }
