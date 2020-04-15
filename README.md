@@ -8,3 +8,4 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
 ## Pre-requisits ##
 * Raspberry Pi (ideally 2 or up)
 * Wiegand.py put in the root directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
+* Enable PiGPIO on the Pi (just do this once and it will start automatically on boot) `sudo systemctl enable pigpiod`
