@@ -143,7 +143,7 @@ def callback(bits, code):
 
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
-	if gpio == 5 and level == 0:
+	if gpio == doorbellButton and level == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
 
