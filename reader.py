@@ -123,8 +123,7 @@ def callback(bits, code):
 		input = input[:-1] # trim last parity bit
 		# print(input)
 		output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
-		output = int(output, 2) # change to integer - required for doing the change to hex
-		output = format(output, '#010x') # make hex string
+		output = format(int(output, 2), '#010x') # make hex string (and quickly change output to integer - required for doing the change to hex)
 		output = output[2:] # trim "0x"
 		output = output.upper() #Make it uppercase
 		print(output)
