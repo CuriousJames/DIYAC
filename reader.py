@@ -38,11 +38,22 @@ def init():
 	pi.write(readerBuzz,1)
 
 def openDoor():
-	print("opening door")
+	print("Opening Door")
+	pi.write(readerLed,0)
 	pi.write(doorStrike,1)
-	time.sleep(5)
+	time.sleep(4)
+	#Now let's warn that the door is about to close by flashing the Reader's LED
+	print("Door Closing soon")
+	i = 5
+	while i < 5:
+		pi.write(readerLed,1)
+		time.sleep(0.1)
+		pi.write(readerLed,0)
+		time.sleep(0.1)
+		i += 1
+	pi.write(readerLed,1)
 	pi.write(doorStrike,0)
-	print("door closed")
+	print("Door Closed")
 
 def ringDoorbell():
 	global doorRinging
