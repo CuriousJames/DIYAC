@@ -15,7 +15,7 @@ atexit.register(cleanup)
 
 pi = pigpio.pi()
 
-doorRinging=True
+doorRinging=False
 #GPIO Variables so we don't have to remember pin numbers!
 doorStrike=17
 doorbell12=4
@@ -30,10 +30,12 @@ wiegand1=14
 wiegand2=15
 
 def init():
-	global doorRinging
+	#Ensure GPOs are initialised as expected
 	pi.write(doorStrike,0)
 	pi.write(doorbell12,0)
-	doorRinging=False
+	pi.write(doorbellCc,0)
+	pi.write(readerLed,1)
+	pi.write(readerBuzz,1)
 
 def openDoor():
 	print("opening door")
