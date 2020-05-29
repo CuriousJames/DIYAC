@@ -4,6 +4,8 @@ import pigpio
 import wiegand
 import atexit
 import threading
+import json
+import os
 
 def cleanup():
 	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
@@ -37,6 +39,144 @@ def init():
 	pi.write(doorbellCc,0)
 	pi.write(readerLed,1)
 	pi.write(readerBuzz,1)
+        getSettings()
+        getAllowedTokens()
+
+def getSettings():
+        # define global var settings = false
+        # if settings file exists
+        ## open/read+decode/close
+        ## put into settings var
+        ## if problem
+        ### error handling
+        #
+        # if no settings file
+        ## error handling
+
+        # make settings var
+        global settings
+        settings = False
+
+
+        if os.path.exists("settings.json"):
+                # open
+                try:
+                        settingsFile = open("settings.json", "r")
+                except OSError as err :
+                        print("os error while opening settings file:")
+                        print(err)
+                except:
+                        print("unknown error while opening settings file:")
+                        return
+
+                # read + decode
+                try:
+                        settings = json.load(settingsFile)
+                except ValueError as err :
+                        print("JSON Decode error while reading settings file")
+                        print(err)
+                except:
+                        print("unknown error while reading settings file")
+
+                # close
+                try:
+                        settingsFile.close()
+                except OSError as err :
+                        print("os error while closing settings file:")
+                        print(err)
+                except:
+                        print("unknown error while closing settings file")
+
+        else:
+                # error - no file found
+                print("settings file not found")
+                return
+
+        return
+
+def getAllowedTokens():
+        # define global var allowedTokens = false
+        #
+        # if no settings
+        ## exit function
+        #
+        # set file path
+        #
+        # if tokens file exists
+        ## open/read+decode/close
+        ## set allowedTokens
+        ## if problem
+        ### error handling
+        ### return
+        #
+        # if no tokens file
+        ## error handling
+        ## return
+        #
+        # remove ":" from all tokens
+        # make all tokens lower case
+
+        # make allowedTokens var
+        global allowedTokens
+        allowedTokens = False
+
+        # if settings haven't worked, return
+        if settings == False:
+                print("no settings - will not get allowedTokens")
+                return
+
+        # make filepath
+        allowedTokensFilePath = settings["root"] + settings["allowedTokens"]["path"]
+
+        if os.path.exists(allowedTokensFilePath) :
+                # open
+                try:
+                        allowedTokensFile = open(allowedTokensFilePath, "r")
+                except OSError as err :
+                        print("os error while opening allowedTokens file:")
+                        print(err)
+                except:
+                        print("unknown error while opening allowedTokens file:")
+                        return
+
+                # read + decode
+                try:
+                        allowedTokens = json.load(allowedTokensFile)
+                except ValueError as err :
+                        print("JSON Decode error while reading allowedTokens file")
+                        print(err)
+                except:
+                        print("unknown error while reading allowedTokens file")
+
+                # close
+                try:
+                        allowedTicketsFile.close()
+                except OSError as err :
+                        print("os error while closing allowedTokens file:")
+                        print(err)
+                except:
+                        print("unknown error while closing allowedTokens file")
+
+        else:
+                print("allowedTokens file does not exist")
+                return
+
+        # remove ":" and make lowercase
+        for token in allowedTokens:
+                token["value"] = token["value"].replace(":", "");
+                token["value"] = token["value"].lower()
+
+        # Perform transform for mifare ultralight
+        for token in allowedTokens:
+                ##
+                ## do some transforming here
+                pass
+                ##
+
+        # print allowedTokens
+        print(allowedTokens)
+
+        return
 
 def openDoor():
 	print("Opening Door")
@@ -89,45 +229,65 @@ def ringDoorbell():
 def callback(bits, code):
 	print("bits={} code={}".format(bits, code))
 
-	# old stuff
-	#
-	#if code == 111:
-	#	openDoorThread=threading.Thread(target=openDoor)
-	#	openDoorThread.start()
-	#elif code == 0:
-	#	ringDoorbellThread=threading.Thread(target=ringDoorbell)
-	#	ringDoorbellThread.start()
+        #
+        # New stuff
+        ## if bits != 4 AND bits != 34
+        ### error
+        #
+        ## if bits == 34, it's a card token
+        ### convert to binary string
+        ### trim "0b", start parity bit, end parity bit
+        ### re order bytes
+        ### convert to hex
+        ### compare against list
+        #
+        ## if bits == 4
+        ### if code = 0
+        #### ring doorbell
+        ### else
+        #### do something else
 
-	#
-	# New stuff
-	## if bits != 4 AND bits != 34
-	### error
-	#
-	## if bits == 34, it's a card token
-	### convert to binary string
-	### trim "0b", start parity bit, end parity bit
-	### re order bytes
-	### convert to hex
-	### compare against list
-	#
-	## if bits == 4
-	### if code = 0
-	#### ring doorbell
-	### else
-	#### do something else
 
-	if bits == 34:
-		## we have a card
-		input = str(format(code, '#036b')) # make binary string
-		input = input[3:]  # trim '0b' and first parity bit
-		input = input[:-1] # trim last parity bit
-		# print(input)
-		output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
-		output = format(int(output, 2), '#010x') # make hex string (and quickly change output to integer - required for doing the change to hex)
-		output = output[2:] # trim "0x"
-		output = output.upper() #Make it uppercase
-		print(output)
-	elif bits == 4:
+        ##
+        ## error condition
+        if bits != 34 and bits != 4:
+                print("error")
+
+        ##
+        ## we have a card
+        if bits == 34:
+
+                ## make input into a hex string
+                ##
+                input = str(format(code, '#036b')) # make binary string
+                input = input[3:]  # trim '0b' and first parity bit
+                input = input[:-1] # trim last parity bit
+                # print(input)
+                output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
+                output = int(output, 2) # change to integer - required for doing the change to hex
+                output = format(output, '#010x') # make hex string
+                output = output[2:] # trim "0x"
+                print(output)
+
+                ## see if the card is in allowed tokens
+                ##
+                match = False
+                for token in allowedTokens:
+
+                        ## for generic cards - no changing necessary
+                        if token["type"] != "code":
+                                if token["value"] == output:
+                                        # open the door
+                                        match = True
+                                        print("ITS A FUCKING MATCH, OPEN THE DOOR (generic card)")
+
+                ## if it wasn't a match
+                if match == False :
+                        print("That token was not a match with any cards in the allowedTokens file")
+
+        ##
+        ## someone pressed a button
+        if bits == 4:
 		## someone pressed a button
 		# We don't handle these yet - but for debugging let's print out what button they pressed!
 		if code == 10:
@@ -141,13 +301,22 @@ def callback(bits, code):
 		## error condition
 		print("Error - unexpected amount of bits:",bits)
 
+
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
 	if gpio == doorbellButton and level == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
 
+
+
+##
+## Let's start doing things
+##
+
+# run initialisation
 init()
+print("running")
 
 cb1 = pi.callback(doorStrike, pigpio.EITHER_EDGE, cbf)
 cb2 = pi.callback(doorbell12, pigpio.EITHER_EDGE, cbf)

@@ -1,12 +1,12 @@
 {
-    root:'/home/pi/DoorPi',
-    allowedTokens: {
-	path:'allowedTokens.json'
-    }
-    modules: {
-	dir:'code/includes/'
-    }
-    logFile: {
-	path'log/logFile'
+    "root":"/home/user/DoorPi/",
+    "allowedTokens": {
+		"path":"allowedTokens.json"
+    },
+    "modules": {
+		"dir":"code/includes/"
+    },
+    "logFile": {
+		"path":"log/logFile"
     }
 }

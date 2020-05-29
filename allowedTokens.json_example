@@ -1,12 +1,12 @@
 [
-	{
-		value:"0123456789",
-		type:"mifaire 1k"
-		user:"aPerson"
-	},
-	{
-		value:"9876543210",
-		type:"mifaire 1k"
-		user:"aDifferentPerson"
-	}
+    {
+		"value":"a1eeb099",
+		"type":"mifaire 1k",
+		"user":"me"
+    },
+    {
+		"value":"1234",
+		"type":"code",
+		"user":"alsoMe"
+    }
 ]
