@@ -126,7 +126,7 @@ def callback(bits, code):
 		output = int(output, 2) # change to integer - required for doing the change to hex
 		output = format(output, '#010x') # make hex string
 		output = output[2:] # trim "0x"
-		output = output.upper #Make it uppercase
+		output = output.upper() #Make it uppercase
 		print(output)
 	elif bits == 4:
 		## someone pressed a button
