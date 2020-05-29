@@ -6,7 +6,12 @@
     "modules": {
 		"dir":"code/includes/"
     },
-    "logFile": {
+	"logging": {
+		"enabled":true,
+		"level": {
+			"file":"NONE",
+			"stdout":"DBUG"
+		},
 		"path":"log/logFile"
     }
 }

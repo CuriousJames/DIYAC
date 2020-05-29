@@ -4,6 +4,11 @@
 		"type":"mifaire 1k",
 		"user":"me"
     },
+	{
+		"value":"EE:A9:11:B5",
+		"type":"mifaire 1k",
+		"user":"anotherMe"
+    },
     {
 		"value":"1234",
 		"type":"code",

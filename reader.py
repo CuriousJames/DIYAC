@@ -7,19 +7,31 @@ import threading
 import json
 import os
 
+#
+# cleanup
+#  makes things clean at exit
+
 def cleanup():
 	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
 	#pi.write(doorStrike,0)
+
 	pi.stop()
 	print("cleanly shutdown")
 
 atexit.register(cleanup)
 
+#
+# define some variables
+#
+
 pi = pigpio.pi()
 
 doorRinging=False
 doorbellCount=0
-#GPIO Variables so we don't have to remember pin numbers!
+
+#
+# GPIO Variables so we don't have to remember pin numbers!
+#
 doorStrike=17
 doorbell12=4
 doorbellCc=26
@@ -29,20 +41,28 @@ doorbellButton=5
 doorSensor=6
 piActiveLed=13
 spareLed=19
-wiegand1=14
-wiegand2=15
+wiegand0=14
+wiegand1=15
 
+#
+# initialisation
+#
 def init():
-	#Ensure GPOs are initialised as expected
+	# Ensure GPOs are initialised as expected
 	pi.write(doorStrike,0)
 	pi.write(doorbell12,0)
 	pi.write(doorbellCc,0)
 	pi.write(readerLed,1)
 	pi.write(readerBuzz,1)
+
+        # get all the settings and allowed tokens
         getSettings()
         getAllowedTokens()
 
+#
+# function to get settings from file
 def getSettings():
+
         # define global var settings = false
         # if settings file exists
         ## open/read+decode/close
@@ -94,6 +114,12 @@ def getSettings():
 
         return
 
+#
+# function to make var of allowed tokens
+#  reads file
+#  changes all hex values to lower case without ":"
+#  changes mifare ultralight tokens to what will be received by reader - not implemented yet
+#
 def getAllowedTokens():
         # define global var allowedTokens = false
         #
@@ -150,7 +176,7 @@ def getAllowedTokens():
 
                 # close
                 try:
-                        allowedTicketsFile.close()
+                        allowedTokensFile.close()
                 except OSError as err :
                         print("os error while closing allowedTokens file:")
                         print(err)
@@ -177,6 +203,103 @@ def getAllowedTokens():
         print(allowedTokens)
 
         return
+
+#
+# function to make log ready
+#  will not enable logging if:
+#   no settings
+#   settings for logging is not enabled
+#   file path is not spefifed
+#   theres an error getting to the file
+#
+# incomplete
+#
+def logSetup() :
+        # set global var logging = false
+        # if no settings
+        ## return
+        # if settings[log][enabled] == false
+        ## return
+        # if settings[log][path] not specified
+        ## return
+        # if file path does not start with "/"
+        ## make file path be root+path
+        # if file does not exist
+        ## make file
+        # open file and close file
+        # if error on open/close
+        ## return
+        # set logging = true
+        # if settings[log][level] not set
+        ## set to error
+
+        # if no settings
+        if settings == False :
+                print("no settings - will not log")
+                return
+
+        # if logging-enabled does not exist or is false
+        try:
+                settings["logging"]["enabled"]
+        except NameError:
+                settings["logging"]["enabled"] == False
+        if settings["logging"]["enabled"] == False :
+                return
+
+        # if logging-path is not set, do not log to file
+        try:
+                settings["logging"]["path"]
+        except NameError:
+                settings["logging"]["level"]["file"] = "NONE"
+
+        # this whoel bit only happens if file logging is not none
+        #  set proper file path
+        #  test if file exists
+        #  make sure read/write/close is possible
+        if settings["logging"]["level"]["file"] != "NONE" :
+
+                # set path so it's absolute
+                if settings["logging"]["path"][0] != "/" :
+                        settings["logging"]["path"] = settings["root"]+settings["logging"]["path"]
+
+                # see if file exists
+                if os.path.exists(settings["logging"]["path"]) :
+                        pass
+                else:
+                        print("log file does not exist, will try to make one in a moment")
+
+                # try to open then close the file
+                openCloseError = False
+                try:
+                        f = open(settings["logging"]["path"], "w+")
+                except:
+                        print("unable to create log file - will not perform logging to file")
+                        settings["logging"]["level"]["file"] = "NONE"
+                        openCloseError = True
+
+                if openCloseError == False :
+                        try :
+                                f.close()
+                        except:
+                                print("unable to close log file - will not perform logging to file")
+                                settings["logging"]["level"]["file"] = "NONE"
+                                openCloseError = True
+
+
+
+
+#
+# function to put a message into the log file
+#  only does anything if log file is setup and ready
+def log(lvl, msg) :
+        # log levels
+        #  FATL - 0
+        #  EROR - 1
+        #  WARN - 2
+        #  INFO - 3
+        #  DBUG - 4
+        pass
+
 
 def openDoor():
 	print("Opening Door")
@@ -226,7 +349,7 @@ def ringDoorbell():
 	else:
 		print("NOT Ringing doorbell - it's already ringing")
 
-def callback(bits, code):
+def wiegandCallback(bits, code):
 	print("bits={} code={}".format(bits, code))
 
         #
@@ -251,7 +374,8 @@ def callback(bits, code):
         ##
         ## error condition
         if bits != 34 and bits != 4:
-                print("error")
+                print("error - unexpected number of bits")
+                return
 
         ##
         ## we have a card
@@ -285,6 +409,11 @@ def callback(bits, code):
                 if match == False :
                         print("That token was not a match with any cards in the allowedTokens file")
 
+                ## log
+                ##  but logging isn't implementd yet
+                if settings != False :
+                        pass
+
         ##
         ## someone pressed a button
         if bits == 4:
@@ -297,9 +426,6 @@ def callback(bits, code):
 		else:
 			key=code
 		print("Keypad key pressed:",key)
-	else:
-		## error condition
-		print("Error - unexpected amount of bits:",bits)
 
 
 def cbf(gpio, level, tick):
@@ -318,12 +444,15 @@ def cbf(gpio, level, tick):
 init()
 print("running")
 
+# this comment will give a nice hint about what the next 4 lines do
 cb1 = pi.callback(doorStrike, pigpio.EITHER_EDGE, cbf)
 cb2 = pi.callback(doorbell12, pigpio.EITHER_EDGE, cbf)
 cb3 = pi.callback(doorbellButton, pigpio.EITHER_EDGE, cbf)
 cb4 = pi.callback(doorSensor, pigpio.EITHER_EDGE, cbf)
 
-w = wiegand.decoder(pi, wiegand1, wiegand2, callback)
+# set the wiegand reading
+# will call function wiegandCallback on receiving data
+w = wiegand.decoder(pi, wiegand0, wiegand1, wiegandCallback)
 
 while True:
 	time.sleep(9999)
