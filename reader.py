@@ -16,6 +16,7 @@ atexit.register(cleanup)
 pi = pigpio.pi()
 
 doorRinging=False
+doorbellCount=0
 #GPIO Variables so we don't have to remember pin numbers!
 doorStrike=17
 doorbell12=4
@@ -57,9 +58,13 @@ def openDoor():
 
 def ringDoorbell():
 	global doorRinging
+	global doorbellCount
+	doorbellCount+=1
+	print("******* Bell Count:",doorbellCount,"*******")
+
 	if doorRinging == False:
 		doorRinging=True
-		print("ringing doorbell")
+		print("Ringing Doorbell")
 		pi.write(doorbell12,1)
 		time.sleep(2)
 		pi.write(doorbell12,0)
@@ -77,7 +82,7 @@ def ringDoorbell():
 		pi.write(doorbell12,0)
 
 		doorRinging=False
-		print("stopping doorbell")
+		print("Stopping Doorbell")
 	else:
 		print("NOT Ringing doorbell - it's already ringing")
 
@@ -138,11 +143,16 @@ def callback(bits, code):
 
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
+	if gpio == 5 and level == 0:
+		ringDoorbellThread=threading.Thread(target=ringDoorbell)
+		ringDoorbellThread.start()
 
 init()
 
 cb1 = pi.callback(doorStrike, pigpio.EITHER_EDGE, cbf)
 cb2 = pi.callback(doorbell12, pigpio.EITHER_EDGE, cbf)
+cb3 = pi.callback(doorbellButton, pigpio.EITHER_EDGE, cbf)
+cb4 = pi.callback(doorSensor, pigpio.EITHER_EDGE, cbf)
 
 w = wiegand.decoder(pi, wiegand1, wiegand2, callback)
 
