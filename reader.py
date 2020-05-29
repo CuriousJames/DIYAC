@@ -124,14 +124,17 @@ def callback(bits, code):
 		print(output)
 	elif bits == 4:
 		## someone pressed a button
-		## if 0 pressed - ring doorbell
-		## this is only for testing things
-		if code == 0:
-			ringDoorbellThread=threading.Thread(target=ringDoorbell)
-			ringDoorbellThread.start()
+		# We don't handle these yet - but for debugging let's print out what button they pressed!
+		if code == 10:
+			key="*"
+		elif code == 11:
+			key="#"
+		else:
+			key=code
+		print("Keypad key pressed:",key)
 	else:
 		## error condition
-		print("Error - unexpected amount of bits!",bits)
+		print("Error - unexpected amount of bits:",bits)
 
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
