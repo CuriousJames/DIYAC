@@ -111,14 +111,8 @@ def callback(bits, code):
 	### else
 	#### do something else
 
-	##
-	## error condition
-	if bits != 34 and bits != 4:
-		print("error")
-
-	##
-	## we have a card
 	if bits == 34:
+		## we have a card
 		input = str(format(code, '#036b')) # make binary string
 		input = input[3:]  # trim '0b' and first parity bit
 		input = input[:-1] # trim last parity bit
@@ -128,15 +122,16 @@ def callback(bits, code):
 		output = format(output, '#010x') # make hex string
 		output = output[2:] # trim "0x"
 		print(output)
-
-	##
-	## someone pressed a button
-	if bits == 4:
+	elif bits == 4:
+		## someone pressed a button
 		## if 0 pressed - ring doorbell
 		## this is only for testing things
 		if code == 0:
 			ringDoorbellThread=threading.Thread(target=ringDoorbell)
 			ringDoorbellThread.start()
+	else:
+		## error condition
+		print("Error - unexpected amount of bits!",bits)
 
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
