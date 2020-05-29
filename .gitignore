@@ -4,3 +4,4 @@ allowedTokens.json
 Experimental/
 .vscode/
 settings.json
+logFile
