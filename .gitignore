@@ -1,5 +1,6 @@
 wiegand.py
 allowedCards.json
+allowedTokens.json
 Experimental/
 .vscode/
 settings.json
