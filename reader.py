@@ -223,7 +223,7 @@ def getAllowedTokens():
 # Description:
 #  this makes the logging happen
 #
-# Level description
+# Level description - when selected as display or file write level all below levels are logged in addition to the selected level
 #  DBUG - everthing that's happening
 #  INFO - program events, token events, door events
 #  WARN - anything wrong but non-fatal
