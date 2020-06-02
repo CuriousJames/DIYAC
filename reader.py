@@ -10,7 +10,7 @@ import datetime # used for logging
 
 #
 # cleanup
-#  makes things clean at exit
+# makes things clean at exit
 
 def cleanup():
 	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
@@ -90,7 +90,6 @@ def getSettings():
         global settings
         settings = False
 
-
         if os.path.exists("settings.json"):
                 # open
                 try:
@@ -100,6 +99,7 @@ def getSettings():
                         print(err)
                 except:
                         print("unknown error while opening settings file:")
+                        print(err)
                         return
 
                 # read + decode
@@ -122,9 +122,9 @@ def getSettings():
 
         else:
                 # error - no file found
-                print("settings file not found")
+                print("Critical Error - settings file not found - please create settings.json using the example provided")
+                exit
                 return
-
         return
 
 #
@@ -199,21 +199,22 @@ def getAllowedTokens():
 
         # remove ":" and make lowercase
         for token in allowedTokens:
-                token["value"] = token["value"].replace(":", "");
+                token["value"] = token["value"].replace(":", "")
                 token["value"] = token["value"].lower()
 
         # Perform transform for mifare ultralight
         for token in allowedTokens:
                 ##
                 ## do some transforming here
-                pass
-                ##
+                ## Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
+                ## So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
+                if len(token["value"]) >8:
+                        token["value"] = "88" + token["value"][:6]
 
         # print allowedTokens
         logger.write("DBUG", "allowedTokens", allowedTokens)
 
         return
-
 
 #
 # log
@@ -479,7 +480,6 @@ class logging :
                         # needle is not in haystack
                         return false
 
-
 def openDoor():
 	logger.write("INFO", "Opening Door")
 	pi.write(readerLed,0)
@@ -605,7 +605,6 @@ def cbf(gpio, level, tick):
 	if gpio == doorbellButton and level == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
-
 
 
 #
