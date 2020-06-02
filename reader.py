@@ -378,7 +378,7 @@ def wiegandCallback(bits, code):
                 match = False
                 for token in allowedTokens:
                         ## for generic cards - no changing necessary
-                        if token["type"] == "code":
+                        if token["type"] == "card":
                                 if token["value"] == output:
                                         # open the door
                                         match = True
