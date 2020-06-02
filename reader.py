@@ -9,7 +9,7 @@ import os
 
 #
 # cleanup
-#  makes things clean at exit
+# makes things clean at exit
 
 def cleanup():
 	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
@@ -77,7 +77,6 @@ def getSettings():
         global settings
         settings = False
 
-
         if os.path.exists("settings.json"):
                 # open
                 try:
@@ -87,6 +86,7 @@ def getSettings():
                         print(err)
                 except:
                         print("unknown error while opening settings file:")
+                        print(err)
                         return
 
                 # read + decode
@@ -109,9 +109,9 @@ def getSettings():
 
         else:
                 # error - no file found
-                print("settings file not found")
+                print("Critical Error - settings file not found - please create settings.json using the example provided")
+				exit
                 return
-
         return
 
 #
@@ -145,11 +145,6 @@ def getAllowedTokens():
         # make allowedTokens var
         global allowedTokens
         allowedTokens = False
-
-        # if settings haven't worked, return
-        if settings == False:
-                print("no settings - will not get allowedTokens")
-                return
 
         # make filepath
         allowedTokensFilePath = settings["root"] + settings["allowedTokens"]["path"]
@@ -232,11 +227,6 @@ def logSetup() :
         # set logging = true
         # if settings[log][level] not set
         ## set to error
-
-        # if no settings
-        if settings == False :
-                print("no settings - will not log")
-                return
 
         # if logging-enabled does not exist or is false
         try:
