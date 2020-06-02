@@ -4,8 +4,9 @@ import pigpio
 import wiegand
 import atexit
 import threading
-import json
-import os
+import os # useful for file operations
+import json # for gettings settings and tokens
+import datetime # used for logging
 
 #
 # cleanup
@@ -16,7 +17,7 @@ def cleanup():
 	#pi.write(doorStrike,0)
 
 	pi.stop()
-	print("cleanly shutdown")
+	logger.write("ERRR", "program shutdown")
 
 atexit.register(cleanup)
 
@@ -48,16 +49,28 @@ wiegand1=15
 # initialisation
 #
 def init():
-	# Ensure GPOs are initialised as expected
-	pi.write(doorStrike,0)
-	pi.write(doorbell12,0)
-	pi.write(doorbellCc,0)
-	pi.write(readerLed,1)
-	pi.write(readerBuzz,1)
 
         # get all the settings and allowed tokens
         getSettings()
+
+        # start logging
+        global logger
+        logger = logging()
+        logger.write("INFO", "DoorPi starting")
+
+        # Ensure GPOs are initialised as expected
+        try :
+	        pi.write(doorStrike,0)
+	        pi.write(doorbell12,0)
+	        pi.write(doorbellCc,0)
+	        pi.write(readerLed,1)
+	        pi.write(readerBuzz,1)
+        except :
+                logger.write("ERRR", "There was an issue setting output pins")
+
+        # get the token list
         getAllowedTokens()
+
 
 #
 # function to get settings from file
@@ -148,7 +161,7 @@ def getAllowedTokens():
 
         # if settings haven't worked, return
         if settings == False:
-                print("no settings - will not get allowedTokens")
+                logger.write("WARN", "no settings - will not get allowedTokens")
                 return
 
         # make filepath
@@ -159,32 +172,29 @@ def getAllowedTokens():
                 try:
                         allowedTokensFile = open(allowedTokensFilePath, "r")
                 except OSError as err :
-                        print("os error while opening allowedTokens file:")
-                        print(err)
+                        logger.write("WARN", "os error while opening allowedTokens file", err)
                 except:
-                        print("unknown error while opening allowedTokens file:")
+                        logger.write("WARN", "unknown error while opening allowedTokens file")
                         return
 
                 # read + decode
                 try:
                         allowedTokens = json.load(allowedTokensFile)
                 except ValueError as err :
-                        print("JSON Decode error while reading allowedTokens file")
-                        print(err)
+                        logger.write("WARN", "JSON Decode error while reading allowedTokens file", err)
                 except:
-                        print("unknown error while reading allowedTokens file")
+                        logger.write("WARN", "unknown error while reading/decoding allowedTokens file")
 
                 # close
                 try:
                         allowedTokensFile.close()
                 except OSError as err :
-                        print("os error while closing allowedTokens file:")
-                        print(err)
+                        logger.write("WARN", "os error while closing allowedTokens file:", err)
                 except:
-                        print("unknown error while closing allowedTokens file")
+                        logger.write("WARN", "unknown error while closing allowedTokens file")
 
         else:
-                print("allowedTokens file does not exist")
+                logger.write("WARN", "allowedTokens file does not exist")
                 return
 
         # remove ":" and make lowercase
@@ -200,114 +210,283 @@ def getAllowedTokens():
                 ##
 
         # print allowedTokens
-        print(allowedTokens)
+        logger.write("DBUG", "allowedTokens", allowedTokens)
 
         return
 
+
 #
-# function to make log ready
-#  will not enable logging if:
-#   no settings
-#   settings for logging is not enabled
-#   file path is not spefifed
-#   theres an error getting to the file
+# log
 #
-# incomplete
 #
-def logSetup() :
-        # set global var logging = false
-        # if no settings
-        ## return
-        # if settings[log][enabled] == false
-        ## return
-        # if settings[log][path] not specified
-        ## return
-        # if file path does not start with "/"
-        ## make file path be root+path
-        # if file does not exist
-        ## make file
-        # open file and close file
-        # if error on open/close
-        ## return
-        # set logging = true
-        # if settings[log][level] not set
-        ## set to error
+# Description:
+#  this makes the logging happen
+#
+# Level description
+#  DBUG - everthing that's happening
+#  INFO - program events, token events, door events
+#  WARN - anything wrong but non-fatal
+#  ERRR - fatal events
+#  NONE - absolutely nothing (after logging is initialised)
+#
+#
+# Variables:
+#  filePath
+#  fileLevel
+#  displayLevel
+#  levelTable
+#
+#
+# Functions:
+#
+#  __init__()
+#   gets info from settings
+#   puts relevent info into vars
+#
+#  write(lvl, msg, [data])
+#   write message to outputs
+#   only if level is above what is set in settings
+#   if no settings found, will log ALL to display
+#
 
-        # if no settings
-        if settings == False :
-                print("no settings - will not log")
-                return
+class logging :
 
-        # if logging-enabled does not exist or is false
-        try:
-                settings["logging"]["enabled"]
-        except NameError:
-                settings["logging"]["enabled"] == False
-        if settings["logging"]["enabled"] == False :
-                return
+        def __init__(self) :
+                # get information out of settings
+                # create some useful vars
 
-        # if logging-path is not set, do not log to file
-        try:
-                settings["logging"]["path"]
-        except NameError:
-                settings["logging"]["level"]["file"] = "NONE"
+                # globalise settings
+                global settings
 
-        # this whoel bit only happens if file logging is not none
-        #  set proper file path
-        #  test if file exists
-        #  make sure read/write/close is possible
-        if settings["logging"]["level"]["file"] != "NONE" :
+                # levelTable
+                self.levelTable = ["DBUG", "INFO", "WARN", "ERRR", "NONE"]
 
-                # set path so it's absolute
-                if settings["logging"]["path"][0] != "/" :
-                        settings["logging"]["path"] = settings["root"]+settings["logging"]["path"]
+                # default set : no output to file, full output to display
+                self.filePath = False
+                self.fileLevel = "NONE"
+                self.displayLevel = "ERRR"
 
-                # see if file exists
-                if os.path.exists(settings["logging"]["path"]) :
-                        pass
-                else:
-                        print("log file does not exist, will try to make one in a moment")
+                # if no settings, there's nothing more can be done
+                if settings == False :
+                        print("no settings - all logs will be printed to stdout")
+                        return
 
-                # try to open then close the file
-                openCloseError = False
-                try:
-                        f = open(settings["logging"]["path"], "w+")
-                except:
-                        print("unable to create log file - will not perform logging to file")
-                        settings["logging"]["level"]["file"] = "NONE"
-                        openCloseError = True
+                #
+                # get display settings
+                #  if not exist - NONE
+                #  make sure it's in the allowed list
+                #
 
-                if openCloseError == False :
+                # flag - false if problem, no subsequent operations will be done
+                tmpDisplayLog = True
+
+                # make sure it exists
+                try :
+                        settings["logging"]["display"]["level"]
+                except NameError :
+                        self.displayLevel = "NONE"
+                        tmpDisplayLog = False
+                        print("display logging level not set - no logs will be printed to stdout")
+
+                # make sure it's in levelTable
+                if tmpDisplayLog == True :
+                        if settings["logging"]["display"]["level"] in self.levelTable :
+                                self.displayLevel = settings["logging"]["display"]["level"]
+                                print("display logging level set to "+settings["logging"]["display"]["level"])
+                        else :
+                                self.displayLevel = "NONE"
+                                print("display logging level is incorrect - no more logs to stdout")
+
+                # delete flag
+                del tmpDisplayLog
+
+                #
+                # file logging
+                #  if no level, level incorrect, or level = none there will be no logging to file
+                #  if no file path - no logs
+                #  change path to absolute (if it's not already)
+                #  test if file can be opened and closed
+                #
+
+                # flag - false if error, do not do subsequent operations
+                tmpFileLog = True
+
+                # test exists
+                try :
+                        settings["logging"]["file"]["level"]
+                except NameError :
+                        self.fileLevel = "NONE"
+                        tmpFileLog = False
+                        print("file logging level not set - no logs will be printed to file")
+
+                # czech in levelTable
+                if tmpFileLog == True :
+                        if settings["logging"]["file"]["level"] in self.levelTable :
+                                self.fileLevel = settings["logging"]["file"]["level"]
+                                print("file logging level set to "+settings["logging"]["file"]["level"])
+                        else :
+                                self.fileLevel = "NONE"
+                                print("file logging level is incorrect - no logs to file")
+
+                # see if it's none
+                if tmpFileLog == True:
+                        if self.fileLevel == "NONE" :
+                                tmpFileLog = False
+
+                # test if path set
+                if tmpFileLog == True :
                         try :
-                                f.close()
+                                settings["logging"]["file"]["path"]
+                        except NameError :
+                                self.fileLevel = "NONE"
+                                tmpFileLog = False
+                                print("File path not set - no logs to file")
+                        else :
+                                self.filePath = settings["logging"]["file"]["path"]
+
+                # change path to absolute if necessary
+                if tmpFileLog == True and self.fileLevel != "NONE" :
+                        if self.filePath[0] != "/" :
+                                # still gotta test settings["root"] exists
+                                try :
+                                        settings["root"]
+                                except NameError:
+                                        print("root dir not in settings - will use relative path for log file")
+                                else :
+                                        self.filePath = settings["root"] + self.filePath
+                        print("log file: "+self.filePath)
+
+                # try opening and closing the file
+                if tmpFileLog == True :
+                        try:
+                                # try to open file
+                                f = open(self.filePath, "a")
                         except:
-                                print("unable to close log file - will not perform logging to file")
-                                settings["logging"]["level"]["file"] = "NONE"
-                                openCloseError = True
+                                # unable to open
+                                print("unable to open log file - will not perform logging to file")
+                                self.fileLevel = "NONE"
+                                tmpFileLog = False
+
+                        if tmpFileLog == True :
+                                try:
+                                        # try to close file
+                                        f.close()
+                                except :
+                                        # unable to close file
+                                        print("unable to close log file - will not perform logging to file")
+                                        self.fileLevel = "NONE"
+                                        tmpFileLog = False
+
+                # double check - if flag is false but level is not NONE, something has gone wonky
+                if tmpFileLog == False and self.fileLevel != "NONE" :
+                        print("error while setting up file log - discrepancy found")
+                        self.fileLevel = "NONE"
+
+
+        def write(self, lvl, msg, data="NoLoggingDataGiven") :
+                # check level is in levelTable
+                # get time
+                # format
+                # display first
+                #  check level is what set or lower
+                #  print
+                # file second
+                #  level check
+                #  open
+                #  write
+                #  close
+
+                # check in levelTable
+                if lvl in self.levelTable :
+                        pass
+                else :
+                        return
+
+                # time
+                isoTime = datetime.datetime.now().replace(microsecond=0).isoformat()
+
+                # format msg
+                outMsg = format(msg)
+
+                # if data - format
+                if data != "NoLoggingDataGiven" :
+                        outMsg = outMsg + " - " + format(data)
+
+                # format
+                outStr = isoTime + " - [" + lvl + "] - " + outMsg
+
+                #
+                # display
+                #  get levels
+                #  check levels
+                #   print
+                #  tidy up
+                if self.displayLevel != "NONE" :
+                        # get indexes
+                        incomingLevelNumber = self.inList(lvl, self.levelTable)
+                        currentLevelNumber = self.inList(self.displayLevel, self.levelTable)
+                        # compare
+                        if incomingLevelNumber >= currentLevelNumber :
+                                print(outStr)
+                        # tidy up
+                        del incomingLevelNumber
+                        del currentLevelNumber
+
+                #
+                # file
+                #  get levels
+                #  check levels
+                #   open
+                #   write
+                #   close
+                if self.fileLevel != "NONE" :
+                        # get indexes
+                        incomingLevelNumber = self.inList(lvl, self.levelTable)
+                        currentLevelNumber = self.inList(self.fileLevel, self.levelTable)
+                        # compare
+                        if incomingLevelNumber >= currentLevelNumber :
+                                try :
+                                        f = open(self.filePath, "a")
+                                        f.write(outStr + "\n")
+                                        f.close()
+                                except :
+                                        print("error writing to file")
+                        # tidy up
+                        del incomingLevelNumber
+                        del currentLevelNumber
 
 
 
+        #
+        # helper function
+        #  returns false if not in list
+        #  returns index if it is in the list
+        def inList(self, needle, haystack) :
+                # check if haystack is a list
+                #if type(haystack) != "list" :
+                #        return False
 
-#
-# function to put a message into the log file
-#  only does anything if log file is setup and ready
-def log(lvl, msg) :
-        # log levels
-        #  FATL - 0
-        #  EROR - 1
-        #  WARN - 2
-        #  INFO - 3
-        #  DBUG - 4
-        pass
+                # do some checking
+                if needle in haystack :
+                        # loop through
+                        i = 0
+                        for x in haystack :
+                                if x == needle :
+                                        return i
+                                else :
+                                        i += 1
+                else :
+                        # needle is not in haystack
+                        return false
 
 
 def openDoor():
-	print("Opening Door")
+	logger.write("INFO", "Opening Door")
 	pi.write(readerLed,0)
 	pi.write(doorStrike,1)
 	time.sleep(4)
 	#Now let's warn that the door is about to close by flashing the Reader's LED
-	print("Door Closing soon")
+	logger.write("DBUG", "Door Closing soon")
 	i = 5
 	while i < 5:
 		pi.write(readerLed,1)
@@ -317,17 +496,17 @@ def openDoor():
 		i += 1
 	pi.write(readerLed,1)
 	pi.write(doorStrike,0)
-	print("Door Closed")
+	logger.write("INFO", "Door Closed")
 
 def ringDoorbell():
 	global doorRinging
 	global doorbellCount
 	doorbellCount+=1
-	print("******* Bell Count:",doorbellCount,"*******")
+	logger.write("DBUG", "******* Bell Count *******", doorbellCount)
 
 	if doorRinging == False:
 		doorRinging=True
-		print("Ringing Doorbell")
+		logger.write("INFO", "Start Doorbell")
 		pi.write(doorbell12,1)
 		time.sleep(2)
 		pi.write(doorbell12,0)
@@ -345,79 +524,72 @@ def ringDoorbell():
 		pi.write(doorbell12,0)
 
 		doorRinging=False
-		print("Stopping Doorbell")
+		logger.write("INFO", "Stop Doorbell")
 	else:
-		print("NOT Ringing doorbell - it's already ringing")
+		logger.write("INFO", "NOT Ringing doorbell - it's already ringing")
 
 def wiegandCallback(bits, code):
-	print("bits={} code={}".format(bits, code))
+        # if bits != 4 AND bits != 34
+        ## error
+        #
+        # if bits == 34, it's a card token
+        ## convert to binary string
+        ## trim "0b", start parity bit, end parity bit
+        ## re order bytes
+        ## convert to hex
+        ## compare against list
+        #
+        # if bits == 4
+        ## if code = 0
+        ### ring doorbell
+        ## else
+        ### do something else
 
         #
-        # New stuff
-        ## if bits != 4 AND bits != 34
-        ### error
-        #
-        ## if bits == 34, it's a card token
-        ### convert to binary string
-        ### trim "0b", start parity bit, end parity bit
-        ### re order bytes
-        ### convert to hex
-        ### compare against list
-        #
-        ## if bits == 4
-        ### if code = 0
-        #### ring doorbell
-        ### else
-        #### do something else
+        # log
+        logger.write("DBUG", "New read", {"bits":bits, "code":code})
 
-
-        ##
-        ## error condition
+        #
+        # error condition
         if bits != 34 and bits != 4:
-                print("error - unexpected number of bits")
+                logger.write("WARN", "unexpected number of bits", bits)
                 return
 
-        ##
-        ## we have a card
+        #
+        # we have a card
         if bits == 34:
 
-                ## make input into a hex string
-                ##
+                # make input into a hex string
+                #
                 input = str(format(code, '#036b')) # make binary string
                 input = input[3:]  # trim '0b' and first parity bit
                 input = input[:-1] # trim last parity bit
-                # print(input)
                 output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
                 output = int(output, 2) # change to integer - required for doing the change to hex
                 output = format(output, '#010x') # make hex string
                 output = output[2:] # trim "0x"
-                print(output)
+                logger.write("DEBUG", "output from formatting", output)
 
-                ## see if the card is in allowed tokens
-                ##
+                # see if the card is in allowed tokens
+                #
                 match = False
                 for token in allowedTokens:
 
-                        ## for generic cards - no changing necessary
+                        # for generic cards - no changing necessary
                         if token["type"] != "code":
                                 if token["value"] == output:
                                         # open the door
                                         match = True
-                                        print("ITS A FUCKING MATCH, OPEN THE DOOR (generic card)")
+                                        logger.write("INFO", "token allowed (generic card)", output)
 
-                ## if it wasn't a match
+                # if it wasn't a match
                 if match == False :
-                        print("That token was not a match with any cards in the allowedTokens file")
+                        logger.write("INFO", "token not allowed", output)
 
-                ## log
-                ##  but logging isn't implementd yet
-                if settings != False :
-                        pass
-
-        ##
-        ## someone pressed a button
+        #
+        # someone pressed a button
         if bits == 4:
-		## someone pressed a button
+		# someone pressed a button
 		# We don't handle these yet - but for debugging let's print out what button they pressed!
 		if code == 10:
 			key="*"
@@ -425,24 +597,24 @@ def wiegandCallback(bits, code):
 			key="#"
 		else:
 			key=code
-		print("Keypad key pressed:",key)
+		logger.write("DBUG", "Keypad key pressed", key)
 
 
 def cbf(gpio, level, tick):
-	print(gpio, level, tick)
+	logger.write("DBUG", "GPIO Change", [gpio, level])
 	if gpio == doorbellButton and level == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
 
 
 
-##
-## Let's start doing things
-##
+#
+# Let's start doing things
+#
 
 # run initialisation
 init()
-print("running")
+logger.write("INFO", "DoorPi running")
 
 # this comment will give a nice hint about what the next 4 lines do
 cb1 = pi.callback(doorStrike, pigpio.EITHER_EDGE, cbf)
@@ -457,4 +629,4 @@ w = wiegand.decoder(pi, wiegand0, wiegand1, wiegandCallback)
 while True:
 	time.sleep(9999)
 	#Just keeping the python fed (slithering)
-	print("boppity")
+	logger.write("INFO", "boppity")

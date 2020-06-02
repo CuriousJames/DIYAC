@@ -7,11 +7,12 @@
 		"dir":"code/includes/"
     },
 	"logging": {
-		"enabled":true,
-		"level": {
-			"file":"NONE",
-			"stdout":"DBUG"
+		"file":{
+			"level":"INFO",
+			"path":"log/logFile"
 		},
-		"path":"log/logFile"
+		"display":{
+			"level":"INFO"
+		}
     }
 }
