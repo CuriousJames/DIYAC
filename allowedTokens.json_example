@@ -1,17 +1,17 @@
 [
     {
 		"value":"a1eeb099",
-		"type":"mifaire 1k",
-		"user":"me"
+		"type":"card",
+		"user":"Me"
     },
 	{
 		"value":"EE:A9:11:B5",
-		"type":"mifaire 1k",
-		"user":"anotherMe"
+		"type":"card",
+		"user":"SomeoneElse"
     },
     {
 		"value":"1234",
 		"type":"code",
-		"user":"alsoMe"
+		"user":"Me"
     }
 ]
