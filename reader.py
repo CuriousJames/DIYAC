@@ -184,7 +184,7 @@ def getAllowedTokens():
 
         # remove ":" and make lowercase
         for token in allowedTokens:
-                token["value"] = token["value"].replace(":", "");
+                token["value"] = token["value"].replace(":", "")
                 token["value"] = token["value"].lower()
 
         # Perform transform for mifare ultralight
