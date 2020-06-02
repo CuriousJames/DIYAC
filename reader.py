@@ -110,7 +110,7 @@ def getSettings():
         else:
                 # error - no file found
                 print("Critical Error - settings file not found - please create settings.json using the example provided")
-				exit
+                exit
                 return
         return
 
