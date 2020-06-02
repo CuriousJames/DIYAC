@@ -291,7 +291,6 @@ def log(lvl, msg) :
         #  DBUG - 4
         pass
 
-
 def openDoor():
 	print("Opening Door")
 	pi.write(readerLed,0)
@@ -343,8 +342,6 @@ def ringDoorbell():
 def wiegandCallback(bits, code):
 	print("bits={} code={}".format(bits, code))
 
-        #
-        # New stuff
         ## if bits != 4 AND bits != 34
         ### error
         #
@@ -361,17 +358,9 @@ def wiegandCallback(bits, code):
         ### else
         #### do something else
 
-
-        ##
-        ## error condition
-        if bits != 34 and bits != 4:
-                print("error - unexpected number of bits")
-                return
-
-        ##
-        ## we have a card
         if bits == 34:
-
+                ##
+                ## we have a card
                 ## make input into a hex string
                 ##
                 input = str(format(code, '#036b')) # make binary string
@@ -388,26 +377,20 @@ def wiegandCallback(bits, code):
                 ##
                 match = False
                 for token in allowedTokens:
-
                         ## for generic cards - no changing necessary
-                        if token["type"] != "code":
+                        if token["type"] == "code":
                                 if token["value"] == output:
                                         # open the door
                                         match = True
-                                        print("ITS A FUCKING MATCH, OPEN THE DOOR (generic card)")
+                                        print("Open Door - Card is a match for user '"+token["user"]+"'")
 
                 ## if it wasn't a match
                 if match == False :
-                        print("That token was not a match with any cards in the allowedTokens file")
+                        print("Card denied access - it is not in the allowedTokens file")
 
                 ## log
-                ##  but logging isn't implementd yet
-                if settings != False :
-                        pass
-
-        ##
-        ## someone pressed a button
-        if bits == 4:
+                ## but logging isn't implementd yet
+        elif bits == 4:
 		## someone pressed a button
 		# We don't handle these yet - but for debugging let's print out what button they pressed!
 		if code == 10:
@@ -417,15 +400,17 @@ def wiegandCallback(bits, code):
 		else:
 			key=code
 		print("Keypad key pressed:",key)
-
+        else:
+                ##
+                ## error condition
+                print("error - unexpected number of bits")
+                return
 
 def cbf(gpio, level, tick):
 	print(gpio, level, tick)
 	if gpio == doorbellButton and level == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
-
-
 
 ##
 ## Let's start doing things
