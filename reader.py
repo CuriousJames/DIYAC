@@ -191,14 +191,15 @@ def getAllowedTokens():
         for token in allowedTokens:
                 ##
                 ## do some transforming here
-                pass
-                ##
+                ## Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
+                ## So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
+                if len(token["value"]) >8:
+                        token["value"] = "88" + token["value"][:6]
 
         # print allowedTokens
         print(allowedTokens)
 
         return
-
 #
 # function to make log ready
 #  will not enable logging if:
