@@ -14,5 +14,8 @@
 		"display":{
 			"level":"INFO"
 		}
-    }
+    },
+	"pinDef": {
+		"readerLed": 7
+	}
 }

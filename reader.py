@@ -14,7 +14,7 @@ import logging # our own logging module
 
 def cleanup():
         # This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
-        #pi.write(doorStrike,0)
+        #pi.write(p.pins["doorStrike"],0)
 
         pi.stop()
         l.log("ERRR", "program shutdown")
@@ -33,17 +33,56 @@ doorbellCount=0
 #
 # GPIO Variables so we don't have to remember pin numbers!
 #
-doorStrike=17
-doorbell12=4
-doorbellCc=26
-readerLed=27
-readerBuzz=22
-doorbellButton=5
-doorSensor=6
-piActiveLed=13
-spareLed=19
-wiegand0=14
-wiegand1=15
+class pinDef :
+
+        #
+        # default pins
+        #  these are the ones used by the hat
+        #
+        pins = {
+                "doorStrike": 17,
+                "doorbell12": 4,
+                "doorbellCc": 26,
+                "readerLed": 27,
+                "readerBuzz": 22,
+                "doorbellButton": 5,
+                "doorSensor": 6,
+                "piActiveLed": 13,
+                "spareLed": 19,
+                "wiegand0": 14,
+                "wiegand1": 15
+        }
+
+        #
+        # function to get pins from settings
+        #  if settings[pinDef] does not exist
+        #   return
+        #  iterate through settings[pinDef]
+        #   check it's in the list of pins
+        #   check value is an integer in the correct range
+        #   update var
+        #
+        def __init__(self, settings, logger) :
+
+                # see if anything even exists in settings
+                try :
+                        settings["pinDef"]
+                except :
+                        logger.log("DBUG", "No new pin definitions from settings")
+                        return
+
+                # iterate settigns[pinDef]
+                for p in settings["pinDef"] :
+                        # see if it's one of the pinDefs we already have
+                        if p in self.pins :
+                                # validate
+                                #  >=2, <=27
+                                if settings["pinDef"][p] >= 2 and settings["pinDef"][p] <= 27 :
+                                        # update pin definition
+                                        l.log("DBUG", "New pin defined by settings", {"name": p, "pin": settings["pinDef"][p]})
+                                        self.pins[p] = settings["pinDef"][p]
+
+
 
 #
 # initialisation
@@ -58,13 +97,17 @@ def init():
         l = logging.logger(settings)
         l.log("INFO", "DoorPi starting")
 
+        # pin definitions
+        global p
+        p = pinDef(settings, l)
+
         # Ensure GPOs are initialised as expected
         try :
-                pi.write(doorStrike,0)
-                pi.write(doorbell12,0)
-                pi.write(doorbellCc,0)
-                pi.write(readerLed,1)
-                pi.write(readerBuzz,1)
+                pi.write(p.pins["doorStrike"],0)
+                pi.write(p.pins["doorbell12"],0)
+                pi.write(p.pins["doorbellCc"],0)
+                pi.write(p.pins["readerLed"],1)
+                pi.write(p.pins["readerBuzz"],1)
         except :
                 l.log("ERRR", "There was an issue setting output pins")
 
@@ -217,20 +260,20 @@ def getAllowedTokens():
 
 def openDoor():
         l.log("INFO", "Opening Door")
-        pi.write(readerLed,0)
-        pi.write(doorStrike,1)
+        pi.write(p.pins["readerLed"],0)
+        pi.write(p.pins["doorStrike"],1)
         time.sleep(4)
         #Now let's warn that the door is about to close by flashing the Reader's LED
         l.log("DBUG", "Door Closing soon")
         i = 5
         while i < 5:
-                pi.write(readerLed,1)
+                pi.write(p.pins["readerLed"],1)
                 time.sleep(0.1)
-                pi.write(readerLed,0)
+                pi.write(p.pins["readerLed"],0)
                 time.sleep(0.1)
                 i += 1
-        pi.write(readerLed,1)
-        pi.write(doorStrike,0)
+        pi.write(p.pins["readerLed"],1)
+        pi.write(p.pins["doorStrike"],0)
         l.log("INFO", "Door Closed")
 
 def ringDoorbell():
@@ -242,21 +285,21 @@ def ringDoorbell():
         if doorRinging == False:
                 doorRinging=True
                 l.log("INFO", "Start Doorbell")
-                pi.write(doorbell12,1)
+                pi.write(p.pins["doorbell12"],1)
                 time.sleep(2)
-                pi.write(doorbell12,0)
+                pi.write(p.pins["doorbell12"],0)
 
                 time.sleep(0.1)
 
-                pi.write(doorbell12,1)
+                pi.write(p.pins["doorbell12"],1)
                 time.sleep(0.2)
-                pi.write(doorbell12,0)
+                pi.write(p.pins["doorbell12"],0)
 
                 time.sleep(0.1)
 
-                pi.write(doorbell12,1)
+                pi.write(p.pins["doorbell12"],1)
                 time.sleep(0.2)
-                pi.write(doorbell12,0)
+                pi.write(p.pins["doorbell12"],0)
 
                 doorRinging=False
                 l.log("INFO", "Stop Doorbell")
@@ -329,7 +372,7 @@ def wiegandCallback(bits, code):
 
 def cbf(gpio, level, tick):
         l.log("DBUG", "GPIO Change", [gpio, level])
-        if gpio == doorbellButton and level == 0:
+        if gpio == p.pins["doorbellButton"] and level == 0:
                 ringDoorbellThread=threading.Thread(target=ringDoorbell)
                 ringDoorbellThread.start()
 
@@ -343,14 +386,14 @@ init()
 l.log("INFO", "DoorPi running")
 
 # this comment will give a nice hint about what the next 4 lines do
-cb1 = pi.callback(doorStrike, pigpio.EITHER_EDGE, cbf)
-cb2 = pi.callback(doorbell12, pigpio.EITHER_EDGE, cbf)
-cb3 = pi.callback(doorbellButton, pigpio.EITHER_EDGE, cbf)
-cb4 = pi.callback(doorSensor, pigpio.EITHER_EDGE, cbf)
+cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
+cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
+cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
+cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
 
 # set the wiegand reading
 # will call function wiegandCallback on receiving data
-w = wiegand.decoder(pi, wiegand0, wiegand1, wiegandCallback)
+w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], wiegandCallback)
 
 while True:
         time.sleep(9999)
