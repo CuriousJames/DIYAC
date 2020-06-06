@@ -258,4 +258,4 @@ class logger:
                                         i += 1
                 else :
                         # needle is not in haystack
-                        return false
+                        return False
