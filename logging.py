@@ -34,7 +34,7 @@ import datetime # used for logging
 #   if no settings found, will log ALL to display
 #
 
-class logging :
+class logger:
         def __init__(self,settings) :
                 # get information out of settings
                 # create some useful vars

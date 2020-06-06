@@ -6,7 +6,7 @@ import atexit
 import threading
 import os # useful for file operations
 import json # for gettings settings and tokens
-import logging #our own logging class
+import logging # our own logging module
 
 #
 # cleanup
@@ -55,7 +55,7 @@ def init():
 
         # start logging
         global logger
-        logger = logging(settings)
+        logger = logging.logger(settings)
         logger.write("INFO", "DoorPi starting")
 
         # Ensure GPOs are initialised as expected
