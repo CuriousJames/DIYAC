@@ -285,12 +285,6 @@ def wiegandCallback(bits, code):
         l.log("DBUG", "New read", {"bits":bits, "code":code})
 
         #
-        # error condition
-        if bits != 34 and bits != 4:
-                l.log("WARN", "unexpected number of bits", bits)
-                return
-
-        #
         # we have a card
         if bits == 34:
                 # make input into a hex string
@@ -314,14 +308,10 @@ def wiegandCallback(bits, code):
                                         # open the door
                                         match = True
                                         l.log("INFO", "token allowed (generic card)", output)
-
                 # if it wasn't a match
                 if match == False :
                         l.log("INFO", "token not allowed", output)
-
-        #
-        # someone pressed a button
-        if bits == 4:
+        elif bits == 4:
                 # someone pressed a button
                 # We don't handle these yet - but for debugging let's print out what button they pressed!
                 if code == 10:
@@ -331,7 +321,11 @@ def wiegandCallback(bits, code):
                 else:
                         key=code
                 l.log("DBUG", "Keypad key pressed", key)
-
+        else:
+                #
+                # error condition
+                l.log("WARN", "unexpected number of bits", bits)
+                return
 
 def cbf(gpio, level, tick):
         l.log("DBUG", "GPIO Change", [gpio, level])
