@@ -14,7 +14,7 @@ import logging # our own logging module
 
 def cleanup():
         # This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
-        #pi.log(doorStrike,0)
+        #pi.write(doorStrike,0)
 
         pi.stop()
         l.log("ERRR", "program shutdown")
@@ -60,11 +60,11 @@ def init():
 
         # Ensure GPOs are initialised as expected
         try :
-                pi.log(doorStrike,0)
-                pi.log(doorbell12,0)
-                pi.log(doorbellCc,0)
-                pi.log(readerLed,1)
-                pi.log(readerBuzz,1)
+                pi.write(doorStrike,0)
+                pi.write(doorbell12,0)
+                pi.write(doorbellCc,0)
+                pi.write(readerLed,1)
+                pi.write(readerBuzz,1)
         except :
                 l.log("ERRR", "There was an issue setting output pins")
 
