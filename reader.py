@@ -13,11 +13,11 @@ import logging # our own logging module
 # makes things clean at exit
 
 def cleanup():
-	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
-	#pi.log(doorStrike,0)
+        # This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
+        #pi.log(doorStrike,0)
 
-	pi.stop()
-	l.log("ERRR", "program shutdown")
+        pi.stop()
+        l.log("ERRR", "program shutdown")
 
 atexit.register(cleanup)
 
@@ -60,11 +60,11 @@ def init():
 
         # Ensure GPOs are initialised as expected
         try :
-	        pi.log(doorStrike,0)
-	        pi.log(doorbell12,0)
-	        pi.log(doorbellCc,0)
-	        pi.log(readerLed,1)
-	        pi.log(readerBuzz,1)
+                pi.log(doorStrike,0)
+                pi.log(doorbell12,0)
+                pi.log(doorbellCc,0)
+                pi.log(readerLed,1)
+                pi.log(readerBuzz,1)
         except :
                 l.log("ERRR", "There was an issue setting output pins")
 
@@ -217,52 +217,52 @@ def getAllowedTokens():
         return
 
 def openDoor():
-	l.log("INFO", "Opening Door")
-	pi.write(readerLed,0)
-	pi.write(doorStrike,1)
-	time.sleep(4)
-	#Now let's warn that the door is about to close by flashing the Reader's LED
-	l.log("DBUG", "Door Closing soon")
-	i = 5
-	while i < 5:
-		pi.write(readerLed,1)
-		time.sleep(0.1)
-		pi.write(readerLed,0)
-		time.sleep(0.1)
-		i += 1
-	pi.write(readerLed,1)
-	pi.write(doorStrike,0)
-	l.log("INFO", "Door Closed")
+        l.log("INFO", "Opening Door")
+        pi.write(readerLed,0)
+        pi.write(doorStrike,1)
+        time.sleep(4)
+        #Now let's warn that the door is about to close by flashing the Reader's LED
+        l.log("DBUG", "Door Closing soon")
+        i = 5
+        while i < 5:
+                pi.write(readerLed,1)
+                time.sleep(0.1)
+                pi.write(readerLed,0)
+                time.sleep(0.1)
+                i += 1
+        pi.write(readerLed,1)
+        pi.write(doorStrike,0)
+        l.log("INFO", "Door Closed")
 
 def ringDoorbell():
-	global doorRinging
-	global doorbellCount
-	doorbellCount+=1
-	l.log("DBUG", "******* Bell Count *******", doorbellCount)
+        global doorRinging
+        global doorbellCount
+        doorbellCount+=1
+        l.log("DBUG", "******* Bell Count *******", doorbellCount)
 
-	if doorRinging == False:
-		doorRinging=True
-		l.log("INFO", "Start Doorbell")
-		pi.write(doorbell12,1)
-		time.sleep(2)
-		pi.write(doorbell12,0)
+        if doorRinging == False:
+                doorRinging=True
+                l.log("INFO", "Start Doorbell")
+                pi.write(doorbell12,1)
+                time.sleep(2)
+                pi.write(doorbell12,0)
 
-		time.sleep(0.1)
+                time.sleep(0.1)
 
-		pi.write(doorbell12,1)
-		time.sleep(0.2)
-		pi.write(doorbell12,0)
+                pi.write(doorbell12,1)
+                time.sleep(0.2)
+                pi.write(doorbell12,0)
 
-		time.sleep(0.1)
+                time.sleep(0.1)
 
-		pi.write(doorbell12,1)
-		time.sleep(0.2)
-		pi.write(doorbell12,0)
+                pi.write(doorbell12,1)
+                time.sleep(0.2)
+                pi.write(doorbell12,0)
 
-		doorRinging=False
-		l.log("INFO", "Stop Doorbell")
-	else:
-		l.log("INFO", "NOT Ringing doorbell - it's already ringing")
+                doorRinging=False
+                l.log("INFO", "Stop Doorbell")
+        else:
+                l.log("INFO", "NOT Ringing doorbell - it's already ringing")
 
 def wiegandCallback(bits, code):
         # if bits != 4 AND bits != 34
@@ -325,22 +325,22 @@ def wiegandCallback(bits, code):
         #
         # someone pressed a button
         if bits == 4:
-		# someone pressed a button
-		# We don't handle these yet - but for debugging let's print out what button they pressed!
-		if code == 10:
-			key="*"
-		elif code == 11:
-			key="#"
-		else:
-			key=code
-		l.log("DBUG", "Keypad key pressed", key)
+                # someone pressed a button
+                # We don't handle these yet - but for debugging let's print out what button they pressed!
+                if code == 10:
+                        key="*"
+                elif code == 11:
+                        key="#"
+                else:
+                        key=code
+                l.log("DBUG", "Keypad key pressed", key)
 
 
 def cbf(gpio, level, tick):
-	l.log("DBUG", "GPIO Change", [gpio, level])
-	if gpio == doorbellButton and level == 0:
-		ringDoorbellThread=threading.Thread(target=ringDoorbell)
-		ringDoorbellThread.start()
+        l.log("DBUG", "GPIO Change", [gpio, level])
+        if gpio == doorbellButton and level == 0:
+                ringDoorbellThread=threading.Thread(target=ringDoorbell)
+                ringDoorbellThread.start()
 
 
 #
@@ -362,6 +362,6 @@ cb4 = pi.callback(doorSensor, pigpio.EITHER_EDGE, cbf)
 w = wiegand.decoder(pi, wiegand0, wiegand1, wiegandCallback)
 
 while True:
-	time.sleep(9999)
-	#Just keeping the python fed (slithering)
-	l.log("INFO", "boppity")
+        time.sleep(9999)
+        #Just keeping the python fed (slithering)
+        l.log("INFO", "boppity")
