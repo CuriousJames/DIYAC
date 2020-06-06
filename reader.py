@@ -7,26 +7,37 @@ import threading
 import os # useful for file operations
 import json # for gettings settings and tokens
 import logging # our own logging module
+import signal # for nice exit
+import sys # for nice exit
 
 #
 # cleanup
 # makes things clean at exit
-
+#
 def cleanup():
         # This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
         #pi.write(p.pins["doorStrike"],0)
 
+        # release gpio resources
         pi.stop()
+
+        #log
         l.log("ERRR", "program shutdown")
 
 atexit.register(cleanup)
 
 #
+# exit from sigint
+#  allows for nice logging of exit by ctrl-c
+def signal_handler(sig, frame):
+        l.log("ERRR", "CTRL-C pressed, will exit")
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
+#
 # define some variables
 #
-
 pi = pigpio.pi()
-
 doorRinging=False
 doorbellCount=0
 
