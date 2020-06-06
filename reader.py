@@ -75,7 +75,6 @@ def init():
 #
 # function to get settings from file
 def getSettings():
-
         # define global var settings = false
         # if settings file exists
         ## open/read+decode/close
@@ -294,7 +293,6 @@ def wiegandCallback(bits, code):
         #
         # we have a card
         if bits == 34:
-
                 # make input into a hex string
                 #
                 input = str(format(code, '#036b')) # make binary string
@@ -310,7 +308,6 @@ def wiegandCallback(bits, code):
                 #
                 match = False
                 for token in allowedTokens:
-
                         # for generic cards - no changing necessary
                         if token["type"] != "code":
                                 if token["value"] == output:
