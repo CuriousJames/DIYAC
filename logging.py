@@ -28,8 +28,8 @@ import datetime # used for logging
 #   gets info from settings
 #   puts relevent info into vars
 #
-#  write(lvl, msg, [data])
-#   write message to outputs
+#  log(lvl, msg, [data])
+#   log message to outputs
 #   only if level is above what is set in settings
 #   if no settings found, will log ALL to display
 #
@@ -164,7 +164,7 @@ class logger:
                         self.fileLevel = "NONE"
 
 
-        def write(self, lvl, msg, data="NoLoggingDataGiven") :
+        def log(self, lvl, msg, data="NoLoggingDataGiven") :
                 # check level is in levelTable
                 # get time
                 # format

@@ -14,10 +14,10 @@ import logging # our own logging module
 
 def cleanup():
 	# This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
-	#pi.write(doorStrike,0)
+	#pi.log(doorStrike,0)
 
 	pi.stop()
-	logger.write("ERRR", "program shutdown")
+	l.log("ERRR", "program shutdown")
 
 atexit.register(cleanup)
 
@@ -54,19 +54,19 @@ def init():
         getSettings()
 
         # start logging
-        global logger
-        logger = logging.logger(settings)
-        logger.write("INFO", "DoorPi starting")
+        global l
+        l = logging.logger(settings)
+        l.log("INFO", "DoorPi starting")
 
         # Ensure GPOs are initialised as expected
         try :
-	        pi.write(doorStrike,0)
-	        pi.write(doorbell12,0)
-	        pi.write(doorbellCc,0)
-	        pi.write(readerLed,1)
-	        pi.write(readerBuzz,1)
+	        pi.log(doorStrike,0)
+	        pi.log(doorbell12,0)
+	        pi.log(doorbellCc,0)
+	        pi.log(readerLed,1)
+	        pi.log(readerBuzz,1)
         except :
-                logger.write("ERRR", "There was an issue setting output pins")
+                l.log("ERRR", "There was an issue setting output pins")
 
         # get the token list
         getAllowedTokens()
@@ -161,7 +161,7 @@ def getAllowedTokens():
 
         # if settings haven't worked, return
         if settings == False:
-                logger.write("WARN", "no settings - will not get allowedTokens")
+                l.log("WARN", "no settings - will not get allowedTokens")
                 return
 
         # make filepath
@@ -172,29 +172,29 @@ def getAllowedTokens():
                 try:
                         allowedTokensFile = open(allowedTokensFilePath, "r")
                 except OSError as err :
-                        logger.write("WARN", "os error while opening allowedTokens file", err)
+                        l.log("WARN", "os error while opening allowedTokens file", err)
                 except:
-                        logger.write("WARN", "unknown error while opening allowedTokens file")
+                        l.log("WARN", "unknown error while opening allowedTokens file")
                         return
 
                 # read + decode
                 try:
                         allowedTokens = json.load(allowedTokensFile)
                 except ValueError as err :
-                        logger.write("WARN", "JSON Decode error while reading allowedTokens file", err)
+                        l.log("WARN", "JSON Decode error while reading allowedTokens file", err)
                 except:
-                        logger.write("WARN", "unknown error while reading/decoding allowedTokens file")
+                        l.log("WARN", "unknown error while reading/decoding allowedTokens file")
 
                 # close
                 try:
                         allowedTokensFile.close()
                 except OSError as err :
-                        logger.write("WARN", "os error while closing allowedTokens file:", err)
+                        l.log("WARN", "os error while closing allowedTokens file:", err)
                 except:
-                        logger.write("WARN", "unknown error while closing allowedTokens file")
+                        l.log("WARN", "unknown error while closing allowedTokens file")
 
         else:
-                logger.write("WARN", "allowedTokens file does not exist")
+                l.log("WARN", "allowedTokens file does not exist")
                 return
 
         # remove ":" and make lowercase
@@ -212,17 +212,17 @@ def getAllowedTokens():
                         token["value"] = "88" + token["value"][:6]
 
         # print allowedTokens
-        logger.write("DBUG", "allowedTokens", allowedTokens)
+        l.log("DBUG", "allowedTokens", allowedTokens)
 
         return
 
 def openDoor():
-	logger.write("INFO", "Opening Door")
+	l.log("INFO", "Opening Door")
 	pi.write(readerLed,0)
 	pi.write(doorStrike,1)
 	time.sleep(4)
 	#Now let's warn that the door is about to close by flashing the Reader's LED
-	logger.write("DBUG", "Door Closing soon")
+	l.log("DBUG", "Door Closing soon")
 	i = 5
 	while i < 5:
 		pi.write(readerLed,1)
@@ -232,17 +232,17 @@ def openDoor():
 		i += 1
 	pi.write(readerLed,1)
 	pi.write(doorStrike,0)
-	logger.write("INFO", "Door Closed")
+	l.log("INFO", "Door Closed")
 
 def ringDoorbell():
 	global doorRinging
 	global doorbellCount
 	doorbellCount+=1
-	logger.write("DBUG", "******* Bell Count *******", doorbellCount)
+	l.log("DBUG", "******* Bell Count *******", doorbellCount)
 
 	if doorRinging == False:
 		doorRinging=True
-		logger.write("INFO", "Start Doorbell")
+		l.log("INFO", "Start Doorbell")
 		pi.write(doorbell12,1)
 		time.sleep(2)
 		pi.write(doorbell12,0)
@@ -260,9 +260,9 @@ def ringDoorbell():
 		pi.write(doorbell12,0)
 
 		doorRinging=False
-		logger.write("INFO", "Stop Doorbell")
+		l.log("INFO", "Stop Doorbell")
 	else:
-		logger.write("INFO", "NOT Ringing doorbell - it's already ringing")
+		l.log("INFO", "NOT Ringing doorbell - it's already ringing")
 
 def wiegandCallback(bits, code):
         # if bits != 4 AND bits != 34
@@ -283,12 +283,12 @@ def wiegandCallback(bits, code):
 
         #
         # log
-        logger.write("DBUG", "New read", {"bits":bits, "code":code})
+        l.log("DBUG", "New read", {"bits":bits, "code":code})
 
         #
         # error condition
         if bits != 34 and bits != 4:
-                logger.write("WARN", "unexpected number of bits", bits)
+                l.log("WARN", "unexpected number of bits", bits)
                 return
 
         #
@@ -304,7 +304,7 @@ def wiegandCallback(bits, code):
                 output = int(output, 2) # change to integer - required for doing the change to hex
                 output = format(output, '#010x') # make hex string
                 output = output[2:] # trim "0x"
-                logger.write("DEBUG", "output from formatting", output)
+                l.log("DEBUG", "output from formatting", output)
 
                 # see if the card is in allowed tokens
                 #
@@ -316,11 +316,11 @@ def wiegandCallback(bits, code):
                                 if token["value"] == output:
                                         # open the door
                                         match = True
-                                        logger.write("INFO", "token allowed (generic card)", output)
+                                        l.log("INFO", "token allowed (generic card)", output)
 
                 # if it wasn't a match
                 if match == False :
-                        logger.write("INFO", "token not allowed", output)
+                        l.log("INFO", "token not allowed", output)
 
         #
         # someone pressed a button
@@ -333,11 +333,11 @@ def wiegandCallback(bits, code):
 			key="#"
 		else:
 			key=code
-		logger.write("DBUG", "Keypad key pressed", key)
+		l.log("DBUG", "Keypad key pressed", key)
 
 
 def cbf(gpio, level, tick):
-	logger.write("DBUG", "GPIO Change", [gpio, level])
+	l.log("DBUG", "GPIO Change", [gpio, level])
 	if gpio == doorbellButton and level == 0:
 		ringDoorbellThread=threading.Thread(target=ringDoorbell)
 		ringDoorbellThread.start()
@@ -349,7 +349,7 @@ def cbf(gpio, level, tick):
 
 # run initialisation
 init()
-logger.write("INFO", "DoorPi running")
+l.log("INFO", "DoorPi running")
 
 # this comment will give a nice hint about what the next 4 lines do
 cb1 = pi.callback(doorStrike, pigpio.EITHER_EDGE, cbf)
@@ -364,4 +364,4 @@ w = wiegand.decoder(pi, wiegand0, wiegand1, wiegandCallback)
 while True:
 	time.sleep(9999)
 	#Just keeping the python fed (slithering)
-	logger.write("INFO", "boppity")
+	l.log("INFO", "boppity")
