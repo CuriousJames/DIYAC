@@ -16,6 +16,9 @@
         }
         },
         "pinDef": {
-                        "readerLed": 7
-        }
+                "readerLed": 7
+        },
+		"inputHandling": {
+				"bruteForceLockoutTime": 20
+		}
 }

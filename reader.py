@@ -112,9 +112,9 @@ def init():
         global p
         p = pinDef(settings, l)
 
-        # numpad - the class which deals with numpad entry
-        global numpad
-        numpad = numpadHandler()
+        # Input handler
+        global inH
+        inH = inputHandler(settings)
 
         # Ensure GPOs are initialised as expected
         try :
@@ -323,20 +323,67 @@ def ringDoorbell():
 
 
 #
-# class to handle codes typed into the keypad
+# class to handle inputs
+#  functions:
+#   newNumpadInput(rx) - process new keypad entry
+#   checkToken(rx, type) - take token and check if in allowedTokens list
+#   checkBruteForce() - see if the lock is active or not, and if it should be activated
+#   wiegandCallback - called by wiegand library, process & translate input from reader
 #
-class numpadHandler :
+class inputHandler :
         # vars
         #  state - [ready|reading], state of what is happen, ready for no input yet, reading for midway through a code input
         #  inputBuffer - a string of input received so far
         #  lastInputTime - used for allowing a timeout and other such stuff
         #  delimiter - start/stop key - can only be # or *
         #  timeOut - seconds before timeout occurs and state should be returned to ready
-        state = "ready"
+        #  bruteForceThresholdAttempts - max failed attempts within the bruteForceLockoutTime before lockout
+        #  bruteForceThresholdTime - seconds of time for above number of attemps to occur within for lockout
+        #  bruteForceLockoutTime - seconds that the lockout will be enforced for
+        #  bruteForceLockoutStart - time in seconds of last lockout start
+        #  previousAttemps - list of times of last 3 attempts
+        params = {
+                "delimiter": "#",
+                "timeOut": 5,
+                "bruteForceThresholdAttempts": 3,
+                "bruteForceThresholdTime": 20,
+                "bruteForceLockoutTime": 600,
+        }
+        numpadState = "ready"
         inputBuffer = ""
-        lastInputTime = None
-        delimiter = "#"
-        timeOut = 5
+        numpadLastInputTime = None
+        bruteForceLockoutStart = 0
+        previousAttempts = []
+
+
+        #
+        # init
+        # this is mostly to ge lockout bits from settings
+        def __init__(self, settings) :
+                # get logger
+                global l
+
+                # see if settings are set
+                if settings == False :
+                        return
+
+                # the settings we're going to get are
+                settingsToGet = ["delimiter", "timeOut", "bruteForceThresholdTime", "bruteForceThresholdAttempts", "bruteForceLockoutTime"]
+                settingsAvailable = []
+                # make sure they exist
+                # if exist, update params list
+                for s in settingsToGet :
+                        try :
+                                settings["inputHandling"][s]
+                        except :
+                                pass
+                        else :
+                                l.log("DBUG", "new setting for input handling parameter", {"parameter": s, "value": settings["inputHandling"][s]})
+                                self.params[s] = settings["inputHandling"][s]
+
+                # done
+                return
+
 
         #
         # function to be run with each incoming bit
@@ -364,7 +411,7 @@ class numpadHandler :
         #   throw into inputBuffer
         #   update lastInputTime
         #
-        def newInput(self, rx) :
+        def newNumpadInput(self, rx) :
 
                 # make logger available
                 global l
@@ -373,143 +420,241 @@ class numpadHandler :
                 timeNow = time.time()
 
                 # if not reading and rx is not the start/stop delimiter, do nothin
-                if self.state == "ready" and rx != self.delimiter :
+                if self.numpadState == "ready" and rx != self.params["delimiter"] :
                         l.log("DBUG", "key press before the start key, ignoring", {"key": rx})
                         return
 
                 # start of input string
-                if self.state == "ready" and rx == self.delimiter :
+                if self.numpadState == "ready" and rx == self.params["delimiter"] :
                         l.log("DBUG", "new keypad string started by delimiter", {"timeNow": timeNow})
-                        self.state = "reading"
-                        self.lastInputTime = timeNow
+                        self.numpadState = "reading"
+                        self.numpadLastInputTime = timeNow
                         return
 
                 # if mid way through reading
-                if self.state == "reading" :
+                if self.numpadState == "reading" :
 
                         # if over timeout
-                        if self.lastInputTime + self.timeOut < timeNow :
-                                l.log("DBUG", "new entry is after timeout limit, resetting and going again", {"timeNow": timeNow, "lastInputTime": self.lastInputTime})
-                                self.state = "ready"
+                        if self.numpadLastInputTime + self.params["timeOut"] < timeNow :
+                                l.log("DBUG", "new entry is after timeout limit, resetting and going again", {"timeNow": timeNow, "lastInputTime": self.numpadLastInputTime})
+                                self.numpadState = "ready"
                                 self.inputBuffer = ""
-                                self.lastInputTime = None
-                                self.newInput(rx)
+                                self.numpadLastInputTime = None
+                                self.newNumpadInput(rx)
                                 return
 
                         # if delimiter, we have an end of input string
-                        if rx == self.delimiter :
+                        if rx == self.params["delimiter"] :
                                 # run comparator
-                                self.checkToken(self.inputBuffer)
+                                self.checkToken(self.inputBuffer, "code")
                                 # clear up
                                 self.inputBuffer = ""
-                                self.lastInputTime = None
-                                self.state = "ready"
+                                self.numpadLastInputTime = None
+                                self.numpadState = "ready"
                                 # done
                                 return
 
                         # this is an actual input
                         #  add it onto the end of the input buffer
                         self.inputBuffer += rx
-                        self.lastInputTime = timeNow
+                        self.numpadLastInputTime = timeNow
                         return
 
         #
         # check incoming code against list of allowed tokens
         #  if match, open door
         #  if not match, shoot whoever entered it
-        def checkToken(self, rx) :
+        def checkToken(self, rx, rxType) :
 
                 # make the allowedTokens and logger accessible
                 global allowedTokens
                 global l
 
+                # check the lockout, bail if locked
+                if self.checkLockout() == "locked" :
+                        l.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
+                        return
+
                 # see if it exists in tokens
                 allowFlag = False
                 for t in allowedTokens :
-                        if t["type"] == "code" :
+                        if t["type"] == rxType :
                                 if t["value"] == rx :
-                                        l.log("INFO", "ACCESS ALLOWED WITH NUMPAD CODE", {"code": rx, "user": t["user"]})
+                                        l.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": t["user"]})
                                         allowFlag = True
+                                        # open the door
                                         return
                 # log incorrect code entered
                 if allowFlag == False :
-                        l.log("INFO", "ACCESS DENIED WITH NUMPAD CODE", {"code": rx})
+                        l.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
 
                 # all done
                 return
 
+        #
+        # check whether lockout is happening
+        #  add attempt
+        #  if getLockoutState == "locked"
+        #   return "locked"
+        #  if calculateNewLockout == "locked"
+        #   return "locked"
+        #  else
+        #   return "unlocked"
+        def checkLockout(self) :
 
-def wiegandCallback(bits, code):
-        # if bits != 4 AND bits != 34
-        ## error
-        #
-        # if bits == 34, it's a card token
-        ## convert to binary string
-        ## trim "0b", start parity bit, end parity bit
-        ## re order bytes
-        ## convert to hex
-        ## compare against list
-        #
-        # if bits == 4
-        ## if code = 0
-        ### ring doorbell
-        ## else
-        ### do something else
-
-        #
-        # log
-        l.log("DBUG", "New read", {"bits":bits, "code":code})
+                self.addAttempt()
+                if self.getBruteForceLockoutState() == "locked" :
+                        return "locked"
+                if self.calculateNewLockout() == "locked" :
+                        return "locked"
+                return "unlocked"
 
         #
-        # we have a card
-        if bits == 34:
-                # make input into a hex string
+        # add attempt into previousAttempts
+        # remove last value if more than 3
+        #
+        def addAttempt(self) :
+                timeNow = time.time()
+                # if previous attempts is already populated, remove entry 0
+                if len(self.previousAttempts) == self.params["bruteForceThresholdAttempts"] :
+                        del self.previousAttempts[0]
+                # append new time
+                self.previousAttempts.append(timeNow)
+
+        #
+        # get lockout state
+        #  basically just time comparator
+        #  get logger
+        #  if lockoutStart == 0, it's not locked
+        #   return "unlocked"
+        #  if lockoutStart + lockoutTime < timeNow
+        #   lockout has finished
+        #   lockoutStart = 0
+        #   return "unlocked"
+        #  else
+        #   return "locked"
+        def getBruteForceLockoutState(self) :
+                # logger
+                global l
+
+                # time
+                timeNow = time.time()
+
+                # if lockoutStart == 0, no lock is set
+                if self.bruteForceLockoutStart == 0 :
+                        l.log("DBUG", "No bruteforce lockout")
+                        return "unlocked"
+
+                # if lockoutStart + lockoutTime <= timeNow, reset lock and return unlocked
+                if self.bruteForceLockoutStart + self.params["bruteForceLockoutTime"] <= timeNow :
+                        l.log("INFO", "BruteForce Lockout stopped")
+                        self.bruteForceLockoutStart = 0
+                        return "unlocked"
+
+                # it's locked
+                l.log("DBUG", "lockout still active")
+                return "locked"
+
+        #
+        # calculate if there should be a lockout based on information from self.previousAttempts
+        # if length of previousAttemps is below threshold, do nothing
+        def calculateNewLockout(self) :
+                # time and logger
+                timeNow = time.time()
+                global l
+
+                # if not at threshold, do nothing
+                if len(self.previousAttempts) < self.params["bruteForceThresholdAttempts"] :
+                        return "no change"
+
+                # check by time of earliest chronological entry,
+                if self.previousAttempts[0] + self.params["bruteForceThresholdTime"] < timeNow :
+                        return "no change"
+
+                # that must mean we're within the threshold time and attempts, initiate lockout
+                l.log("INFO", "Bruteforce lockout started")
+                self.bruteForceLockoutStart = timeNow
+                return "locked"
+
+
+        #
+        # this function is called by the wiegand library when it has read something
+        #
+        def wiegandCallback(self, bits, code):
+                # if bits != 4 AND bits != 34
+                ## error
                 #
-                input = str(format(code, '#036b')) # make binary string
-                input = input[3:]  # trim '0b' and first parity bit
-                input = input[:-1] # trim last parity bit
-                output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
-                output = int(output, 2) # change to integer - required for doing the change to hex
-                output = format(output, '#010x') # make hex string
-                output = output[2:] # trim "0x"
-                l.log("DEBUG", "output from formatting", output)
-
-                # see if the card is in allowed tokens
+                # if bits == 34, it's a card token
+                ## convert to binary string
+                ## trim "0b", start parity bit, end parity bit
+                ## re order bytes
+                ## convert to hex
+                ## compare against list
                 #
-                match = False
-                for token in allowedTokens:
-                        # for generic cards - no changing necessary
-                        if token["type"] != "code":
-                                if token["value"] == output:
-                                        # open the door
-                                        match = True
-                                        l.log("INFO", "token allowed (generic card)", output)
-                # if it wasn't a match
-                if match == False :
-                        l.log("INFO", "token not allowed", output)
-        elif bits == 4:
-                # someone pressed a button
+                # if bits == 4
+                ## if code = 0
+                ### ring doorbell
+                ## else
+                ### do something else
 
-                # little check - hint that wiegand wires may not be correct way around
-                if code > 11 :
-                        l.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
+                #
+                # log
+                l.log("DBUG", "New read", {"bits":bits, "code":code})
 
-                # Tidy up the input - change * and #, or convert to string
-                if code == 10:
-                        key="*"
-                elif code == 11:
-                        key="#"
+                #
+                # we have a card
+                if bits == 34:
+                        # make input into a hex string
+                        #
+                        input = str(format(code, '#036b')) # make binary string
+                        input = input[3:]  # trim '0b' and first parity bit
+                        input = input[:-1] # trim last parity bit
+                        output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
+                        output = int(output, 2) # change to integer - required for doing the change to hex
+                        output = format(output, '#010x') # make hex string
+                        output = output[2:] # trim "0x"
+                        l.log("DEBUG", "output from formatting", output)
+
+                        # see if the card is in allowed tokens
+                        #
+                        # match = False
+                        # for token in allowedTokens:
+                        #         # for generic cards - no changing necessary
+                        #         if token["type"] != "code":
+                        #                 if token["value"] == output:
+                        #                         # open the door
+                        #                         match = True
+                        #                         l.log("INFO", "token allowed (generic card)", output)
+                        # # if it wasn't a match
+                        # if match == False :
+                        #         l.log("INFO", "token not allowed", output)
+                        self.checkToken(output, "card")
+                elif bits == 4:
+                        # someone pressed a button
+                        #  sanity check - maybe wiegand connection is swapped
+                        #  tidy input
+                        #  run numpadinput function
+
+                        # little check - hint that wiegand wires may not be correct way around
+                        if code > 11 :
+                                l.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
+
+                        # Tidy up the input - change * and #, or convert to string
+                        if code == 10:
+                                key="*"
+                        elif code == 11:
+                                key="#"
+                        else:
+                                key=str(code)
+                        l.log("DBUG", "Keypad key pressed", key)
+
+                        # run through the keypad checker
+                        self.newNumpadInput(key)
                 else:
-                        key=str(code)
-                l.log("DBUG", "Keypad key pressed", key)
-
-                # run through the keypad checker
-                numpad.newInput(key)
-        else:
-                #
-                # error condition
-                l.log("WARN", "unexpected number of bits", bits)
-                return
+                        #
+                        # error condition
+                        l.log("WARN", "unexpected number of bits", bits)
+                        return
 
 def cbf(gpio, level, tick):
         l.log("DBUG", "GPIO Change", [gpio, level])
@@ -534,7 +679,7 @@ cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
 
 # set the wiegand reading
 # will call function wiegandCallback on receiving data
-w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], wiegandCallback)
+w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
 
 while True:
         time.sleep(9999)
