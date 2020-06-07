@@ -268,6 +268,42 @@ def getAllowedTokens():
                 if len(token["value"]) >8:
                         token["value"] = "88" + token["value"][:6]
 
+        #
+        # remove duplicates
+        # matching tokens will be deleted, with the duplicate's user appended to the first user with DOR (meaning DuplicateOR) - user1 DOR user2
+        #
+        #  i and j are both index counters
+        #  iterate allowed tokens
+        #   iterate again to compare
+        #    if token values match, types match, and it's not the same entry, and it's not already listed in duplicateIndexes
+        #     log
+        #     add to index
+        #  if there are duplicates listed in the index
+        #   iterate
+        #    delete the duplicates
+        duplicateIndexes = []
+        # main iterate
+        i = 0
+        for original in allowedTokens :
+                # second iterate
+                j = 0
+                for check in allowedTokens:
+                        # if tokens match, types match, it's not the same entry, and not listed in duplicate indexes
+                        if original["value"] == check["value"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
+                                l.log("WARN", "Duplicate token found in allowedTokens file", {"token": allowedTokens[j]["value"], "type": allowedTokens[j]["type"], "user": allowedTokens[j]["user"]})
+                                allowedTokens[i]["user"] += " DOR " + allowedTokens[j]["user"]
+                                duplicateIndexes.append(j)
+
+                        j += 1
+                i += 1
+        # if there's duplicates listed, delete them
+        if not duplicateIndexes :
+                pass
+        else:
+                duplicateIndexes.sort(reverse=True) # have to sort and do from the highest index first
+                for dup in duplicateIndexes :
+                        del allowedTokens[dup]
+
         # print allowedTokens
         l.log("DBUG", "allowedTokens", allowedTokens)
 
