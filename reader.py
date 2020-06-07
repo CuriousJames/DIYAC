@@ -34,12 +34,6 @@ def signal_handler(sig, frame):
         sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
 
-#
-# define some variables
-#
-pi = pigpio.pi()
-doorRinging=False
-doorbellCount=0
 
 #
 # GPIO Variables so we don't have to remember pin numbers!
@@ -99,6 +93,15 @@ class pinDef :
 # initialisation
 #
 def init():
+
+        # define some variables
+        global pi
+        pi = pigpio.pi()
+        global doorRinging
+        doorRinging=False
+        global doorbellCount
+        doorbellCount=0
+
 
         # get all the settings and allowed tokens
         getSettings()
@@ -692,8 +695,18 @@ class inputHandler :
                         l.log("WARN", "unexpected number of bits", bits)
                         return
 
+#
+# callback function that is hit whenever the GPIO changes
 def cbf(gpio, level, tick):
-        l.log("DBUG", "GPIO Change", [gpio, level])
+        # log
+        # see if we know which pin it is
+        logData = {"gpio": gpio, "level": level}
+        for pin in p.pins :
+                if p.pins[pin] == gpio :
+                        logData["name"] = pin
+        l.log("DBUG", "GPIO Change", logData)
+
+        # if it's the doorbell button, ring the doorbell
         if gpio == p.pins["doorbellButton"] and level == 0:
                 ringDoorbellThread=threading.Thread(target=ringDoorbell)
                 ringDoorbellThread.start()
@@ -707,7 +720,7 @@ def cbf(gpio, level, tick):
 init()
 l.log("INFO", "DoorPi running")
 
-# this comment will give a nice hint about what the next 4 lines do
+# register these GPIO pins to run cbf on rising or falling edge
 cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
 cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
 cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
