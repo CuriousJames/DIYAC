@@ -5,3 +5,4 @@ Experimental/
 .vscode/
 settings.json
 logFile
+*.pyc
