@@ -11,6 +11,39 @@ import signal # for nice exit
 import sys # for nice exit
 
 #
+# file synopsis
+#
+# cleanup
+# nice exit
+# class: pinDef
+#  vars
+#  function: init(settings, logger) - get custom pin defs from settings
+# function: init() - main script initialisation
+# function: getSettings() - get settings from settings file
+# class: token
+#  vars
+#  function: getAllowedTokens(settings)
+#  function: formatTokens()
+#  function: transformOverlengthTokens()
+#  function: removeDuplicateTokens()
+# funciton: openDoor()
+# function: ringDoorbell()
+# class: inputHandler
+#  vars
+#  function: init(settings)
+#  function: newNumpadInput(rx)
+#  function: checkToken(rx, rxType)
+#  function: checkLockout()
+#  function: addAttempt()
+#  function: getBruteForceState()
+#  function: calculateNewLockout()
+#  function: wiegandCallback(bits, code)
+# function: cbf(gpio, level, tick)
+# some code to actually run the program
+
+
+
+#
 # cleanup
 # makes things clean at exit
 #
@@ -103,13 +136,19 @@ def init():
         doorbellCount=0
 
 
-        # get all the settings and allowed tokens
+        # get all the settings
         getSettings()
+
 
         # start logging
         global l
         l = logging.logger(settings)
         l.log("INFO", "DoorPi starting")
+
+        # set tokens
+        global tokens
+        tokens = token()
+        tokens.getAllowedTokens(settings)
 
         # pin definitions
         global p
@@ -130,7 +169,7 @@ def init():
                 l.log("ERRR", "There was an issue setting output pins")
 
         # get the token list
-        getAllowedTokens()
+        #getAllowedTokens()
 
 
 #
@@ -187,130 +226,181 @@ def getSettings():
                 return
         return
 
-#
-# function to make var of allowed tokens
-#  reads file
-#  changes all hex values to lower case without ":"
-#  changes mifare ultralight tokens to what will be received by reader - not implemented yet
-#
-def getAllowedTokens():
-        # define global var allowedTokens = false
-        #
-        # if no settings
-        ## exit function
-        #
-        # set file path
-        #
-        # if tokens file exists
-        ## open/read+decode/close
-        ## set allowedTokens
-        ## if problem
-        ### error handling
-        ### return
-        #
-        # if no tokens file
-        ## error handling
-        ## return
-        #
-        # remove ":" from all tokens
-        # make all tokens lower case
 
-        # make allowedTokens var
-        global allowedTokens
+#
+# here's a class for keeping a list of allowed tokens and doing something with them
+class token :
+
+        # vars
         allowedTokens = False
 
-        # if settings haven't worked, return
-        if settings == False:
-                l.log("WARN", "no settings - will not get allowedTokens")
-                return
 
-        # make filepath
-        allowedTokensFilePath = settings["root"] + settings["allowedTokens"]["path"]
 
-        if os.path.exists(allowedTokensFilePath) :
-                # open
-                try:
-                        allowedTokensFile = open(allowedTokensFilePath, "r")
-                except OSError as err :
-                        l.log("WARN", "os error while opening allowedTokens file", err)
-                except:
-                        l.log("WARN", "unknown error while opening allowedTokens file")
+        #
+        # function to make var of allowed tokens
+        #  reads file
+        #  changes all hex values to lower case without ":"
+        #  changes mifare ultralight tokens to what will be received by reader - not implemented yet
+        #
+        def getAllowedTokens(self, settings):
+                # define global var allowedTokens = false
+                #
+                # if no settings
+                ## exit function
+                #
+                # set file path
+                #
+                # if tokens file exists
+                ## open/read+decode/close
+                ## set allowedTokens
+                ## if problem
+                ### error handling
+                ### return
+                #
+                # if no tokens file
+                ## error handling
+                ## return
+                #
+                # remove ":" from all tokens
+                # make all tokens lower case
+
+                # make allowedTokens var
+                #global allowedTokens
+                #allowedTokens = False
+
+                global l
+
+                # if settings haven't worked, return
+                if settings == False:
+                        l.log("WARN", "no settings - will not get allowedTokens")
                         return
 
-                # read + decode
-                try:
-                        allowedTokens = json.load(allowedTokensFile)
-                except ValueError as err :
-                        l.log("WARN", "JSON Decode error while reading allowedTokens file", err)
-                except:
-                        l.log("WARN", "unknown error while reading/decoding allowedTokens file")
+                # make filepath
+                try :
+                        allowedTokensFilePath = settings["root"] + settings["allowedTokens"]["path"]
+                except :
+                        l.log("WARN", "Error while gettigns allowedTokens file path from settings")
+                        return
 
-                # close
-                try:
-                        allowedTokensFile.close()
-                except OSError as err :
-                        l.log("WARN", "os error while closing allowedTokens file:", err)
-                except:
-                        l.log("WARN", "unknown error while closing allowedTokens file")
+                # open / read / decode / close
+                if os.path.exists(allowedTokensFilePath) :
+                        # open
+                        try:
+                                allowedTokensFile = open(allowedTokensFilePath, "r")
+                        except OSError as err :
+                                l.log("WARN", "os error while opening allowedTokens file", err)
+                        except:
+                                l.log("WARN", "unknown error while opening allowedTokens file")
+                                return
 
-        else:
-                l.log("WARN", "allowedTokens file does not exist")
+                        # read + decode
+                        try:
+                                self.allowedTokens = json.load(allowedTokensFile)
+                        except ValueError as err :
+                                l.log("WARN", "JSON Decode error while reading allowedTokens file", err)
+                        except:
+                                l.log("WARN", "unknown error while reading/decoding allowedTokens file")
+
+                        # close
+                        try:
+                                allowedTokensFile.close()
+                        except OSError as err :
+                                l.log("WARN", "os error while closing allowedTokens file:", err)
+                        except:
+                                l.log("WARN", "unknown error while closing allowedTokens file")
+
+                else:
+                        l.log("WARN", "allowedTokens file does not exist")
+                        return
+
+                # do some actions on our new shiny list of tokens
+                self.formatTokens()
+                self.transformOverlengthTokens()
+                self.removeDuplicateTokens()
+                l.log("DBUG", "allowedTokens", self.allowedTokens)
                 return
 
-        # remove ":" and make lowercase
-        for token in allowedTokens:
-                token["value"] = token["value"].replace(":", "")
-                token["value"] = token["value"].lower()
-
-        # Perform transform for mifare ultralight
-        for token in allowedTokens:
-                ##
-                ## do some transforming here
-                ## Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
-                ## So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
-                if len(token["value"]) >8:
-                        token["value"] = "88" + token["value"][:6]
 
         #
-        # remove duplicates
-        # matching tokens will be deleted, with the duplicate's user appended to the first user with DOR (meaning DuplicateOR) - user1 DOR user2
+        # format token values
+        #  remove ":"
+        #  make lowercase
+        def formatTokens(self) :
+                # remove ":" and make lowercase
+                if self.allowedTokens != False :
+                        for token in self.allowedTokens :
+                                token["value"] = token["value"].replace(":", "")
+                                token["value"] = token["value"].lower()
+                return
+
+
         #
-        #  i and j are both index counters
-        #  iterate allowed tokens
-        #   iterate again to compare
-        #    if token values match, types match, and it's not the same entry, and it's not already listed in duplicateIndexes
-        #     log
-        #     add to index
-        #  if there are duplicates listed in the index
-        #   iterate
-        #    delete the duplicates
-        duplicateIndexes = []
-        # main iterate
-        i = 0
-        for original in allowedTokens :
-                # second iterate
-                j = 0
-                for check in allowedTokens:
-                        # if tokens match, types match, it's not the same entry, and not listed in duplicate indexes
-                        if original["value"] == check["value"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
-                                l.log("WARN", "Duplicate token found in allowedTokens file", {"token": allowedTokens[j]["value"], "type": allowedTokens[j]["type"], "user": allowedTokens[j]["user"]})
-                                allowedTokens[i]["user"] += " DOR " + allowedTokens[j]["user"]
-                                duplicateIndexes.append(j)
+        # for mifare ultralight and other tokens that are more than 4 bytes long
+        #
+        def transformOverlengthTokens(self) :
+                # Perform transform for mifare ultralight
+                if self.allowedTokens != False :
+                        for token in self.allowedTokens :
+                                ##
+                                ## do some transforming here
+                                ## Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
+                                ## So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
+                                if len(token["value"]) >8:
+                                        token["value"] = "88" + token["value"][:6]
+                return
 
-                        j += 1
-                i += 1
-        # if there's duplicates listed, delete them
-        if not duplicateIndexes :
-                pass
-        else:
-                duplicateIndexes.sort(reverse=True) # have to sort and do from the highest index first
-                for dup in duplicateIndexes :
-                        del allowedTokens[dup]
+        #
+        # remove duplicate tokens
+        #  because having duplicates would be bad
+        def removeDuplicateTokens(self) :
+                #  i and j are both index counters
+                #  iterate allowed tokens
+                #   iterate again to compare
+                #    if token values match, types match, and it's not the same entry, and it's not already listed in duplicateIndexes
+                #     log
+                #     add to index
+                #  if there are duplicates listed in the index
+                #   iterate
+                #    delete the duplicates
 
-        # print allowedTokens
-        l.log("DBUG", "allowedTokens", allowedTokens)
+                # die if nothing there
+                if self.allowedTokens == False :
+                        return
+                # initialise
+                global l
+                duplicateIndexes = []
+                # main iterate
+                i = 0
+                for original in self.allowedTokens :
+                        # second iterate
+                        j = 0
+                        for check in self.allowedTokens:
+                                # if tokens match, types match, it's not the same entry, and not listed in duplicate indexes
+                                if original["value"] == check["value"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
+                                        # log - it only takes 3 lines because it wou;'dnt nicely fit on one
+                                        logData = {"token": self.allowedTokens[j]["value"], "type": self.allowedTokens[j]["type"], "user": self.allowedTokens[j]["user"]}
+                                        l.log("WARN", "Duplicate token found in allowedTokens file", logData)
+                                        del logData
+                                        # append duplicate username to original username
+                                        self.allowedTokens[i]["user"] += " DOR " + self.allowedTokens[j]["user"]
+                                        # add to list of duplicates
+                                        duplicateIndexes.append(j)
 
-        return
+                                j += 1
+                        i += 1
+
+                # if there's duplicates listed, delete them
+                if not duplicateIndexes :
+                        pass
+                else:
+                        duplicateIndexes.sort(reverse=True) # have to sort and do from the highest index first
+                        for dup in duplicateIndexes :
+                                del self.allowedTokens[dup]
+
+                # done
+                return
+
+
 
 def openDoor():
         l.log("INFO", "Opening Door")
@@ -506,7 +596,7 @@ class inputHandler :
         def checkToken(self, rx, rxType) :
 
                 # make the allowedTokens and logger accessible
-                global allowedTokens
+                global tokens
                 global l
 
                 # check the lockout, bail if locked
@@ -516,7 +606,7 @@ class inputHandler :
 
                 # see if it exists in tokens
                 allowFlag = False
-                for t in allowedTokens :
+                for t in tokens.allowedTokens :
                         if t["type"] == rxType :
                                 if t["value"] == rx :
                                         l.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": t["user"]})
