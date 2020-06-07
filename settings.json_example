@@ -1,21 +1,21 @@
 {
-    "root":"/home/user/DoorPi/",
-    "allowedTokens": {
-		"path":"allowedTokens.json"
-    },
-    "modules": {
-		"dir":"code/includes/"
-    },
-	"logging": {
-		"file":{
-			"level":"INFO",
-			"path":"log/logFile"
-		},
-		"display":{
-			"level":"INFO"
-		}
-    },
-	"pinDef": {
-		"readerLed": 7
-	}
+        "root":"/home/user/DoorPi/",
+        "allowedTokens": {
+                "path":"allowedTokens.json"
+        },
+        "modules": {
+                "dir":"code/includes/"
+        },
+        "logging": {
+                "file":{
+                "level":"INFO",
+                "path":"log/logFile"
+        },
+        "display":{
+                "level":"INFO"
+        }
+        },
+        "pinDef": {
+                        "readerLed": 7
+        }
 }
