@@ -112,6 +112,10 @@ def init():
         global p
         p = pinDef(settings, l)
 
+        # numpad - the class which deals with numpad entry
+        global numpad
+        numpad = numpadHandler()
+
         # Ensure GPOs are initialised as expected
         try :
                 pi.write(p.pins["doorStrike"],0)
@@ -317,6 +321,124 @@ def ringDoorbell():
         else:
                 l.log("INFO", "NOT Ringing doorbell - it's already ringing")
 
+
+#
+# class to handle codes typed into the keypad
+#
+class numpadHandler :
+        # vars
+        #  state - [ready|reading], state of what is happen, ready for no input yet, reading for midway through a code input
+        #  inputBuffer - a string of input received so far
+        #  lastInputTime - used for allowing a timeout and other such stuff
+        #  delimiter - start/stop key - can only be # or *
+        #  timeOut - seconds before timeout occurs and state should be returned to ready
+        state = "ready"
+        inputBuffer = ""
+        lastInputTime = None
+        delimiter = "#"
+        timeOut = 5
+
+        #
+        # function to be run with each incoming bit
+        # will work out if input should go into buffer, be ignored, or starts the buffer
+        #
+        # globalise logger
+        # set time now
+        # if state = ready AND input is not delimiter
+        #  return
+        # if state = ready AND input is delimiter
+        #  set state to reading
+        #  update lastInputTime
+        # if state = reading
+        #  if later that timeout
+        #   empty inputBuffer
+        #   set state to ready
+        #   run function again
+        #   return
+        #  if input = start/stop delimiter
+        #   submit inputBuffer to comparator function
+        #   empty inputBuffer
+        #   set state to ready
+        #   return
+        #  if input is a button (basically just 'else')
+        #   throw into inputBuffer
+        #   update lastInputTime
+        #
+        def newInput(self, rx) :
+
+                # make logger available
+                global l
+
+                # set time
+                timeNow = time.time()
+
+                # if not reading and rx is not the start/stop delimiter, do nothin
+                if self.state == "ready" and rx != self.delimiter :
+                        l.log("DBUG", "key press before the start key, ignoring", {"key": rx})
+                        return
+
+                # start of input string
+                if self.state == "ready" and rx == self.delimiter :
+                        l.log("DBUG", "new keypad string started by delimiter", {"timeNow": timeNow})
+                        self.state = "reading"
+                        self.lastInputTime = timeNow
+                        return
+
+                # if mid way through reading
+                if self.state == "reading" :
+
+                        # if over timeout
+                        if self.lastInputTime + self.timeOut < timeNow :
+                                l.log("DBUG", "new entry is after timeout limit, resetting and going again", {"timeNow": timeNow, "lastInputTime": self.lastInputTime})
+                                self.state = "ready"
+                                self.inputBuffer = ""
+                                self.lastInputTime = None
+                                self.newInput(rx)
+                                return
+
+                        # if delimiter, we have an end of input string
+                        if rx == self.delimiter :
+                                # run comparator
+                                self.checkToken(self.inputBuffer)
+                                # clear up
+                                self.inputBuffer = ""
+                                self.lastInputTime = None
+                                self.state = "ready"
+                                # done
+                                return
+
+                        # this is an actual input
+                        #  add it onto the end of the input buffer
+                        self.inputBuffer += rx
+                        self.lastInputTime = timeNow
+                        return
+
+        #
+        # check incoming code against list of allowed tokens
+        #  if match, open door
+        #  if not match, shoot whoever entered it
+        def checkToken(self, rx) :
+
+                # make the allowedTokens and logger accessible
+                global allowedTokens
+                global l
+
+                # see if it exists in tokens
+                allowFlag = False
+                for t in allowedTokens :
+                        if t["type"] == "code" :
+                                if t["value"] == rx :
+                                        l.log("INFO", "ACCESS ALLOWED WITH NUMPAD CODE", {"code": rx, "user": t["user"]})
+                                        allowFlag = True
+                                        return
+                # log incorrect code entered
+                if allowFlag == False :
+                        l.log("INFO", "ACCESS DENIED WITH NUMPAD CODE", {"code": rx})
+
+                # all done
+                return
+
+
 def wiegandCallback(bits, code):
         # if bits != 4 AND bits != 34
         ## error
@@ -367,14 +489,22 @@ def wiegandCallback(bits, code):
                         l.log("INFO", "token not allowed", output)
         elif bits == 4:
                 # someone pressed a button
-                # We don't handle these yet - but for debugging let's print out what button they pressed!
+
+                # little check - hint that wiegand wires may not be correct way around
+                if code > 11 :
+                        l.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
+
+                # Tidy up the input - change * and #, or convert to string
                 if code == 10:
                         key="*"
                 elif code == 11:
                         key="#"
                 else:
-                        key=code
+                        key=str(code)
                 l.log("DBUG", "Keypad key pressed", key)
+
+                # run through the keypad checker
+                numpad.newInput(key)
         else:
                 #
                 # error condition
