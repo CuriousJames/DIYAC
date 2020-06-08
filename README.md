@@ -1,4 +1,4 @@
-# Door Pi #
+# DIYAC - Do-It-Yourself Access Control #
 ## Warning! ##
 This is very much a work in progress - we are still developing this as a personal hobby
 ## Purpose ##
