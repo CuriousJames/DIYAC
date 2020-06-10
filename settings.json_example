@@ -16,9 +16,13 @@
         }
         },
         "pinDef": {
+				"pcbVersion": 1,
                 "readerLed": 7
         },
 		"inputHandling": {
 				"bruteForceLockoutTime": 20
+		},
+		"outputHandling" : {
+			    "doorOpenTime": 2
 		}
 }
