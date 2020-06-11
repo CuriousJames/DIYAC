@@ -54,7 +54,6 @@ class inputHandler :
 
                 # the settings we're going to get are
                 settingsToGet = ["delimiter", "timeOut", "bruteForceThresholdTime", "bruteForceThresholdAttempts", "bruteForceLockoutTime"]
-                settingsAvailable = []
                 # make sure they exist
                 # if exist, update params list
                 for s in settingsToGet :
