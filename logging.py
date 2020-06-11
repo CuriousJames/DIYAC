@@ -74,10 +74,10 @@ class logger:
                 if tmpDisplayLog == True :
                         if settings["logging"]["display"]["level"] in self.levelTable :
                                 self.displayLevel = settings["logging"]["display"]["level"]
-                                self.log("INFO","display logging level set to "+settings["logging"]["display"]["level"])
+                                print("display logging level set to "+settings["logging"]["display"]["level"])
                         else :
                                 self.displayLevel = "NONE"
-                                self.log("WARN","display logging level is incorrect - no more logs to stdout")
+                                print("display logging level is incorrect - no more logs to stdout")
 
                 # delete flag
                 del tmpDisplayLog
@@ -99,16 +99,16 @@ class logger:
                 except NameError :
                         self.fileLevel = "NONE"
                         tmpFileLog = False
-                        self.log("INFO","file logging level not set - no logs will be printed to file")
+                        print("file logging level not set - no logs will be printed to file")
 
                 # czech in levelTable
                 if tmpFileLog == True :
                         if settings["logging"]["file"]["level"] in self.levelTable :
                                 self.fileLevel = settings["logging"]["file"]["level"]
-                                self.log("INFO","file logging level set to "+settings["logging"]["file"]["level"])
+                                print("file logging level set to "+settings["logging"]["file"]["level"])
                         else :
                                 self.fileLevel = "NONE"
-                                self.log("WARN","file logging level is incorrect - no logs to file")
+                                print("file logging level is incorrect - no logs to file")
 
                 # see if it's none
                 if tmpFileLog == True:
@@ -122,7 +122,7 @@ class logger:
                         except NameError :
                                 self.fileLevel = "NONE"
                                 tmpFileLog = False
-                                self.log("WARN","File path not set - no logs to file")
+                                print("File path not set - no logs to file")
                         else :
                                 self.filePath = settings["logging"]["file"]["path"]
 
@@ -133,10 +133,10 @@ class logger:
                                 try :
                                         settings["root"]
                                 except NameError:
-                                        self.log("WARN","root dir not in settings - will use relative path for log file")
+                                        print("root dir not in settings - will use relative path for log file")
                                 else :
                                         self.filePath = settings["root"] + self.filePath
-                        self.log("DBUG","log file: "+self.filePath)
+                                        print("log file: "+self.filePath)
 
                 # try opening and closing the file
                 if tmpFileLog == True :
@@ -145,7 +145,7 @@ class logger:
                                 f = open(self.filePath, "a")
                         except:
                                 # unable to open
-                                self.log("WARN","unable to open log file - will not perform logging to file")
+                                print("unable to open log file - will not perform logging to file")
                                 self.fileLevel = "NONE"
                                 tmpFileLog = False
 
@@ -155,13 +155,13 @@ class logger:
                                         f.close()
                                 except :
                                         # unable to close file
-                                        self.log("WARN","unable to close log file - will not perform logging to file")
+                                        print("unable to close log file - will not perform logging to file")
                                         self.fileLevel = "NONE"
                                         tmpFileLog = False
 
                 # double check - if flag is false but level is not NONE, something has gone wonky
                 if tmpFileLog == False and self.fileLevel != "NONE" :
-                        self.log("ERRR","error while setting up file log - discrepancy found")
+                        print("error while setting up file log - discrepancy found")
                         self.fileLevel = "NONE"
 
 
