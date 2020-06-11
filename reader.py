@@ -10,7 +10,7 @@ import logging # our own logging module
 import inputHandler # our own input handling module
 import outputHandler
 import tokenHandler # our ouwn token hangling module
-from pinDef import pinDef # our own pin definition module
+import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
 
@@ -97,7 +97,7 @@ def init():
 
         # pin definitions
         global p
-        p = pinDef(settings, l)
+        p = pinDef.pinDef(settings, l)
 
         # output handler
         global outH
