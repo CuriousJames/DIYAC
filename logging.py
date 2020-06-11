@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import datetime # used for logging
+import sys # for checking python type for ansi escape
 
 #
 # log
@@ -36,54 +37,106 @@ import datetime # used for logging
 #
 
 class logger:
+        # let's have some default vars
+        levelTable = ["DBUG", "INFO", "WARN", "ERRR", "NONE"]
+        filePath = False
+        fileLevel = "NONE"
+        displayLevel = "INFO"
+        displayColour = False
+        ansiEscape = "\033["
+        # the order must be the same as the level table, it uses the indexes
+        colourLookup = [
+                {
+                        "colour": "0",
+                        "bg": "40",
+                        "style": "0"
+                },
+                {
+                        "colour": "32",
+                        "bg": "40",
+                        "style": "0"
+                },
+                {
+                        "colour": "33",
+                        "bg": "40",
+                        "style": "0"
+                },
+                {
+                        "colour": "37",
+                        "bg": "41",
+                        "style": "0"
+                }
+        ]
+
         def __init__(self,settings) :
+                # internalise settings
+                self.settings = settings
+
                 # get information out of settings
                 # create some useful vars
 
                 # levelTable
-                self.levelTable = ["DBUG", "INFO", "WARN", "ERRR", "NONE"]
+                #self.levelTable = ["DBUG", "INFO", "WARN", "ERRR", "NONE"]
 
                 # default set : no output to file, full output to display
-                self.filePath = False
-                self.fileLevel = "NONE"
-                self.displayLevel = "ERRR"
+                # self.filePath = False
+                # self.fileLevel = "NONE"
+                # self.displayLevel = "ERRR"
 
                 # if no settings, there's nothing more can be done
                 if settings == False :
-                        self.log("WARN","no settings - all logs will be printed to stdout")
+                        self.log("WARN", "no settings - no logging to file, display logging will be INFO")
                         return
 
+                # setup for logging to display
+                self.setLogToDisplaySettings()
+                self.setLogToFileSettings()
+
+
+
+        def setLogToDisplaySettings(self) :
                 #
                 # get display settings
                 #  if not exist - NONE
                 #  make sure it's in the allowed list
                 #
 
-                # flag - false if problem, no subsequent operations will be done
-                tmpDisplayLog = True
-
                 # make sure it exists
                 try :
-                        settings["logging"]["display"]["level"]
+                        self.settings["logging"]["display"]["level"]
                 except NameError :
-                        self.displayLevel = "NONE"
-                        tmpDisplayLog = False
                         self.log("INFO","display logging level not set - no logs will be printed to stdout")
+                        self.displayLevel = "NONE"
+                        return
 
                 # make sure it's in levelTable
-                if tmpDisplayLog == True :
-                        if settings["logging"]["display"]["level"] in self.levelTable :
-                                self.displayLevel = settings["logging"]["display"]["level"]
-                                print("display logging level set to "+settings["logging"]["display"]["level"])
-                        else :
-                                self.displayLevel = "NONE"
-                                print("display logging level is incorrect - no more logs to stdout")
+                if self.settings["logging"]["display"]["level"] in self.levelTable :
+                        self.displayLevel = self.settings["logging"]["display"]["level"]
+                        self.log("INFO", "display logging level set", {"level": self.displayLevel})
+                else :
+                        self.log("WARN", "display logging level is incorrect - no more logs to stdout", {"value in settings": self.settings["logging"]["display"]["level"]})
+                        self.displayLevel = "NONE"
 
-                # delete flag
-                del tmpDisplayLog
+                # check if colour enabled
+                try :
+                        self.settings["logging"]["display"]["colour"]
+                except :
+                        pass
+                else :
+                        # the if is only here to validate input
+                        if self.settings["logging"]["display"]["colour"] == True :
+                                # set the vairbale
+                                self.displayColour = True
 
+                # done
+                return
+
+
+        def setLogToFileSettings(self) :
                 #
                 # file logging
+                # note - fileLevel is stored as temporary until the end
+                # -allows log function to be used without risk of errors from logging to file before it's all setup
                 #  if no level, level incorrect, or level = none there will be no logging to file
                 #  if no file path - no logs
                 #  change path to absolute (if it's not already)
@@ -91,78 +144,79 @@ class logger:
                 #
 
                 # flag - false if error, do not do subsequent operations
-                tmpFileLog = True
+                #tmpFileLog = True
 
                 # test exists
                 try :
-                        settings["logging"]["file"]["level"]
+                        self.settings["logging"]["file"]["level"]
                 except NameError :
+                        self.log("INFO", "file logging level not set - no logs will be printed to file")
                         self.fileLevel = "NONE"
-                        tmpFileLog = False
-                        print("file logging level not set - no logs will be printed to file")
+                        return
+
+                # temporary var for file level
+                tmpFileLevel = "NONE"
 
                 # czech in levelTable
-                if tmpFileLog == True :
-                        if settings["logging"]["file"]["level"] in self.levelTable :
-                                self.fileLevel = settings["logging"]["file"]["level"]
-                                print("file logging level set to "+settings["logging"]["file"]["level"])
-                        else :
-                                self.fileLevel = "NONE"
-                                print("file logging level is incorrect - no logs to file")
+                if self.settings["logging"]["file"]["level"] in self.levelTable :
+                        tmpFileLevel = self.settings["logging"]["file"]["level"]
+                        self.log("INFO", "file logging level set", {"level": tmpFileLevel})
+                else :
+                        self.fileLevel = "NONE"
+                        self.log("WARN", "file logging level is incorrect in settings", {"value": self.settings["logging"]["file"]["level"]})
+                        return
 
-                # see if it's none
-                if tmpFileLog == True:
-                        if self.fileLevel == "NONE" :
-                                tmpFileLog = False
+                # see if it's none, if so we don't need to do anything more
+                if tmpFileLevel == "NONE" :
+                        return
 
                 # test if path set
-                if tmpFileLog == True :
-                        try :
-                                settings["logging"]["file"]["path"]
-                        except NameError :
-                                self.fileLevel = "NONE"
-                                tmpFileLog = False
-                                print("File path not set - no logs to file")
-                        else :
-                                self.filePath = settings["logging"]["file"]["path"]
+                try :
+                        self.settings["logging"]["file"]["path"]
+                except NameError :
+                        # not set, no log to file and return
+                        self.log("WARN", "File path not set - no logs to file")
+                        self.fileLevel = "NONE"
+                        return
+                else :
+                        self.filePath = self.settings["logging"]["file"]["path"]
 
                 # change path to absolute if necessary
-                if tmpFileLog == True and self.fileLevel != "NONE" :
-                        if self.filePath[0] != "/" :
-                                # still gotta test settings["root"] exists
-                                try :
-                                        settings["root"]
-                                except NameError:
-                                        print("root dir not in settings - will use relative path for log file")
-                                else :
-                                        self.filePath = settings["root"] + self.filePath
-                                        print("log file: "+self.filePath)
+                if self.filePath[0] != "/" :
+                        # still gotta test settings["root"] exists
+                        try :
+                                self.settings["root"]
+                        except NameError:
+                                self.log("DBUG", "root dir not in settings - will use relative path for log file")
+                        else :
+                                self.filePath = self.settings["root"] + self.filePath
+                self.log("DBUG", "log file path set ", {"path": self.filePath})
 
-                # try opening and closing the file
-                if tmpFileLog == True :
-                        try:
-                                # try to open file
-                                f = open(self.filePath, "a")
-                        except:
-                                # unable to open
-                                print("unable to open log file - will not perform logging to file")
-                                self.fileLevel = "NONE"
-                                tmpFileLog = False
-
-                        if tmpFileLog == True :
-                                try:
-                                        # try to close file
-                                        f.close()
-                                except :
-                                        # unable to close file
-                                        print("unable to close log file - will not perform logging to file")
-                                        self.fileLevel = "NONE"
-                                        tmpFileLog = False
-
-                # double check - if flag is false but level is not NONE, something has gone wonky
-                if tmpFileLog == False and self.fileLevel != "NONE" :
-                        print("error while setting up file log - discrepancy found")
+                # open the file - this will also create the file if it doens't already exist
+                try:
+                        # try to open file
+                        f = open(self.filePath, "a")
+                except:
+                        # unable to open
+                        self.log("WARN", "unable to open log file - will not perform logging to file")
                         self.fileLevel = "NONE"
+                        return
+
+                # close the file
+                try:
+                        # try to close file
+                        f.close()
+                except :
+                        # unable to close file
+                        self.log("WARN", "unable to close log file - will not perform logging to file")
+                        self.fileLevel = "NONE"
+                        return
+
+                # get out fileLevel and put it into the object
+                self.fileLevel = tmpFileLevel
+
+                # done
+                return
 
 
         def log(self, lvl, msg, data="NoLoggingDataGiven") :
@@ -209,15 +263,24 @@ class logger:
                         currentLevelNumber = self.inList(self.displayLevel, self.levelTable)
                         # compare
                         if incomingLevelNumber >= currentLevelNumber :
-                                if incomingLevelNumber == 0:
-                                        outStr = "\033[1;37;40m"+outStr
-                                elif incomingLevelNumber == 1:
-                                        outStr="\033[1;32;40m"+outStr
-                                elif incomingLevelNumber == 2:
-                                        outStr="\033[1;33;40m"+outStr
-                                elif incomingLevelNumber == 3:
-                                        outStr="\033[0;37;41m"+outStr
-                                print(outStr)
+                                dispStr = outStr
+                                if self.displayColour == True :
+                                        iln = incomingLevelNumber # just to make the next line not horribly long
+                                        colStr = self.ansiEscape + self.colourLookup[iln]["style"] +";"+ self.colourLookup[iln]["colour"] +";"+ self.colourLookup[iln]["bg"] +"m"
+                                        dispStr = colStr + dispStr
+                                        dispStr += self.ansiEscape + "0;0;0m"
+
+                                # if incomingLevelNumber == 0:
+                                #         outStr = "\033[1;37;40m"+outStr
+                                # elif incomingLevelNumber == 1:
+                                #         outStr="\033[1;32;40m"+outStr
+                                # elif incomingLevelNumber == 2:
+                                #         outStr="\033[1;33;40m"+outStr
+                                # elif incomingLevelNumber == 3:
+                                #         outStr="\033[0;37;41m"+outStr
+
+                                print(dispStr)
+
                         # tidy up
                         del incomingLevelNumber
                         del currentLevelNumber
