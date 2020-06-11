@@ -209,6 +209,14 @@ class logger:
                         currentLevelNumber = self.inList(self.displayLevel, self.levelTable)
                         # compare
                         if incomingLevelNumber >= currentLevelNumber :
+                                if incomingLevelNumber == 0:
+                                        outStr = "\033[1;37;40m"+outStr
+                                elif incomingLevelNumber == 1:
+                                        outStr="\033[1;32;40m"+outStr
+                                elif incomingLevelNumber == 2:
+                                        outStr="\033[1;33;40m"+outStr
+                                elif incomingLevelNumber == 3:
+                                        outStr="\033[0;37;41m"+outStr
                                 print(outStr)
                         # tidy up
                         del incomingLevelNumber
