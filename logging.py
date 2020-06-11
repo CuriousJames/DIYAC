@@ -161,7 +161,7 @@ class logger:
 
                 # double check - if flag is false but level is not NONE, something has gone wonky
                 if tmpFileLog == False and self.fileLevel != "NONE" :
-                        self.log("ERRR,"error while setting up file log - discrepancy found")
+                        self.log("ERRR","error while setting up file log - discrepancy found")
                         self.fileLevel = "NONE"
 
 
