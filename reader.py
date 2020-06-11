@@ -7,9 +7,9 @@ import threading
 import os # useful for file operations
 import json # for gettings settings and tokens
 import logging # our own logging module
-from inputHandler import inputHandler # our own input handling module
-from outputHandler import outputHandler
-from tokenHandler import tokenHandler # our ouwn token hangling module
+import inputHandler # our own input handling module
+import outputHandler
+import tokenHandler # our ouwn token hangling module
 from pinDef import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
@@ -94,7 +94,7 @@ def init():
 
         # set tokens
         global tokens
-        tokens = tokenHandler(settings, l)
+        tokens = tokenHandler.tokenHandler(settings, l)
         tokens.getAllowedTokens()
 
         # pin definitions
@@ -103,11 +103,11 @@ def init():
 
         # output handler
         global outH
-        outH = outputHandler(settings, l, pi, p)
+        outH = outputHandler.outputHandler(settings, l, pi, p)
 
         # Input handler
         global inH
-        inH = inputHandler(settings, l, tokens, outH)
+        inH = inputHandler.inputHandler(settings, l, tokens, outH)
 
 
 
