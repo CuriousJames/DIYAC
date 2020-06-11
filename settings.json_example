@@ -12,7 +12,8 @@
                 "path":"log/logFile"
         },
         "display":{
-                "level":"INFO"
+                "level":"INFO",
+				"colour":true
         }
         },
         "pinDef": {
