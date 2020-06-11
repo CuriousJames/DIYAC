@@ -134,9 +134,9 @@ class outputHandler :
 
 
     def doorbellHit(self) :
-        setDoorbellOutState(1)
+        self.setDoorbellOutState(1)
         time.sleep(2)
-        setDoorbellOutState(0)
+        self.setDoorbellOutState(0)
         time.sleep(0.1)
 
 
