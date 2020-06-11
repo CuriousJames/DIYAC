@@ -61,22 +61,20 @@ def cleanup():
         #log
         l.log("ERRR", "program shutdown")
 
-atexit.register(cleanup)
-
 #
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
 def signal_handler(sig, frame):
         l.log("ERRR", "CTRL-C pressed, will exit")
         sys.exit(0)
-signal.signal(signal.SIGINT, signal_handler)
 
 
 #
 # initialisation
 #
 def init():
-
+        atexit.register(cleanup)
+        signal.signal(signal.SIGINT, signal_handler)
         # define some variables
         global pi
         pi = pigpio.pi()
