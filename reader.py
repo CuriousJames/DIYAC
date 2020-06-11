@@ -61,6 +61,7 @@ def cleanup():
         #log
         l.log("ERRR", "program shutdown")
 
+
 #
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
