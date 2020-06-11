@@ -150,6 +150,7 @@ class inputHandler :
                         self.numpadLastInputTime = timeNow
                         return
 
+
         #
         # check input
         # this if for a fully formed input to be checked/approved by lockout and then token checked
@@ -167,6 +168,7 @@ class inputHandler :
                         self.outputHandler.openDoor()
                 else :
                         self.logger.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
+
 
         #
         # check whether lockout is happening
@@ -186,6 +188,7 @@ class inputHandler :
                         return "locked"
                 return "unlocked"
 
+
         #
         # add attempt into previousAttempts
         # remove last value if more than 3
@@ -197,6 +200,7 @@ class inputHandler :
                         del self.previousAttempts[0]
                 # append new time
                 self.previousAttempts.append(timeNow)
+
 
         #
         # get lockout state
@@ -231,6 +235,7 @@ class inputHandler :
                 # it's locked
                 self.logger.log("DBUG", "lockout still active")
                 return "locked"
+
 
         #
         # calculate if there should be a lockout based on information from self.previousAttempts

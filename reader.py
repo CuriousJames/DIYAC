@@ -47,7 +47,6 @@ import sys # for nice exit
 # some code to actually run the program
 
 
-
 #
 # cleanup
 # makes things clean at exit
@@ -71,7 +70,6 @@ def signal_handler(sig, frame):
         l.log("ERRR", "CTRL-C pressed, will exit")
         sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
-
 
 
 #
@@ -108,12 +106,6 @@ def init():
         # Input handler
         global inH
         inH = inputHandler.inputHandler(settings, l, tokens, outH)
-
-
-
-
-        # get the token list
-        #getAllowedTokens()
 
 
 #
@@ -169,13 +161,6 @@ def getSettings():
                 exit
                 return
         return
-
-
-
-
-
-
-
 
 
 #

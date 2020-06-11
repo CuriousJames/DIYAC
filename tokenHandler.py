@@ -5,7 +5,6 @@ import json # for gettings settings and tokens
 #
 # here's a class for keeping a list of allowed tokens and doing something with them
 class tokenHandler :
-
     # vars
     allowedTokens = False
 

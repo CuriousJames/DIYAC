@@ -8,7 +8,6 @@ import time
 #
 
 class outputHandler :
-
     doorRinging=False
     doorbellCount=0
     doorbellOutputs = [
@@ -33,7 +32,6 @@ class outputHandler :
     #  set initial state of some outputs
     #  get anything useful from settings
     def __init__(self, settings, logger, pi, pinDef) :
-
         # internalise the stuff
         self.settings = settings
         self.logger = logger
@@ -68,7 +66,6 @@ class outputHandler :
     # open and close the door
     #  this is for when a token has been read and approved
     def openDoor(self):
-
         # open
         self.setDoor("open")
 

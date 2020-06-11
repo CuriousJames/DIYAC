@@ -238,7 +238,6 @@ class logger:
                         del currentLevelNumber
 
 
-
         #
         # helper function
         #  returns false if not in list
