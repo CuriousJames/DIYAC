@@ -109,6 +109,27 @@ def init():
         global inH
         inH = inputHandler.inputHandler(settings, l, tokens, outH)
 
+        # register these GPIO pins to run cbf on rising or falling edge
+        global cb1,cb2,cb3,cb4
+        cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
+        cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
+        cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
+        cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
+
+        # set the wiegand reading
+        # will call function wiegandCallback on receiving data
+        global w
+        w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
+
+        l.log("INFO", "DoorPi running")
+
+
+def keepAlive():
+        while True:
+                time.sleep(9999)
+                #Just keeping the python fed (slithering)
+                l.log("INFO", "boppity")
+
 
 #
 # function to get settings from file
@@ -188,19 +209,6 @@ def cbf(gpio, level, tick):
 
 # run initialisation
 init()
-l.log("INFO", "DoorPi running")
 
-# register these GPIO pins to run cbf on rising or falling edge
-cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
-cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
-cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
-cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
-
-# set the wiegand reading
-# will call function wiegandCallback on receiving data
-w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
-
-while True:
-        time.sleep(9999)
-        #Just keeping the python fed (slithering)
-        l.log("INFO", "boppity")
+# Keep the program running to wait for callbacks
+keepAlive()
