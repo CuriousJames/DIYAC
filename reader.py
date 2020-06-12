@@ -76,18 +76,21 @@ def signal_handler(sig, frame):
 def init():
         atexit.register(cleanup)
         signal.signal(signal.SIGINT, signal_handler)
-        # define some variables
-        global pi
-        pi = pigpio.pi()
-
         # get all the settings
         getSettings()
-
 
         # start logging
         global l
         l = logging.logger(settings)
         l.log("INFO", "DoorPi starting")
+
+        # define some variables
+        global pi
+        pi = pigpio.pi()
+
+        if not pi.connected:
+            l.log("ERRR","PiGPIO - Unable to connect; Is the daemon running?")
+            exit()
 
         # set tokens
         global tokens
