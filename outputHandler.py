@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-
 import time
+import threading
 
 #
 # TODO:
@@ -66,6 +66,10 @@ class outputHandler :
     # open and close the door
     #  this is for when a token has been read and approved
     def openDoor(self):
+        openDoorThread=threading.Thread(target=self.openDoorThreadFunc)
+        openDoorThread.start()
+
+    def openDoorThreadFunc(self):
         # open
         self.setDoor("open")
 
