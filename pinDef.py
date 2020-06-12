@@ -24,7 +24,7 @@ class pinDef :
         "wiegand1": None
     }
     pcbVersion = None
-    pcbVersionsAvailable = [1, 2]
+    pcbVersionsAvailable = [1, 2.0, 2.1]
     pcbPinouts = {
         1: {
             "doorStrike": 17,
@@ -39,18 +39,32 @@ class pinDef :
             "wiegand0": 14,
             "wiegand1": 15
         },
-        2: {
-            "doorStrike": 17,
-            "doorbell12": 4,
-            "doorbellCc": 26,
-            "readerLed": 27,
-            "readerBuzz": 22,
-            "doorbellButton": 5,
-            "doorSensor": 6,
-            "piActiveLed": 13,
-            "spareLed": 19,
-            "wiegand0": 14,
-            "wiegand1": 15
+        2.0: {
+            "doorStrike": 27,
+            "doorbell12": 22,
+            "doorbellCc": 17,
+            "readerLed": 6,
+            "readerBuzz": 5,
+            "doorbellButton": 26,
+            "doorSensor": 20,
+            "piActiveLed": 4,
+            "spareLed": 3,
+            "wiegand0": 19,
+            "wiegand1": 13
+        },
+        2.1: {
+            "doorStrike": 27,
+            "doorbell12": 22,
+            "doorbellCc": 17,
+            "readerLed": 6,
+            "readerBuzz": 5,
+            "doorbellButton": 26,
+            "doorSensor": 20,
+            "piActiveLed": 4,
+            "spareLed": 3,
+            "wiegand0": 19,
+            "wiegand1": 13,
+            "exitButton": 10
         }
     }
 
