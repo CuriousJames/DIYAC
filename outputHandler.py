@@ -16,7 +16,7 @@ class outputHandler :
             "inverted": False
         },
         {
-            "name": "boorbellCc",
+            "name": "doorbellCc",
             "inverted": True
         }
     ]
