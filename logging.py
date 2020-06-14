@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import datetime # used for logging
 import sys # for checking python type for ansi escape
+import json # for outputting pretty strings from data
 
 #
 # log
@@ -246,7 +247,7 @@ class logger:
 
                 # if data - format
                 if data != "NoLoggingDataGiven" :
-                        outMsg = outMsg + " - " + format(data)
+                        outMsg = outMsg + " - " + json.dumps(data)
 
                 # format
                 outStr = isoTime + " - [" + lvl + "] - " + outMsg
