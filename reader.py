@@ -13,6 +13,7 @@ import tokenHandler # our ouwn token hangling module
 import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
+import subprocess
 
 
 #
@@ -56,7 +57,10 @@ def cleanup():
         #pi.write(p.pins["doorStrike"],0)
 
         # release gpio resources
-        pi.stop()
+        try :
+                pi.stop()
+        except :
+                pass
 
         #log
         l.log("ERRR", "program shutdown")
@@ -84,12 +88,15 @@ def init():
         l = logging.logger(settings)
         l.log("INFO", "DoorPi starting")
 
-        # define some variables
+        # start gpio stuff
+        stat = subprocess.call("service pigpiod status > /dev/null", shell=True)
+        if stat != 0 :
+                l.log("ERRR", "PIGPIOD is not running, will stop execution")
+                sys.exit()
         global pi
         pi = pigpio.pi()
-
         if not pi.connected:
-            l.log("ERRR","PiGPIO - Unable to connect; Is the daemon running?")
+            l.log("ERRR","PiGPIO - Unable to connect")
             exit()
 
         # set tokens
