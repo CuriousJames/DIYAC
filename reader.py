@@ -102,7 +102,6 @@ def init():
         # set tokens
         global tokens
         tokens = tokenHandler.tokenHandler(settings, l)
-        tokens.getAllowedTokens()
 
         # pin definitions
         global p

@@ -16,6 +16,7 @@ class tokenHandler :
     def __init__(self, settings=False, logger=False) :
         self.settings = settings
         self.logger = logger
+        self.getAllowedTokens()
 
 
     #
