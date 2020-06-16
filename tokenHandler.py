@@ -13,7 +13,7 @@ class tokenHandler :
     # initialisation function
     # just sets vars for settings and logger
     #
-    def __init__(self, settings=False, logger=False) :
+    def __init__(self, settings, logger) :
         self.settings = settings
         self.logger = logger
         self.getAllowedTokens()
@@ -58,13 +58,13 @@ class tokenHandler :
         #settings = self.settings
 
         # if settings haven't worked, return
-        if self.settings == False:
+        if self.settings.allSettings == False:
             self.logger.log("WARN", "no settings - will not get allowedTokens")
             return
 
         # make filepath
         try :
-            allowedTokensFilePath = self.settings["root"] + self.settings["allowedTokens"]["path"]
+            allowedTokensFilePath = self.settings.allSettings["root"] + self.settings.allSettings["allowedTokens"]["path"]
         except :
             self.logger.log("WARN", "Allowed tokens file path not set in settings")
             return

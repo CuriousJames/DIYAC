@@ -10,6 +10,7 @@ import logging # our own logging module
 import inputHandler # our own input handling module
 import outputHandler
 import tokenHandler # our ouwn token hangling module
+from settingsHandler import settingsHandler
 import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
@@ -60,11 +61,12 @@ def init():
         atexit.register(cleanup)
         signal.signal(signal.SIGINT, signal_handler)
         # get all the settings
-        getSettings()
+        #getSettings()
+        s = settingsHandler()
 
         # start logging
         global l
-        l = logging.logger(settings)
+        l = logging.logger(s)
         l.log("INFO", "DoorPi starting")
 
         # see if pigpiod is running
@@ -94,19 +96,19 @@ def init():
 
         # set tokens
         global tokens
-        tokens = tokenHandler.tokenHandler(settings, l)
+        tokens = tokenHandler.tokenHandler(s, l)
 
         # pin definitions
         global p
-        p = pinDef.pinDef(settings, l)
+        p = pinDef.pinDef(s, l)
 
-        # output handler
+        # output handler (settings, logger, gpio, pins
         global outH
-        outH = outputHandler.outputHandler(settings, l, pi, p)
+        outH = outputHandler.outputHandler(s, l, pi, p)
 
         # Input handler
         global inH
-        inH = inputHandler.inputHandler(settings, l, tokens, outH)
+        inH = inputHandler.inputHandler(s, l, tokens, outH)
 
         # register these GPIO pins to run cbf on rising or falling edge
         global cb1,cb2,cb3,cb4
@@ -129,60 +131,6 @@ def keepAlive():
                 #Just keeping the python fed (slithering)
                 l.log("INFO", "boppity")
 
-
-#
-# function to get settings from file
-def getSettings():
-        # define global var settings = false
-        # if settings file exists
-        ## open/read+decode/close
-        ## put into settings var
-        ## if problem
-        ### error handling
-        #
-        # if no settings file
-        ## error handling
-
-        # make settings var
-        global settings
-        settings = False
-
-        if os.path.exists("settings.json"):
-                # open
-                try:
-                        settingsFile = open("settings.json", "r")
-                except OSError as err :
-                        print("os error while opening settings file:")
-                        print(err)
-                except:
-                        print("unknown error while opening settings file:")
-                        print(err)
-                        return
-
-                # read + decode
-                try:
-                        settings = json.load(settingsFile)
-                except ValueError as err :
-                        print("JSON Decode error while reading settings file")
-                        print(err)
-                except:
-                        print("unknown error while reading settings file")
-
-                # close
-                try:
-                        settingsFile.close()
-                except OSError as err :
-                        print("os error while closing settings file:")
-                        print(err)
-                except:
-                        print("unknown error while closing settings file")
-
-        else:
-                # error - no file found
-                print("Critical Error - settings file not found - please create settings.json using the example provided")
-                exit
-                return
-        return
 
 
 #

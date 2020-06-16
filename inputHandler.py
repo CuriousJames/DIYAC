@@ -49,7 +49,7 @@ class inputHandler :
                 self.outputHandler = outputHandler
 
                 # see if settings are set
-                if self.settings == False :
+                if self.settings.allSettings == False :
                         return
 
                 # the settings we're going to get are
@@ -58,12 +58,12 @@ class inputHandler :
                 # if exist, update params list
                 for s in settingsToGet :
                         try :
-                                self.settings["inputHandling"][s]
+                                self.settings.allSettings["inputHandling"][s]
                         except :
                                 pass
                         else :
-                                self.logger.log("DBUG", "new setting for input handling parameter", {"parameter": s, "value": self.settings["inputHandling"][s]})
-                                self.params[s] = self.settings["inputHandling"][s]
+                                self.logger.log("DBUG", "new setting for input handling parameter", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
+                                self.params[s] = self.settings.allSettings["inputHandling"][s]
 
                 # done
                 return

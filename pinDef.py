@@ -126,14 +126,14 @@ class pinDef :
     def setByPcb(self) :
         # see if it's set
         try :
-            self.settings["pinDef"]["pcbVersion"]
+            self.settings.allSettings["pinDef"]["pcbVersion"]
         except :
             pass
         else :
             # make sure it's a valid value
-            if self.settings["pinDef"]["pcbVersion"] in self.pcbVersionsAvailable :
+            if self.settings.allSettings["pinDef"]["pcbVersion"] in self.pcbVersionsAvailable :
                 # store it
-                self.pcbVersion = self.settings["pinDef"]["pcbVersion"]
+                self.pcbVersion = self.settings.allSettings["pinDef"]["pcbVersion"]
                 self.logger.log("DBUG", "pcb version found", {"version": self.pcbVersion} )
 
         # if it's defined, set the values
@@ -151,7 +151,7 @@ class pinDef :
     def setByCustom(self) :
         # is it set?
         try :
-            self.settings["pinDef"]
+            self.settings.allSettings["pinDef"]
         except :
             pass
         else :
@@ -159,11 +159,11 @@ class pinDef :
             for p in self.pins :
                 # but first make sure it exists
                 try :
-                    self.settings["pinDef"][p]
+                    self.settings.allSettings["pinDef"][p]
                 except :
                     pass
                 else :
-                    self.pins[p] = self.settings["pinDef"][p]
+                    self.pins[p] = self.settings.allSettings["pinDef"][p]
                     self.logger.log( "DBUG", "custom pin set", {"name": p, "pin": self.pins[p]} )
 
         # done

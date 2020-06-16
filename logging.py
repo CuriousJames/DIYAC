@@ -85,7 +85,7 @@ class logger:
                 # self.displayLevel = "ERRR"
 
                 # if no settings, there's nothing more can be done
-                if settings == False :
+                if self.settings.allSettings == False :
                         self.log("WARN", "no settings - no logging to file, display logging will be INFO")
                         return
 
@@ -104,28 +104,28 @@ class logger:
 
                 # make sure it exists
                 try :
-                        self.settings["logging"]["display"]["level"]
+                        self.settings.allSettings["logging"]["display"]["level"]
                 except NameError :
                         self.log("INFO","display logging level not set - no logs will be printed to stdout")
                         self.displayLevel = "NONE"
                         return
 
                 # make sure it's in levelTable
-                if self.settings["logging"]["display"]["level"] in self.levelTable :
-                        self.displayLevel = self.settings["logging"]["display"]["level"]
+                if self.settings.allSettings["logging"]["display"]["level"] in self.levelTable :
+                        self.displayLevel = self.settings.allSettings["logging"]["display"]["level"]
                         self.log("INFO", "display logging level set", {"level": self.displayLevel})
                 else :
-                        self.log("WARN", "display logging level is incorrect - no more logs to stdout", {"value in settings": self.settings["logging"]["display"]["level"]})
+                        self.log("WARN", "display logging level is incorrect - no more logs to stdout", {"value in settings": self.settings.allSettings["logging"]["display"]["level"]})
                         self.displayLevel = "NONE"
 
                 # check if colour enabled
                 try :
-                        self.settings["logging"]["display"]["colour"]
+                        self.settings.allSettings["logging"]["display"]["colour"]
                 except :
                         pass
                 else :
                         # the if is only here to validate input
-                        if self.settings["logging"]["display"]["colour"] == True :
+                        if self.settings.allSettings["logging"]["display"]["colour"] == True :
                                 # set the vairbale
                                 self.displayColour = True
 
@@ -149,7 +149,7 @@ class logger:
 
                 # test exists
                 try :
-                        self.settings["logging"]["file"]["level"]
+                        self.settings.allSettings["logging"]["file"]["level"]
                 except NameError :
                         self.log("INFO", "file logging level not set - no logs will be printed to file")
                         self.fileLevel = "NONE"
@@ -159,12 +159,12 @@ class logger:
                 tmpFileLevel = "NONE"
 
                 # czech in levelTable
-                if self.settings["logging"]["file"]["level"] in self.levelTable :
-                        tmpFileLevel = self.settings["logging"]["file"]["level"]
+                if self.settings.allSettings["logging"]["file"]["level"] in self.levelTable :
+                        tmpFileLevel = self.settings.allSettings["logging"]["file"]["level"]
                         self.log("INFO", "file logging level set", {"level": tmpFileLevel})
                 else :
                         self.fileLevel = "NONE"
-                        self.log("WARN", "file logging level is incorrect in settings", {"value": self.settings["logging"]["file"]["level"]})
+                        self.log("WARN", "file logging level is incorrect in settings", {"value": self.settings.allSettings["logging"]["file"]["level"]})
                         return
 
                 # see if it's none, if so we don't need to do anything more
@@ -173,24 +173,24 @@ class logger:
 
                 # test if path set
                 try :
-                        self.settings["logging"]["file"]["path"]
+                        self.settings.allSettings["logging"]["file"]["path"]
                 except NameError :
                         # not set, no log to file and return
                         self.log("WARN", "File path not set - no logs to file")
                         self.fileLevel = "NONE"
                         return
                 else :
-                        self.filePath = self.settings["logging"]["file"]["path"]
+                        self.filePath = self.settings.allSettings["logging"]["file"]["path"]
 
                 # change path to absolute if necessary
                 if self.filePath[0] != "/" :
                         # still gotta test settings["root"] exists
                         try :
-                                self.settings["root"]
+                                self.settings.allSettings["root"]
                         except NameError:
                                 self.log("DBUG", "root dir not in settings - will use relative path for log file")
                         else :
-                                self.filePath = self.settings["root"] + self.filePath
+                                self.filePath = self.settings.allSettings["root"] + self.filePath
                 self.log("DBUG", "log file path set ", {"path": self.filePath})
 
                 # open the file - this will also create the file if it doens't already exist
