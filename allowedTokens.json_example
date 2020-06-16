@@ -1,16 +1,16 @@
 [
         {
-                "value":"a1eeb099",
+                "token":"a1eeb099",
                 "type":"card",
                 "user":"Me"
         },
         {
-                "value":"EE:A9:11:B5",
+                "token":"EE:A9:11:B5",
                 "type":"card",
                 "user":"SomeoneElse"
         },
         {
-                "value":"1234",
+                "token":"1234",
                 "type":"code",
                 "user":"Me"
         }

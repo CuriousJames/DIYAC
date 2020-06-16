@@ -125,9 +125,9 @@ class tokenHandler :
     def formatTokens(self) :
         # remove ":" and make lowercase
         if self.allowedTokens != False :
-            for token in self.allowedTokens :
-                token["value"] = token["value"].replace(":", "")
-                token["value"] = token["value"].lower()
+            for tkn in self.allowedTokens :
+                tkn["token"] = tkn["token"].replace(":", "")
+                tkn["token"] = tkn["token"].lower()
         return
 
 
@@ -137,13 +137,13 @@ class tokenHandler :
     def transformOverlengthTokens(self) :
         # Perform transform for mifare ultralight
         if self.allowedTokens != False :
-            for token in self.allowedTokens :
+            for tkn in self.allowedTokens :
                 #
                 # do some transforming here
                 # Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
                 # So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
-                if len(token["value"]) >8:
-                    token["value"] = "88" + token["value"][:6]
+                if len(tkn["token"]) >8:
+                    tkn["token"] = "88" + tkn["token"][:6]
         return
 
     #
@@ -172,9 +172,9 @@ class tokenHandler :
             j = 0
             for check in self.allowedTokens:
                 # if tokens match, types match, it's not the same entry, and not listed in duplicate indexes
-                if original["value"] == check["value"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
+                if original["token"] == check["token"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
                     # log - it only takes 3 lines because it wou;'dnt nicely fit on one
-                    logData = {"token": self.allowedTokens[j]["value"], "type": self.allowedTokens[j]["type"], "user": self.allowedTokens[j]["user"]}
+                    logData = {"token": self.allowedTokens[j]["token"], "type": self.allowedTokens[j]["type"], "user": self.allowedTokens[j]["user"]}
                     self.logger.log("WARN", "Duplicate token found in allowedTokens file", logData)
                     del logData
                     # append duplicate username to original username
@@ -208,7 +208,7 @@ class tokenHandler :
 
         for t in self.allowedTokens :
             if t["type"] == rxType :
-                if t["value"] == rx :
+                if t["token"] == rx :
                     return {"allow": True, "user": t["user"]}
         # all done
         return {"allow": False}
