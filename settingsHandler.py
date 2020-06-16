@@ -16,6 +16,7 @@ class settingsHandler :
         if self.allSettings == False :
             print("Unexpected error while initialising settigns, will stop execution")
             exit
+        self.checkRoot()
 
 
     # load the settings from the settings.json file
@@ -58,3 +59,11 @@ class settingsHandler :
             print("unknown error while closing settings file")
 
         return(True)
+
+    #
+    # if root is not set, make it the same as where reader.py is
+    def checkRoot(self) :
+        try :
+            self.allSettings["root"]
+        except :
+            self.allSettings["root"] = os.path.dirname(os.path.realpath(__file__))
