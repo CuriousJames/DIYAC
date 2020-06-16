@@ -3,10 +3,51 @@ import time
 import threading
 
 #
-# TODO:
-#  set door open time from settings
+# Output Handling
 #
-
+# Description:
+#  Do anything that involves making an output happen
+#
+# Variables:
+#  doorRinging - bool - shows whether the doorbell is currently ringing
+#  doorbellCount - int - used for debounce
+#  doorbellOutputs - list of dicts - the individual doorbell outputs and whether they are inverted
+#  params - dict
+#   doorOpenTime - int - seconds that the door will stay open after a successful token compare
+#   doorbellCcTime - float - seconds that the doorbell closed contact output will be changed for
+#
+# Functions:
+#
+#  __init__(settings, logger, pi, pinDef)
+#   store objects for later use
+#   set initial state of some outputs
+#   get parameters from settings
+#
+#  openDoor()
+#   called to open the door
+#   starts openDoorThreadFunc in its own thread
+#
+#  openDoorThreadFunc()
+#   open
+#   wait for time
+#   close
+#
+#  setDoor(state)
+#   close or open the door strike
+#   do the readerLed too
+#   and log
+#
+#  ringDoorbell()
+#   makes sure the doorbell is not already ringing
+#   does a ring
+#
+#  doorbellHit()
+#   on/off cycle for the doorbell
+#   calls setDoorbellOutState
+#
+#  setDoorbellOutState(state)
+#   sets each output as described in doorbellOutputs
+#
 class outputHandler :
     doorRinging=False
     doorbellCount=0
@@ -50,14 +91,14 @@ class outputHandler :
 
         # get settings
         settingsToGet = ["doorOpenTime", "doorbellCcTime"]
-        if self.settings != False :
+        if self.settings.allSettings != False :
             for s in settingsToGet :
                 try :
-                    self.settings["outputHandling"][s]
+                    self.settings.allSettings["outputHandling"][s]
                 except :
                     pass
                 else :
-                    self.params[s] = self.settings["outputHandling"][s]
+                    self.params[s] = self.settings.allSettings["outputHandling"][s]
                     self.logger.log("INFO", "new setting for output handling", {"parameter": s, "value": self.params[s]} )
             # done
         return

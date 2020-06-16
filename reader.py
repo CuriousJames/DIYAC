@@ -23,7 +23,16 @@ import subprocess
 # cleanup
 # nice exit
 # function: init() - main script initialisation
-# function: getSettings() - get settings from settings file
+#  settings
+#  logger
+#  gpio
+#  tokens
+#  pins
+#  out
+#  in
+#  bind gpio callbacks
+#  start iwegand
+# function: keepalive()
 # function: cbf(gpio, level, tick)
 # some code to actually run the program
 
@@ -61,7 +70,6 @@ def init():
         atexit.register(cleanup)
         signal.signal(signal.SIGINT, signal_handler)
         # get all the settings
-        #getSettings()
         s = settingsHandler()
 
         # start logging

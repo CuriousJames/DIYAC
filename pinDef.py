@@ -2,7 +2,30 @@
 import sys
 
 #
-# GPIO Variables so we don't have to remember pin numbers!
+# Pin Definitions
+#
+# Description:
+#  define what pins do what things - either by specifying a PCB version or defining each pin
+#
+# Variables:
+#  pins - dict of all pin names and numbers, this is what is used by other functions
+#  pcbVersion - the pcb version specified in settings file
+#  pcbVersionsAvailable - allowable values of pcbVersion
+#  pcbPinout - what each pin definition is by PCB version
+#
+# Functions:
+#
+#  __init__(settings, logger)
+#   setup the usable pin defs
+#   get from pcb version
+#   get from custom - this will overwrite any pcb defaults
+#   make sure all critical pins are defined
+#
+#  setByPcb()
+#   get pin definitions as shown by pcb version in settings
+#
+#  setByCustom()
+#   get pin definitions as defined in the settings file
 #
 class pinDef :
 
@@ -70,36 +93,12 @@ class pinDef :
 
     #
     # function to get pins from settings
-    #  if settings[pinDef] does not exist
-    #   return
-    #  iterate through settings[pinDef]
-    #   check it's in the list of pins
-    #   check value is an integer in the correct range
-    #   update var
     #
     def __init__(self, settings, logger) :
 
         # internalise settings and logger
         self.logger = logger
         self.settings = settings
-
-        # # see if anything even exists in settings
-        # try :
-        #     self.settings["pinDef"]
-        # except :
-        #     self.logger.log("DBUG", "No new pin definitions from settings")
-        #     return
-
-        # # iterate settigns[pinDef]
-        # for p in self.settings["pinDef"] :
-        #     # see if it's one of the pinDefs we already have
-        #         if p in self.pins :
-        #             # validate
-        #             #  >=2, <=27
-        #             if self.settings["pinDef"][p] >= 2 and self.settings["pinDef"][p] <= 27 :
-        #                 # update pin definition
-        #                 self.logger.log("DBUG", "New pin defined by settings", {"name": p, "pin": settings["pinDef"][p]})
-        #                 self.pins[p] = self.settings["pinDef"][p]
 
         # get pins from PCB Version
         # get any other pins that have been set

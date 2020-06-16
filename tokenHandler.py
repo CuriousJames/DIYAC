@@ -3,7 +3,22 @@ import os # useful for file operations
 import json # for gettings settings and tokens
 
 #
-# here's a class for keeping a list of allowed tokens and doing something with them
+# Tokens
+#
+# Description:
+#  basically for getting, storing and comparing tokens
+#
+# Vars:
+#  allowedTokens - list of allowed tokens - default False
+#
+# Functions:
+#
+#  __init__(settings, logger)
+#   store settigns and logger internally for later use
+#   run getAllowedTokens()
+
+#  getAllowedTokens()
+#
 class tokenHandler :
     # vars
     allowedTokens = False
@@ -26,8 +41,6 @@ class tokenHandler :
     #  changes mifare ultralight tokens to what will be received by reader - not implemented yet
     #
     def getAllowedTokens(self):
-        # define global var allowedTokens = false
-        #
         # if no settings
         ## exit function
         #
@@ -47,27 +60,24 @@ class tokenHandler :
         # remove ":" from all tokens
         # make all tokens lower case
 
-        # make allowedTokens var
-        #global allowedTokens
-        #allowedTokens = False
-
-        #global l
-
-        # to make all this stuff work without having to change it all
-        #global settings
-        #settings = self.settings
-
         # if settings haven't worked, return
         if self.settings.allSettings == False:
             self.logger.log("WARN", "no settings - will not get allowedTokens")
             return
 
-        # make filepath
+        # check file path exists
+        # if relative, make absolute
+        # open / read / decode / close
         try :
-            allowedTokensFilePath = self.settings.allSettings["root"] + self.settings.allSettings["allowedTokens"]["path"]
+            self.settings.allSettings["allowedTokens"]["path"]
         except :
             self.logger.log("WARN", "Allowed tokens file path not set in settings")
             return
+
+        if self.settings.allSettings["allowedTokens"]["path"][0] != "/" :
+            allowedTokensFilePath = self.settings.allSettings["root"] + self.settings.allSettings["allowedTokens"]["path"]
+        else :
+            allowedTokensFilePath = self.settings.allSettings["allowedTokens"]["path"]
 
         # open / read / decode / close
         if os.path.exists(allowedTokensFilePath) :
@@ -128,10 +138,10 @@ class tokenHandler :
         # Perform transform for mifare ultralight
         if self.allowedTokens != False :
             for token in self.allowedTokens :
-                ##
-                ## do some transforming here
-                ## Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
-                ## So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
+                #
+                # do some transforming here
+                # Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
+                # So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
                 if len(token["value"]) >8:
                     token["value"] = "88" + token["value"][:6]
         return
@@ -154,7 +164,6 @@ class tokenHandler :
         if self.allowedTokens == False :
             return
         # initialise
-        #global l
         duplicateIndexes = []
         # main iterate
         i = 0
@@ -193,28 +202,13 @@ class tokenHandler :
     #  if match, open door
     #  if not match, shoot whoever entered it
     def checkToken(self, rx, rxType) :
-
-        # make the allowedTokens and logger accessible
-        #global tokens
-        #global l
-
-        # see if it exists in tokens
-        #allowFlag = False
-
         if self.allowedTokens == False :
-            self.logger.log("INFO", "no available tokens list - access denied")
+            self.logger.log("INFO", "ACCESS DENIED - no available tokens list")
             return
 
         for t in self.allowedTokens :
             if t["type"] == rxType :
                 if t["value"] == rx :
-                    #l.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": t["user"]})
-                    #allowFlag = True
-                    # open the door
                     return {"allow": True, "user": t["user"]}
-        # log incorrect code entered
-        #if allowFlag == False :
-        #l.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
-
         # all done
         return {"allow": False}

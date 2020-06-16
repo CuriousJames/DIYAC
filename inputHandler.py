@@ -2,25 +2,52 @@
 import time
 
 #
-# class to handle inputs
-#  functions:
-#   newNumpadInput(rx) - process new keypad entry
-#   checkToken(rx, type) - take token and check if in allowedTokens list
-#   checkBruteForce() - see if the lock is active or not, and if it should be activated
-#   wiegandCallback - called by wiegand library, process & translate input from reader
+# Input Handler
+#
+# Description:
+#  Handle input from everything (mostly wiegand)
+#  do appropriate things
+#  including lockouts
+#
+# Variables:
+#  state - [ready|reading], state of what is happen, ready for no input yet, reading for midway through a code input
+#  inputBuffer - a string of input received so far
+#  lastInputTime - used for allowing a timeout and other such stuff
+#  delimiter - start/stop key - can only be # or *
+#  timeOut - seconds before timeout occurs and state should be returned to ready
+#  bruteForceThresholdAttempts - max failed attempts within the bruteForceLockoutTime before lockout
+#  bruteForceThresholdTime - seconds of time for above number of attemps to occur within for lockout
+#  bruteForceLockoutTime - seconds that the lockout will be enforced for
+#  bruteForceLockoutStart - time in seconds of last lockout start
+#  previousAttemps - list of times of last 3 attempts
+#
+# Functions:
+#  newNumpadInput(rx)
+#   process new entry from keypad (deals with each individual key press)
+#
+#  checkInput(rx, type)
+#   called when there is a full token to be checked
+#   take token and check if in allowedTokens list
+#
+#  checkLockout()
+#   see if the lock is active or not, and if it should be activated
+#
+#  addAttempt()
+#   puts a new attempt and time into previousAttempts
+#
+#  getBruteForceLockoutState()
+#   bool - if brute force is in action
+#
+#  calculateLockout()
+#   see if a new lockout should be activated - based on previousAttempts
+#
+#  wiegandCallback(bytes, code)
+#   called by wiegand library, process & translate input from reader
+#   includes translation from incoming int to hex string
 #
 class inputHandler :
         # vars
-        #  state - [ready|reading], state of what is happen, ready for no input yet, reading for midway through a code input
-        #  inputBuffer - a string of input received so far
-        #  lastInputTime - used for allowing a timeout and other such stuff
-        #  delimiter - start/stop key - can only be # or *
-        #  timeOut - seconds before timeout occurs and state should be returned to ready
-        #  bruteForceThresholdAttempts - max failed attempts within the bruteForceLockoutTime before lockout
-        #  bruteForceThresholdTime - seconds of time for above number of attemps to occur within for lockout
-        #  bruteForceLockoutTime - seconds that the lockout will be enforced for
-        #  bruteForceLockoutStart - time in seconds of last lockout start
-        #  previousAttemps - list of times of last 3 attempts
+
         params = {
                 "delimiter": "#",
                 "timeOut": 5,
@@ -230,6 +257,7 @@ class inputHandler :
                 if self.bruteForceLockoutStart + self.params["bruteForceLockoutTime"] <= timeNow :
                         self.logger.log("INFO", "BruteForce Lockout stopped")
                         self.bruteForceLockoutStart = 0
+                        self.previousAttempts = []
                         return "unlocked"
 
                 # it's locked
@@ -264,20 +292,20 @@ class inputHandler :
         #
         def wiegandCallback(self, bits, code):
                 # if bits != 4 AND bits != 34
-                ## error
+                #  error
                 #
                 # if bits == 34, it's a card token
-                ## convert to binary string
-                ## trim "0b", start parity bit, end parity bit
-                ## re order bytes
-                ## convert to hex
-                ## compare against list
+                #  convert to binary string
+                #  trim "0b", start parity bit, end parity bit
+                #  re order bytes
+                #  convert to hex
+                #  compare against list
                 #
                 # if bits == 4
-                ## if code = 0
-                ### ring doorbell
-                ## else
-                ### do something else
+                #  if code = 0
+                #   ring doorbell
+                #  else
+                #   do something else
 
                 #
                 # log
@@ -297,19 +325,6 @@ class inputHandler :
                         output = output[2:] # trim "0x"
                         self.logger.log("DEBUG", "output from formatting", output)
 
-                        # see if the card is in allowed tokens
-                        #
-                        # match = False
-                        # for token in allowedTokens:
-                        #         # for generic cards - no changing necessary
-                        #         if token["type"] != "code":
-                        #                 if token["value"] == output:
-                        #                         # open the door
-                        #                         match = True
-                        #                         l.log("INFO", "token allowed (generic card)", output)
-                        # # if it wasn't a match
-                        # if match == False :
-                        #         l.log("INFO", "token not allowed", output)
                         self.checkInput(output, "card")
                 elif bits == 4:
                         # someone pressed a button

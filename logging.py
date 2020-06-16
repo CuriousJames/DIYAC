@@ -19,10 +19,13 @@ import json # for outputting pretty strings from data
 #
 #
 # Variables:
-#  filePath
-#  fileLevel
-#  displayLevel
-#  levelTable
+#  filePath - path to logfile
+#  fileLevel - message level to to into logfile - deafult NONE
+#  displayLevel - message level to go to display - default INFO
+#  displayColour - whether or not to colourize display output - default FALSE
+#  levelTable - levels of logging available
+#  ansiEscape - ansi escape string for making colour output to terminal
+#  colourLookup - list of colour stuff for each log level
 #
 #
 # Functions:
@@ -35,6 +38,16 @@ import json # for outputting pretty strings from data
 #   log message to outputs
 #   only if level is above what is set in settings
 #   if no settings found, will log ALL to display
+#
+#  setLogToDisplaySettings()
+#   go through settings and get the ones related to display output
+#
+#  setLogToFileSettings()
+#   go through settings and get the ones related to file output
+#
+#  inList(needle, haystack)
+#   find if needle is in haystack
+#   if it is, return the index
 #
 
 class logger:
@@ -72,17 +85,6 @@ class logger:
         def __init__(self,settings) :
                 # internalise settings
                 self.settings = settings
-
-                # get information out of settings
-                # create some useful vars
-
-                # levelTable
-                #self.levelTable = ["DBUG", "INFO", "WARN", "ERRR", "NONE"]
-
-                # default set : no output to file, full output to display
-                # self.filePath = False
-                # self.fileLevel = "NONE"
-                # self.displayLevel = "ERRR"
 
                 # if no settings, there's nothing more can be done
                 if self.settings.allSettings == False :
@@ -143,9 +145,6 @@ class logger:
                 #  change path to absolute (if it's not already)
                 #  test if file can be opened and closed
                 #
-
-                # flag - false if error, do not do subsequent operations
-                #tmpFileLog = True
 
                 # test exists
                 try :
@@ -315,10 +314,6 @@ class logger:
         #  returns false if not in list
         #  returns index if it is in the list
         def inList(self, needle, haystack) :
-                # check if haystack is a list
-                #if type(haystack) != "list" :
-                #        return False
-
                 # do some checking
                 if needle in haystack :
                         # loop through
