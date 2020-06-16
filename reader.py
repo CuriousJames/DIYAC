@@ -21,29 +21,8 @@ import subprocess
 #
 # cleanup
 # nice exit
-# class: pinDef
-#  vars
-#  function: init(settings, logger) - get custom pin defs from settings
 # function: init() - main script initialisation
 # function: getSettings() - get settings from settings file
-# class: token
-#  vars
-#  function: getAllowedTokens(settings)
-#  function: formatTokens()
-#  function: transformOverlengthTokens()
-#  function: removeDuplicateTokens()
-# funciton: openDoor()
-# function: ringDoorbell()
-# class: inputHandler
-#  vars
-#  function: init(settings)
-#  function: newNumpadInput(rx)
-#  function: checkToken(rx, rxType)
-#  function: checkLockout()
-#  function: addAttempt()
-#  function: getBruteForceState()
-#  function: calculateNewLockout()
-#  function: wiegandCallback(bits, code)
 # function: cbf(gpio, level, tick)
 # some code to actually run the program
 
@@ -88,11 +67,25 @@ def init():
         l = logging.logger(settings)
         l.log("INFO", "DoorPi starting")
 
-        # start gpio stuff
-        stat = subprocess.call("service pigpiod status > /dev/null", shell=True)
+        # see if pigpiod is running
+        # if not running
+        #  try to start
+        #  check again
+        #  if not running
+        #   exit
+        # pigpiod.pi()
+        # if not connected
+        #  exit
+        stat = subprocess.call("systemctl status pigpiod > /dev/null", shell=True)
         if stat != 0 :
-                l.log("ERRR", "PIGPIOD is not running, will stop execution")
-                sys.exit()
+                l.log("WARN", "PIGPIOD is not running, will try to start")
+                subprocess.call("sudo systemctl start pigpiod > /dev/null", shell=True)
+                stat = subprocess.call("service pigpiod status > /dev/null", shell=True)
+                if stat != 0 :
+                        l.log("ERRR", "Unable to start pigpiod daemon")
+                        sys.exit()
+                else :
+                        l.log("INFO", "Starting pigpiod daemon successful")
         global pi
         pi = pigpio.pi()
         if not pi.connected:
