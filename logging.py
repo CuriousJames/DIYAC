@@ -104,6 +104,17 @@ class logger:
                 #  make sure it's in the allowed list
                 #
 
+                # check if colour enabled
+                try :
+                        self.settings.allSettings["logging"]["display"]["colour"]
+                except :
+                        pass
+                else :
+                        # the if is only here to validate input
+                        if self.settings.allSettings["logging"]["display"]["colour"] == True :
+                                # set the vairbale
+                                self.displayColour = True
+
                 # make sure it exists
                 try :
                         self.settings.allSettings["logging"]["display"]["level"]
@@ -119,17 +130,6 @@ class logger:
                 else :
                         self.log("WARN", "display logging level is incorrect - no more logs to stdout", {"value in settings": self.settings.allSettings["logging"]["display"]["level"]})
                         self.displayLevel = "NONE"
-
-                # check if colour enabled
-                try :
-                        self.settings.allSettings["logging"]["display"]["colour"]
-                except :
-                        pass
-                else :
-                        # the if is only here to validate input
-                        if self.settings.allSettings["logging"]["display"]["colour"] == True :
-                                # set the vairbale
-                                self.displayColour = True
 
                 # done
                 return
