@@ -42,8 +42,34 @@ class tokenHandler :
     #
     def getAllowedTokens(self):
         # if no settings
-        ## exit function
-        #
+        #  exit function
+        # get tokens from file
+        # move "value" to "token" - backward compatibility with older version of allowedTokens file
+        # remove ":" from all tokens
+        # make all tokens lower case
+        # chenge tokens that are too long for the reader
+        #  TODO - this might have to be changed to be reader dependant
+        #         if reader only does 26 bit wiegand for example
+        # remove duplicates
+
+        # if settings haven't worked, return
+        if self.settings.allSettings == False:
+            self.logger.log("WARN", "no settings - will not get allowedTokens")
+            return
+
+        # get the tokens from the file
+        self.loadFromFile()
+
+        # do some actions on our new shiny list of tokens
+        self.moveValueToToken()
+        self.sanitiseAllowedTokens()
+        self.formatTokens()
+        self.transformOverlengthTokens()
+        self.removeDuplicateTokens()
+        self.logger.log("DBUG", "AllowedTokens: list of tokens", self.allowedTokens)
+        return
+
+    def loadFromFile(self) :
         # set file path
         #
         # if tokens file exists
@@ -56,14 +82,6 @@ class tokenHandler :
         # if no tokens file
         ## error handling
         ## return
-        #
-        # remove ":" from all tokens
-        # make all tokens lower case
-
-        # if settings haven't worked, return
-        if self.settings.allSettings == False:
-            self.logger.log("WARN", "no settings - will not get allowedTokens")
-            return
 
         # check file path exists
         # if relative, make absolute
@@ -110,11 +128,69 @@ class tokenHandler :
             self.logger.log("WARN", "allowedTokens file does not exist")
             return
 
-        # do some actions on our new shiny list of tokens
-        self.formatTokens()
-        self.transformOverlengthTokens()
-        self.removeDuplicateTokens()
-        self.logger.log("DBUG", "allowedTokens", self.allowedTokens)
+    #
+    # key change
+    #  up a semitone
+    #  don't worry, it's a music joke
+    # move all keys of "value" to "token"
+    # backwards compatibility
+    def moveValueToToken(self) :
+        # sanity
+        if self.allowedTokens == False :
+            return
+
+        # iterate
+        for i in self.allowedTokens :
+            # if value exists, copy to token and then delete
+            if "value" in i :
+                i["token"] = i["value"]
+                del i["value"]
+
+        return
+
+    #
+    # sanitiseAllowedTokens
+    #  remove from allowedTokens if no token set
+    #  remove from allowedTokens if token is not a string of length > 0
+    #  remove from allowedTokens if no type set
+    #  add empty user string if user not set
+    #
+    def sanitiseAllowedTokens(self) :
+        # sanity
+        if self.allowedTokens == False :
+            return
+
+        indexesToDelete = []
+
+        # check for no or invalid token
+        counter = 0
+        for i in self.allowedTokens :
+            # if token not set
+            if "token" not in i :
+                indexesToDelete.append(counter)
+                self.logger.log("WARN", "AllowedTokens - entry without token, will not be used", i)
+            # if token is empty string
+            if "token" in i :
+                if i["token"] == "" :
+                    indexesToDelete.append(counter)
+                    self.logger.log("WARN", "AllowedTokens - entry with token of 0 length, will not be used", i)
+            counter += 1
+
+        # if entries have been marked for delete, DELETE THEM
+        if not indexesToDelete :
+            pass
+        else:
+            indexesToDelete.sort(reverse=True) # have to sort and do from the highest index first
+            for ind in indexesToDelete :
+                del self.allowedTokens[ind]
+
+        # user cleaning
+        for i in self.allowedTokens :
+            if "user" not in i :
+                i["user"] = "USER NOT GIVEN"
+                self.logger.log("WARN", "AllowedTokens - user not set", i)
+
+        # done
         return
 
 
@@ -123,11 +199,16 @@ class tokenHandler :
     #  remove ":"
     #  make lowercase
     def formatTokens(self) :
+        if self.allowedTokens == False :
+            return
         # remove ":" and make lowercase
-        if self.allowedTokens != False :
-            for tkn in self.allowedTokens :
-                tkn["token"] = tkn["token"].replace(":", "")
-                tkn["token"] = tkn["token"].lower()
+        for tkn in self.allowedTokens :
+            # check token is there
+            if "token" not in tkn :
+                continue
+            # do the operation
+            tkn["token"] = tkn["token"].replace(":", "")
+            tkn["token"] = tkn["token"].lower()
         return
 
 
@@ -135,15 +216,19 @@ class tokenHandler :
     # for mifare ultralight and other tokens that are more than 4 bytes long
     #
     def transformOverlengthTokens(self) :
+        if self.allowedTokens == False :
+            return
         # Perform transform for mifare ultralight
-        if self.allowedTokens != False :
-            for tkn in self.allowedTokens :
-                #
-                # do some transforming here
-                # Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
-                # So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
-                if len(tkn["token"]) >8:
-                    tkn["token"] = "88" + tkn["token"][:6]
+        for tkn in self.allowedTokens :
+            # check token is there
+            if "token" not in tkn :
+                continue
+            #
+            # do some transforming here
+            # Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
+            # So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
+            if len(tkn["token"]) >8:
+                tkn["token"] = "88" + tkn["token"][:6]
         return
 
     #
@@ -163,19 +248,24 @@ class tokenHandler :
         # die if nothing there
         if self.allowedTokens == False :
             return
+
         # initialise
         duplicateIndexes = []
+
         # main iterate
         i = 0
         for original in self.allowedTokens :
             # second iterate
             j = 0
             for check in self.allowedTokens:
+                # check token is there
+                if "token" not in original or "token" not in check :
+                    continue
                 # if tokens match, types match, it's not the same entry, and not listed in duplicate indexes
                 if original["token"] == check["token"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
                     # log - it only takes 3 lines because it wou;'dnt nicely fit on one
                     logData = {"token": self.allowedTokens[j]["token"], "type": self.allowedTokens[j]["type"], "user": self.allowedTokens[j]["user"]}
-                    self.logger.log("WARN", "Duplicate token found in allowedTokens file", logData)
+                    self.logger.log("WARN", "AllowedTokens - duplicate token found", logData)
                     del logData
                     # append duplicate username to original username
                     self.allowedTokens[i]["user"] += " DOR " + self.allowedTokens[j]["user"]
