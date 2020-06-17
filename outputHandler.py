@@ -84,8 +84,10 @@ class outputHandler :
             pi.write(self.pinDef.pins["doorStrike"],0)
             pi.write(self.pinDef.pins["doorbell12"],0)
             pi.write(self.pinDef.pins["doorbellCc"],0)
+            pi.write(self.pinDef.pins["spareLed"],1)
             pi.write(self.pinDef.pins["readerLed"],1)
             pi.write(self.pinDef.pins["readerBuzz"],1)
+            pi.write(self.pinDef.pins["piActiveLed"],1)
         except :
             self.logger.log("ERRR", "There was an issue setting output pins")
 
