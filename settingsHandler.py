@@ -8,13 +8,15 @@ class settingsHandler :
     allSettings = False
 
     # load all settings on initialisation
-    def __init__(self) :
+    def __init__(self, logger=False) :
+        # sort out the logger
+
         successfulLoad = self.loadFromFile()
         if successfulLoad == False :
-            print("Initial settings load was not successful, will stop execution")
+            self.log("ERRR", "Initial settings load was not successful, will stop execution")
             exit
         if self.allSettings == False :
-            print("Unexpected error while initialising settigns, will stop execution")
+            self.log("ERRR", "Unexpected error while initialising settigns, will stop execution")
             exit
         self.checkRoot()
 
@@ -24,39 +26,36 @@ class settingsHandler :
     #  open, return if unable
     def loadFromFile(self) :
         if os.path.exists("settings.json") != True:
-            print("no settings file found")
+            self.log("WARN", "no settings file found")
             return(False)
 
         # open
         try:
             settingsFile = open("settings.json", "r")
         except OSError as err :
-            print("os error while opening settings file:")
-            print(err)
+            self.log("ERRR", "os error while opening settings file", err)
             return (False)
         except:
-            print("unknown error while opening settings file:")
+            self.log("ERRR", "unknown error while opening settings file")
             return(False)
 
         # read + decode
         try:
             self.allSettings = json.load(settingsFile)
         except ValueError as err :
-            print("JSON Decode error while reading settings file")
-            print(err)
+            self.log("ERRR", "JSON Decode error while reading settings file", err)
             return(False)
         except:
-            print("unknown error while reading settings file")
+            self.log("ERRR", "unknown error while reading settings file")
             return(False)
 
         # close
         try:
             settingsFile.close()
         except OSError as err :
-            print("os error while closing settings file:")
-            print(err)
+            self.log("ERRR", "os error while closing settings file", err)
         except:
-            print("unknown error while closing settings file")
+            self.log("ERRR", "unknown error while closing settings file")
 
         return(True)
 
@@ -67,3 +66,21 @@ class settingsHandler :
             self.allSettings["root"]
         except :
             self.allSettings["root"] = os.path.dirname(os.path.realpath(__file__))
+
+
+    #
+    # down and dirty logger
+    # just in case there wasan't a logger available
+    def log(self, lvl, msg, data="NoDataHere") :
+        if self.logger == False :
+            outStr = "[" + lvl + "] " + msg
+            if data != "NoDataHere" :
+                outStr += " - " + format(data)
+            print(outStr)
+        else :
+            if data == "NoDataHere" :
+                self.logger.log(lvl, msg)
+            else :
+                self.logger.log(lvl, msg, data)
+
+        return

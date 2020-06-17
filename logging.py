@@ -2,6 +2,7 @@
 import datetime # used for logging
 import sys # for checking python type for ansi escape
 import json # for outputting pretty strings from data
+import syslog
 
 #
 # log
@@ -13,37 +14,55 @@ import json # for outputting pretty strings from data
 # Level description - when selected as display or file write level all below levels are logged in addition to the selected level
 #  DBUG - everthing that's happening
 #  INFO - program events, token events, door events
+#  NOTE - notices that are a tad more important than INFO level (makes for good syslog without loads if INFO level stuff, eg. can have program start/close)
 #  WARN - anything wrong but non-fatal
 #  ERRR - fatal events
 #  NONE - absolutely nothing (after logging is initialised)
 #
 #
 # Variables:
-#  filePath - path to logfile
-#  fileLevel - message level to to into logfile - deafult NONE
-#  displayLevel - message level to go to display - default INFO
-#  displayColour - whether or not to colourize display output - default FALSE
-#  levelTable - levels of logging available
-#  ansiEscape - ansi escape string for making colour output to terminal
-#  colourLookup - list of colour stuff for each log level
+#  levelTable - list - levels of logging available
+#  syslogLevelConversion - dict - lookup for converting log level to something recognisable by syslog
+#  filePath - str - path to logfile
+#  fileLevel - str - message level to to into logfile - deafult NONE
+#  syslogLevel - str - message level for syslog - default NOTE
+#  displayLevel - str - message level to go to display - default INFO
+#  displayColour - bool - whether or not to colourize display output - default FALSE
+#  ansiEscape - str - ansi escape string for making colour output to terminal
+#  colourLookup - list of dicts - list of colour stuff for each log level
+#  settings - bool - where the settings object goes, false when no settings obj available
 #
 #
 # Functions:
 #
-#  __init__()
-#   gets info from settings
-#   puts relevent info into vars
+#  __init__([settings])
+#   basic setup of useful vars
+#   if settings have been given, store them and run loadSettings
+#
+#  loadSettings([settings])
+#   if given settings, store them
+#   run setLogTo***Settings functions
+#
+#  setLogToSyslogSettings()
+#  setLogToDisplaySettings()
+#  setLogToFileSettings()
+#   go through settings and get the ones related to the respective outputs
 #
 #  log(lvl, msg, [data])
 #   log message to outputs
-#   only if level is above what is set in settings
-#   if no settings found, will log ALL to display
 #
-#  setLogToDisplaySettings()
-#   go through settings and get the ones related to display output
+#  logToSyslog(lvl, msg)
+#  logToDisplay(time, lvl, msg, data)
+#  logToFile(time, lvl, msg, data)
+#   perform checks and log to each output
 #
-#  setLogToFileSettings()
-#   go through settings and get the ones related to file output
+#  checkLevel(destination, incomingLevel)
+#   checks whether an incoming message is high enough level to be logged to this destination
+#   returns true if it whould be logged
+#
+#  dataFormat(destination, data)
+#   makes incoming data into a nice string
+#   will also redact any information, as specified in settings
 #
 #  inList(needle, haystack)
 #   find if needle is in haystack
@@ -52,9 +71,11 @@ import json # for outputting pretty strings from data
 
 class logger:
     # let's have some default vars
-    levelTable = ["DBUG", "INFO", "WARN", "ERRR", "NONE"]
+    levelTable = ["DBUG", "INFO", "NOTE", "WARN", "ERRR", "NONE"]
+    syslogLevelConversion = {"DBUG": syslog.LOG_DEBUG, "INFO": syslog.LOG_INFO, "NOTE": syslog.LOG_NOTICE, "WARN": syslog.LOG_WARNING, "ERRR": syslog.LOG_ERR}
     filePath = False
     fileLevel = "NONE"
+    syslogLevel = "NOTE"
     displayLevel = "INFO"
     displayColour = False
     ansiEscape = "\033["
@@ -71,6 +92,11 @@ class logger:
             "style": "0"
         },
         {
+            "colour": "35",
+            "bg": "40",
+            "style": "0"
+        },
+        {
             "colour": "33",
             "bg": "40",
             "style": "0"
@@ -81,8 +107,14 @@ class logger:
             "style": "0"
         }
     ]
+    settings = False
 
-    def __init__(self,settings) :
+    def __init__(self,settings=False) :
+        # if there's no settings, only use defaults
+        if settings == False :
+            self.log("INFO", "Logger started without settings, will use defaults")
+            return
+
         # internalise settings
         self.settings = settings
 
@@ -91,9 +123,36 @@ class logger:
             self.log("WARN", "no settings - no logging to file, display logging will be INFO")
             return
 
-        # setup for logging to display
+        # do some loading
+        self.loadSettings()
+
+    def loadSettings(self, settings=False) :
+        # sanity check
+        if settings == False and self.settings == False :
+            self.log("WARN", "logger load settings - no settings given and no settings available")
+            return
+
+        # load settings if there's new settings
+        if settings != False :
+            self.settings = settings
+
+        # make some loading happen
         self.setLogToDisplaySettings()
         self.setLogToFileSettings()
+        self.setLogToSyslogSettings()
+
+
+    def setLogToSyslogSettings(self) :
+        # this will only get the level for output to syslog
+        # might have more in future
+        try :
+            self.settings.allSettings["logging"]["syslog"]["level"]
+        except :
+            pass
+        else :
+            # make sure it's a valid value, then set
+            if self.settings.allSettings["logging"]["syslog"]["level"] in self.levelTable :
+                self.syslogLevel = self.settings.allSettings["logging"]["syslog"]["level"]
 
 
 
@@ -242,71 +301,132 @@ class logger:
         isoTime = datetime.datetime.now().replace(microsecond=0).isoformat()
 
         # format msg
-        outMsg = format(msg)
+        msg = format(msg)
 
-        # if data - format
+        self.logToSyslog(lvl, msg)
+        self.logToDisplay(isoTime, lvl, msg, data)
+        self.logToFile(isoTime, lvl, msg, data)
+        return
+
+
+    def logToSyslog(self, lvl, msg) :
+        # sanity
+        if self.syslogLevel == "NONE" :
+            return
+
+        # level compare
+        if self.checkLevel("syslog", lvl) == False:
+            return
+
+        # make a string
+        outStr = "[" + lvl + "] " + msg
+        # open / write / close
+        syslog.openlog(ident="diyac", logoption=syslog.LOG_PID)
+        syslog.syslog(self.syslogLevelConversion[lvl], outStr)
+        syslog.closelog()
+
+        # done
+        return
+
+
+    def logToDisplay(self, isoTime, lvl, msg, data) :
+        # sanity
+        if self.displayLevel == "NONE" :
+            return
+
+        # level compare
+        if self.checkLevel("display", lvl) == False:
+            return
+
+        # make output string
+        outStr = isoTime + " [" + lvl + "] " + msg
+
+        # pretty-up the data and put into output string - if it's there
         if data != "NoLoggingDataGiven" :
-            outMsg = outMsg + " - " + json.dumps(data)
+            data = self.dataFormat("display", data)
+            outStr += " - " + data
 
-        # format
-        outStr = isoTime + " - [" + lvl + "] - " + outMsg
+        # apply colour
+        if self.displayColour == True :
+            iln = self.inList(lvl, self.levelTable) # just to make the next line not horribly long
+            colStr = self.ansiEscape + self.colourLookup[iln]["style"] +";"+ self.colourLookup[iln]["colour"] +";"+ self.colourLookup[iln]["bg"] +"m"
+            outStr = colStr + outStr + self.ansiEscape + "0;0;0m"
 
-        #
+        # do an output
+        print(outStr)
+
+        # done
+        return
+
+
+    def logToFile(self, isoTime, lvl, msg, data) :
+        # sanity
+        if self.fileLevel == "NONE" :
+            return
+
+        # level compare
+        if self.checkLevel("file", lvl) == False :
+            return
+
+        # make output string
+        outStr = isoTime + " [" + lvl + "] " + msg
+
+        # pretty-up the data and put into output string - if it's there
+        if data != "NoLoggingDataGiven" :
+            data = self.dataFormat("display", data)
+            outStr += " - " + data
+
+        # do an output
+        try :
+            f = open(self.filePath, "a")
+            f.write(outStr + "\n")
+            f.close()
+        except :
+            pass
+
+
+    #
+    # see if the incoming message is of sufficient level to log
+    #
+    def checkLevel(self, destination, incomingLevel) :
+        # sanity check
+        if destination != "syslog" and destination != "display" and destination != "file" :
+            return False
+
+        # syslog
+        if destination == "syslog" :
+            currentLevelNumber = self.inList(self.syslogLevel, self.levelTable)
         # display
-        #  get levels
-        #  check levels
-        #   print
-        #  tidy up
-        if self.displayLevel != "NONE" :
-            # get indexes
-            incomingLevelNumber = self.inList(lvl, self.levelTable)
+        if destination == "display" :
             currentLevelNumber = self.inList(self.displayLevel, self.levelTable)
-            # compare
-            if incomingLevelNumber >= currentLevelNumber :
-                dispStr = outStr
-                if self.displayColour == True :
-                    iln = incomingLevelNumber # just to make the next line not horribly long
-                    colStr = self.ansiEscape + self.colourLookup[iln]["style"] +";"+ self.colourLookup[iln]["colour"] +";"+ self.colourLookup[iln]["bg"] +"m"
-                    dispStr = colStr + dispStr
-                    dispStr += self.ansiEscape + "0;0;0m"
-
-                # if incomingLevelNumber == 0:
-                #     outStr = "\033[1;37;40m"+outStr
-                # elif incomingLevelNumber == 1:
-                #     outStr="\033[1;32;40m"+outStr
-                # elif incomingLevelNumber == 2:
-                #     outStr="\033[1;33;40m"+outStr
-                # elif incomingLevelNumber == 3:
-                #     outStr="\033[0;37;41m"+outStr
-
-                print(dispStr)
-
-            # tidy up
-            del incomingLevelNumber
-            del currentLevelNumber
-
-        #
         # file
-        #  get levels
-        #  check levels
-        #   open
-        #   write
-        #   close
-        if self.fileLevel != "NONE" :
-            # get indexes
-            incomingLevelNumber = self.inList(lvl, self.levelTable)
+        if destination == "file" :
             currentLevelNumber = self.inList(self.fileLevel, self.levelTable)
-            # compare
-            if incomingLevelNumber >= currentLevelNumber :
-                try :
-                    f = open(self.filePath, "a")
-                    f.write(outStr + "\n")
-                    f.close()
-                except :
-                    self.log("WARN","error writing to file")
-            # tidy up
-            del incomingLevelNumber
-            del currentLevelNumber
+
+        # get number for incoming
+        incomingLevelNumber = self.inList(incomingLevel, self.levelTable)
+
+        # compare
+        if incomingLevelNumber >= currentLevelNumber :
+            return True
+
+        # done, and we don't want to log the message to this destination
+        return False
+
+
+    #
+    # format data into a nice string
+    #  TODO
+    #  redact things should happen here
+    #
+    def dataFormat(self, destination, data) :
+        if destination == "syslog" :
+            data = json.dumps(data)
+        if destination == "display" :
+            data = json.dumps(data)
+        if destination == "file" :
+            data = json.dumps(data)
+        return data
 
 
     #

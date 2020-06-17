@@ -59,7 +59,7 @@ def cleanup():
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
 def signal_handler(sig, frame):
-    l.log("ERRR", "CTRL-C pressed, will exit")
+    l.log("NOTE", "CTRL-C pressed, will exit")
     sys.exit(0)
 
 
@@ -67,15 +67,20 @@ def signal_handler(sig, frame):
 # initialisation
 #
 def init():
-    atexit.register(cleanup)
-    signal.signal(signal.SIGINT, signal_handler)
-    # get all the settings
-    s = settingsHandler()
-
     # start logging
     global l
-    l = logging.logger(s)
-    l.log("INFO", "DoorPi starting")
+    l = logging.logger()
+    l.log("NOTE", "DoorPi starting")
+
+    # stuff for a nice clean exit
+    atexit.register(cleanup)
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # get all the settings
+    s = settingsHandler(l)
+
+    # update the logger with new settings
+    l.loadSettings(s)
 
     # see if pigpiod is running
     # if not running
