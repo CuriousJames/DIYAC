@@ -129,6 +129,8 @@ def init():
     cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
     cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
     cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
+    pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
+    pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
 
     # set the wiegand reading
     # will call function wiegandCallback on receiving data
