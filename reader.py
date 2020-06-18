@@ -129,6 +129,8 @@ def init():
     pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
     pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
 
+    time.sleep(0.1)
+
     # register these GPIO pins to run cbf on rising or falling edge
     global cb1,cb2,cb3,cb4
     cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
