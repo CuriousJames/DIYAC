@@ -1,5 +1,5 @@
 {
-        "root":"/home/user/DoorPi/",
+        "root":"/home/user/DIYAC/",
         "allowedTokens": {
                 "path":"allowedTokens.json"
         },

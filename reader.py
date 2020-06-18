@@ -70,7 +70,7 @@ def init():
     # start logging
     global l
     l = logging.logger()
-    l.log("NOTE", "DoorPi starting")
+    l.log("NOTE", "DIYAC starting")
 
     # stuff for a nice clean exit
     atexit.register(cleanup)
@@ -123,21 +123,29 @@ def init():
     global inH
     inH = inputHandler.inputHandler(s, l, tokens, outH)
 
+    pi.set_noise_filter(p.pins["doorbellButton"],30000,3000)
+
+    pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
+    pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
+
+
+
     # register these GPIO pins to run cbf on rising or falling edge
     global cb1,cb2,cb3,cb4
     cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
     cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
+    
     cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
     cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
-    pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
-    pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
+
+    
 
     # set the wiegand reading
     # will call function wiegandCallback on receiving data
     global w
     w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
 
-    l.log("INFO", "DoorPi running")
+    l.log("INFO", "DIYAC running")
 
 
 def keepAlive():
