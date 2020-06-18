@@ -10,7 +10,7 @@ import logging # our own logging module
 import inputHandler # our own input handling module
 import outputHandler
 import tokenHandler # our ouwn token hangling module
-from settingsHandler
+import settingsHandler
 import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
