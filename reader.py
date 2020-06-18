@@ -10,7 +10,7 @@ import logging # our own logging module
 import inputHandler # our own input handling module
 import outputHandler
 import tokenHandler # our ouwn token hangling module
-from settingsHandler import settingsHandler
+from settingsHandler
 import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
@@ -77,7 +77,7 @@ def init():
     signal.signal(signal.SIGINT, signal_handler)
 
     # get all the settings
-    s = settingsHandler(l)
+    s = settingsHandler.settingsHandler(l)
 
     # update the logger with new settings
     l.loadSettings(s)
