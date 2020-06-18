@@ -421,11 +421,20 @@ class logger:
     #
     def dataFormat(self, destination, data) :
         if destination == "syslog" :
-            data = json.dumps(data)
+            try :
+                data = json.dumps(data)
+            except :
+                data = format(data)
         if destination == "display" :
-            data = json.dumps(data)
+            try :
+                data = json.dumps(data)
+            except :
+                data = format(data)
         if destination == "file" :
-            data = json.dumps(data)
+            try :
+                data = json.dumps(data)
+            except :
+                data = format(data)
         return data
 
 

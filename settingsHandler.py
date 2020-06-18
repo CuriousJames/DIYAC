@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os # useful for file operations
+import sys
 import json # for gettings settings and tokens
 
 #
@@ -7,17 +8,24 @@ import json # for gettings settings and tokens
 class settingsHandler :
     allSettings = False
 
+
     # load all settings on initialisation
     def __init__(self, logger=False) :
         # sort out the logger
+        self.logger = logger
 
+        # load the stuff
         successfulLoad = self.loadFromFile()
+
+        # see if it worked
         if successfulLoad == False :
             self.log("ERRR", "Initial settings load was not successful, will stop execution")
-            exit
+            sys.exit(1)
         if self.allSettings == False :
             self.log("ERRR", "Unexpected error while initialising settigns, will stop execution")
-            exit
+            sys.exit(1)
+
+        # work out root - set if unset
         self.checkRoot()
 
 
@@ -44,6 +52,7 @@ class settingsHandler :
             self.allSettings = json.load(settingsFile)
         except ValueError as err :
             self.log("ERRR", "JSON Decode error while reading settings file", err)
+
             return(False)
         except:
             self.log("ERRR", "unknown error while reading settings file")
@@ -65,7 +74,9 @@ class settingsHandler :
         try :
             self.allSettings["root"]
         except :
+            print
             self.allSettings["root"] = os.path.dirname(os.path.realpath(__file__))
+
 
 
     #
