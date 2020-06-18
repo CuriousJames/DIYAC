@@ -75,8 +75,7 @@ class settingsHandler :
             self.allSettings["root"]
         except :
             print
-            self.allSettings["root"] = os.path.dirname(os.path.realpath(__file__))
-
+            self.allSettings["root"] = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 
     #
