@@ -23,7 +23,13 @@ import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
 import subprocess
-import sdnotify
+try:
+    import sdnotify
+except:
+    print("*** sdnotify module not installed - this is required ***\n")
+    print("Please try this to install:")
+    print("pip install sdnotify\n")
+    exit()
 
 #
 # file synopsis
