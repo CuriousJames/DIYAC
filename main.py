@@ -53,8 +53,9 @@ def cleanup():
     l.log("DBUG", "cleanup started")
 
     # close the door
+    global outH
     try :
-        outH.doorState("closed")
+        outH.setDoor("closed")
     except :
         l.log("WARN", "Unable to close the door")
     # release gpio resources
@@ -62,6 +63,10 @@ def cleanup():
         pi.stop()
     except :
         pass
+
+    # systemd out
+    notify = sdnotify.SystemdNotifier()
+    notify.notify("READY=0")
 
     #log
     l.log("ERRR", "program shutdown")
@@ -71,14 +76,19 @@ def cleanup():
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
 def sigint_handler(sig, frame):
+    global notify
+    notify.notify("STOPPING=1")
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
     sys.exit(0)
 
 # SIGHUP handler
 # to reload tokens
 def sighup_handler(sig, frame):
+    global notify
+    notify.notify("RELOADING=1")
     l.log("NOTE", "SIGHUP received, will reload tokens")
     tokens.getAllowedTokens()
+    notify.notify("READY=1")
     return
 
 
@@ -86,9 +96,19 @@ def sighup_handler(sig, frame):
 # initialisation
 #
 def init():
+    # get our run mode - find out if daemon
+    global runMode
+    for i in sys.argv :
+        if i == "--daemon" :
+            runMode = "daemon"
+        else :
+            runMode = "normal"
+    if os.environ.get("LAUNCHED_BY_SYSTEMD") == "1" :
+        runMode = "daemon"
+
     # start logging
     global l
-    l = logging.logger()
+    l = logging.logger(runMode=runMode)
     l.log("NOTE", "DIYAC starting")
 
     # stuff for a nice clean exit
@@ -165,17 +185,20 @@ def init():
     w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
 
     # state ready
+    global notify
     notify = sdnotify.SystemdNotifier()
     notify.notify("READY=1")
-    l.log("INFO", "DIYAC running")
+    l.log("NOTE", "DIYAC running")
 
 
 
 def keepAlive():
+    global notify
     while True:
-        time.sleep(9999)
+        time.sleep(10)
         #Just keeping the python fed (slithering)
-        l.log("INFO", "boppity")
+        #l.log("INFO", "boppity")
+        notify.notify("WATCHDOG=1")
 
 
 #
