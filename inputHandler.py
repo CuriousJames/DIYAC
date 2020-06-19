@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import time
+import threading
 
 #
 # Input Handler
@@ -50,15 +51,16 @@ class inputHandler :
 
     params = {
         "delimiter": "#",
-        "timeOut": 5,
-        "bruteForceThresholdAttempts": 3,
-        "bruteForceThresholdTime": 20,
-        "bruteForceLockoutTime": 600,
+        "timeout": 5,
+        "bruteforceThresholdAttempts": 3,
+        "bruteforceThresholdTime": 20,
+        "overspeedThresholdTime": 0.1,
+        "lockoutTime": 600,
     }
     numpadState = "ready"
     inputBuffer = ""
     numpadLastInputTime = None
-    bruteForceLockoutStart = 0
+    lockout = {"state": "unlocked"}
     previousAttempts = []
 
 
@@ -80,7 +82,7 @@ class inputHandler :
             return
 
         # the settings we're going to get are
-        settingsToGet = ["delimiter", "timeOut", "bruteForceThresholdTime", "bruteForceThresholdAttempts", "bruteForceLockoutTime"]
+        settingsToGet = ["delimiter", "timeout", "bruteforceThresholdTime", "bruteforceThresholdAttempts", "overspeedThresholdTime", "lockoutTime"]
         # make sure they exist
         # if exist, update params list
         for s in settingsToGet :
@@ -89,7 +91,7 @@ class inputHandler :
             except :
                 pass
             else :
-                self.logger.log("DBUG", "new setting for input handling parameter", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
+                self.logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
                 self.params[s] = self.settings.allSettings["inputHandling"][s]
 
         # done
@@ -146,7 +148,7 @@ class inputHandler :
         if self.numpadState == "reading" :
 
             # if over timeout
-            if self.numpadLastInputTime + self.params["timeOut"] < timeNow :
+            if self.numpadLastInputTime + self.params["timeout"] < timeNow :
                 # log
                 logData = {"timeNow": timeNow, "lastInputTime": self.numpadLastInputTime}
                 self.logger.log("DBUG", "new entry is after timeout limit, resetting and going again", logData)
@@ -172,7 +174,14 @@ class inputHandler :
                 return
 
             # this is an actual input
+            #  see if we need to think about lockout
+            #  if locked out by overspeed - die
             #  add it onto the end of the input buffer
+            self.calculateNewOverspeedLockout()
+            if self.lockout["state"] == "locked" :
+                if self.lockout["type"] == "overspeed":
+                    self.logger.log("DBUG", "overspeed - numpad input ignored")
+                    return
             self.inputBuffer += rx
             self.numpadLastInputTime = timeNow
             return
@@ -183,6 +192,9 @@ class inputHandler :
     # this if for a fully formed input to be checked/approved by lockout and then token checked
     #
     def checkInput(self, rx, rxType) :
+        # add attempt to previousAttempts
+        self.addAttempt()
+
         # check the lockout, bail if locked
         if self.checkLockout() == "locked" :
             self.logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
@@ -196,25 +208,8 @@ class inputHandler :
         else :
             self.logger.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
 
-
-    #
-    # check whether lockout is happening
-    #  add attempt
-    #  if getLockoutState == "locked"
-    #   return "locked"
-    #  if calculateNewLockout == "locked"
-    #   return "locked"
-    #  else
-    #   return "unlocked"
-    def checkLockout(self) :
-
-        self.addAttempt()
-        if self.getBruteForceLockoutState() == "locked" :
-            return "locked"
-        if self.calculateNewLockout() == "locked" :
-            return "locked"
-        return "unlocked"
-
+        # done
+        return
 
     #
     # add attempt into previousAttempts
@@ -223,68 +218,98 @@ class inputHandler :
     def addAttempt(self) :
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
-        if len(self.previousAttempts) == self.params["bruteForceThresholdAttempts"] :
+        if len(self.previousAttempts) == self.params["bruteforceThresholdAttempts"] :
             del self.previousAttempts[0]
         # append new time
         self.previousAttempts.append(timeNow)
 
 
     #
-    # get lockout state
-    #  basically just time comparator
-    #  get logger
-    #  if lockoutStart == 0, it's not locked
-    #   return "unlocked"
-    #  if lockoutStart + lockoutTime < timeNow
-    #   lockout has finished
-    #   lockoutStart = 0
-    #   return "unlocked"
-    #  else
-    #   return "locked"
-    def getBruteForceLockoutState(self) :
-        # logger
-        #global l
+    # lockout
+    def checkLockout(self) :
+        # if already locked, DENY
+        if self.lockout["state"] == "locked" :
+            return "locked"
 
-        # time
-        timeNow = time.time()
+        # see if a new lockout should be started by bruteforce
+        if self.calculateNewBruteforceLockout() == "locked" :
+            return "locked"
 
-        # if lockoutStart == 0, no lock is set
-        if self.bruteForceLockoutStart == 0 :
-            self.logger.log("DBUG", "No bruteforce lockout")
-            return "unlocked"
+        # see if we need lockout from overspeed input
+        if self.calculateNewOverspeedLockout() == "locked" :
+            return "locked"
 
-        # if lockoutStart + lockoutTime <= timeNow, reset lock and return unlocked
-        if self.bruteForceLockoutStart + self.params["bruteForceLockoutTime"] <= timeNow :
-            self.logger.log("INFO", "BruteForce Lockout stopped")
-            self.bruteForceLockoutStart = 0
-            self.previousAttempts = []
-            return "unlocked"
-
-        # it's locked
-        self.logger.log("DBUG", "lockout still active")
-        return "locked"
+        # it's all easy
+        return "unlocked"
 
 
     #
     # calculate if there should be a lockout based on information from self.previousAttempts
     # if length of previousAttemps is below threshold, do nothing
-    def calculateNewLockout(self) :
-        # time and logger
+    def calculateNewBruteforceLockout(self) :
+        # time
         timeNow = time.time()
-        #global l
 
         # if not at threshold, do nothing
-        if len(self.previousAttempts) < self.params["bruteForceThresholdAttempts"] :
+        if len(self.previousAttempts) < self.params["bruteforceThresholdAttempts"] :
             return "no change"
 
         # check by time of earliest chronological entry,
-        if self.previousAttempts[0] + self.params["bruteForceThresholdTime"] < timeNow :
+        if self.previousAttempts[0] + self.params["bruteforceThresholdTime"] < timeNow :
             return "no change"
 
-        # that must mean we're within the threshold time and attempts, initiate lockout
-        self.logger.log("INFO", "Bruteforce lockout started")
-        self.bruteForceLockoutStart = timeNow
+        # that must mean we're within the threshold time and attempts, initiate lockout!
+        # run the thread function
+        # but only if it's not already locked
+        if self.lockout["state"] != "locked" :
+            lockoutThread=threading.Thread(target=self.lockoutThreadFunc, args=("bruteforce",))
+            lockoutThread.start()
+
+        # done
         return "locked"
+
+
+    #
+    # new lockout based on overspeed input?
+    #
+    def calculateNewOverspeedLockout(self) :
+        # time
+        timeNow = time.time()
+
+        # make sure there was already an input
+        if self.numpadLastInputTime == None :
+            return "no change"
+
+        # test time
+        if self.numpadLastInputTime + self.params["overspeedThresholdTime"] < timeNow :
+            return "no change"
+
+        # lets fuckin lock it oot
+        if self.lockout["state"] != "locked" :
+            lockoutThread=threading.Thread(target=self.lockoutThreadFunc, args=("overspeed",))
+            lockoutThread.start()
+
+        # done
+        return "locked"
+
+
+    #
+    # lockout thread
+    #  a thread that will just sit for the time lockout
+    #
+    def lockoutThreadFunc(self, method) :
+        # init
+        timeNow = time.time()
+        # start
+        self.logger.log("INFO", "Lockout started", {"method": method, "duration": self.params["lockoutTime"]})
+        self.lockout = {"state": "locked", "type": method, "start": timeNow}
+        # wait
+        time.sleep(self.params["lockoutTime"])
+        # end
+        self.logger.log("INFO", "Lockout ended")
+        self.lockout = {"state": "unlocked"}
+        self.previousAttempts = []
+        return
 
 
     #
