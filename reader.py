@@ -1,7 +1,15 @@
 #!/usr/bin/env python
 import time
 import pigpio
-import wiegand
+try:
+    import wiegand
+except:
+    print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
+    print("This should do the trick, assuming you're in the root directory now:")
+    print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
+    print("unzip wiegand_py.zip")
+    print("rm -rf wiegand_old.py wiegand_py.zip\n")
+    exit()
 import atexit
 import threading
 import os # useful for file operations
@@ -15,7 +23,6 @@ import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
 import subprocess
-
 
 #
 # file synopsis
