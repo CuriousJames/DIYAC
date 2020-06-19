@@ -10,6 +10,7 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
 * Wiegand.py put in the root directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
 * Enable PiGPIO on the Pi (just do this once and it will start automatically on boot) `sudo systemctl enable pigpiod`
 * allow sudo group to run systemctl start pigpiod without password
+* sd_notify python library. Can be installed with apt-get install python-sdnotify
 ## Settings ##
 - root - str - optional, default to where reader.py is - path to project root
 - allowedTokens - obj
@@ -39,10 +40,11 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
   - wiegand1 - int - optional - gpio number
 - inputHandling - obj
   - delimiter - str - optional, default "#" - start/stop character for keypad entry
-  - timeOut - float - optional, default 5 - seconds between keypad button presses before timeout
-  - bruteForceThresholdTime - float - optional, default 20 - seconds for number of attempts before lockout
-  - bruteForceThresholdAttempts - int - optional, default 3 - number of attempts within threshold time that will start lockout
-  - bruteForceLockoutTime - float - optional, default 600 - seconds that a lockout will last
+  - timeout - float - optional, default 5 - seconds between keypad button presses before timeout
+  - bruteforceThresholdTime - float - optional, default 20 - seconds for number of attempts before lockout
+  - bruteforceThresholdAttempts - int - optional, default 3 - number of attempts within threshold time that will start lockout
+  - overspeedThresholdTime - float - minimum number of seconds between ench key press or card read
+  - lockoutTime - float - optional, default 600 - seconds that a lockout will last
 - outputHandling - obj
   - doorOpenTime - float - optional, default 5 - seconds that the door strike will be open for on access granted
   - doorbellCcTime - float - optional, default 0.1 - seconds that doorbell contact closure will be closed/opened for
@@ -65,3 +67,6 @@ Log levels are as follows:
 - NONE - no output (least verbose)
 
 All levels are equivalent to linux syslog levels.
+
+## Resources ##
+Systemd integration - https://www.freedesktop.org/software/systemd/man/systemd.service.html
