@@ -1,0 +1,34 @@
+[Unit]
+
+# Human readable name of the unit
+Description=diyac
+
+
+[Service]
+
+# Command to execute when the service is started
+ExecStart=/usr/bin/python /home/pi/DoorPi/main.py
+# Command to reload the allowedTokens file
+ExecReload=/bin/kill -HUP $MAINPID
+# Command for stopping
+ExecStop=/bin/kill -INT $MAINPID
+# Disable Python's buffering of STDOUT and STDERR, so that output from the
+# service shows up immediately in systemd's logs
+#Environment=PYTHONUNBUFFERED=1
+
+# Automatically restart the service if it crashes
+#Restart=on-failure
+
+# Our service will notify systemd once it is up and running
+Type=notify
+NotifyAccess=all
+
+# Use a dedicated user to run our service
+User=pi
+
+
+[Install]
+
+# Tell systemd to automatically start this service when the system boots
+# (assuming the service is enabled)
+WantedBy=default.target

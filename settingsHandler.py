@@ -26,20 +26,21 @@ class settingsHandler :
             sys.exit(1)
 
         # work out root - set if unset
-        self.checkRoot()
+        self.checkRoot("set")
 
 
     # load the settings from the settings.json file
     #  test if file exists, return if not
     #  open, return if unable
     def loadFromFile(self) :
-        if os.path.exists("settings.json") != True:
+        root = self.checkRoot("get")
+        if os.path.exists(root + "settings.json") != True:
             self.log("WARN", "no settings file found")
             return(False)
 
         # open
         try:
-            settingsFile = open("settings.json", "r")
+            settingsFile = open(root + "settings.json", "r")
         except OSError as err :
             self.log("ERRR", "os error while opening settings file", err)
             return (False)
@@ -70,12 +71,18 @@ class settingsHandler :
 
     #
     # if root is not set, make it the same as where reader.py is
-    def checkRoot(self) :
+    def checkRoot(self, action) :
+        # get it
+        root = os.path.dirname(os.path.realpath(__file__)) + '/'
+        # if we just want to return it
+        if action == "get" :
+            return root
+        # otherwise, we're setting it
         try :
             self.allSettings["root"]
         except :
-            print
-            self.allSettings["root"] = os.path.dirname(os.path.realpath(__file__)) + '/'
+            #print
+            self.allSettings["root"] = root
 
 
     #

@@ -23,6 +23,7 @@ import pinDef # our own pin definition module
 import signal # for nice exit
 import sys # for nice exit
 import subprocess
+import sdnotify
 
 #
 # file synopsis
@@ -49,9 +50,13 @@ import subprocess
 # makes things clean at exit
 #
 def cleanup():
-    # This next bit doesn't work - we're looking into how to make it work so the door isn't left open if the script exits prematurely
-    #pi.write(p.pins["doorStrike"],0)
+    l.log("DBUG", "cleanup started")
 
+    # close the door
+    try :
+        outH.doorState("closed")
+    except :
+        l.log("WARN", "Unable to close the door")
     # release gpio resources
     try :
         pi.stop()
@@ -65,9 +70,16 @@ def cleanup():
 #
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
-def signal_handler(sig, frame):
-    l.log("NOTE", "CTRL-C pressed, will exit")
+def sigint_handler(sig, frame):
+    l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
     sys.exit(0)
+
+# SIGHUP handler
+# to reload tokens
+def sighup_handler(sig, frame):
+    l.log("NOTE", "SIGHUP received, will reload tokens")
+    tokens.getAllowedTokens()
+    return
 
 
 #
@@ -81,7 +93,8 @@ def init():
 
     # stuff for a nice clean exit
     atexit.register(cleanup)
-    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGINT, sigint_handler)
+    signal.signal(signal.SIGHUP, sighup_handler)
 
     # get all the settings
     s = settingsHandler.settingsHandler(l)
@@ -142,7 +155,7 @@ def init():
     global cb1,cb2,cb3,cb4
     cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
     cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
-    
+
     cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
     cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
 
@@ -151,7 +164,11 @@ def init():
     global w
     w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
 
+    # state ready
+    notify = sdnotify.SystemdNotifier()
+    notify.notify("READY=1")
     l.log("INFO", "DIYAC running")
+
 
 
 def keepAlive():
