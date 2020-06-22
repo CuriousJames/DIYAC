@@ -176,7 +176,6 @@ def init():
     l.log("INFO", "DIYAC running")
 
 
-
 def keepAlive():
     while True:
         time.sleep(9999)
