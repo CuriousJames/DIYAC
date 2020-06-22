@@ -168,8 +168,9 @@ class outputHandler :
             self.logger.log("INFO", "Start Doorbell")
 
             self.doorbellHit()
-            self.doorbellHit()
-            self.doorbellHit()
+
+            #Wait to give a break before hearing more bell, even if the button is pressed again
+            time.sleep(2)
 
             self.doorRinging=False
             self.logger.log("INFO", "Stop Doorbell")
@@ -181,10 +182,18 @@ class outputHandler :
 
 
     def doorbellHit(self) :
-        self.setDoorbellOutState(1)
-        time.sleep(2)
-        self.setDoorbellOutState(0)
-        time.sleep(0.1)
+            # Some kind of nice-enough doorbell ring pattern
+            self.setDoorbellOutState(1)
+            time.sleep(0.7)
+            self.setDoorbellOutState(0)
+            time.sleep(0.3)
+            self.setDoorbellOutState(1)
+            time.sleep(0.4)
+            self.setDoorbellOutState(0)
+            time.sleep(0.2)
+            self.setDoorbellOutState(1)
+            time.sleep(0.4)
+            self.setDoorbellOutState(0)
 
 
     def setDoorbellOutState(self, state) :
