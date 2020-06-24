@@ -32,6 +32,7 @@ try:
 except:
     print("*** sdnotify module not installed - this is required ***\n")
     print("Please try this to install:")
+    print("sudo apt-get install python-pip")
     print("pip install sdnotify\n")
     exit()
 
