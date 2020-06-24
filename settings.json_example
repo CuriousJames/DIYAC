@@ -21,7 +21,7 @@
                 "readerLed": 7
         },
         "inputHandling": {
-                "bruteForceLockoutTime": 20
+                "lockoutTime": 600
         },
         "outputHandling" : {
                 "doorOpenTime": 2

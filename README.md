@@ -44,7 +44,7 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
   - bruteforceThresholdTime - float - optional, default 20 - seconds for number of attempts before lockout
   - bruteforceThresholdAttempts - int - optional, default 3 - number of attempts within threshold time that will start lockout
   - overspeedThresholdTime - float - minimum number of seconds between ench key press or card read
-  - lockoutTime - float - optional, default 600 - seconds that a lockout will last
+  - lockoutTime - float - optional, default 600 - seconds that a lockout will last (for both brute forces & overspeed inputs)
 - outputHandling - obj
   - doorOpenTime - float - optional, default 5 - seconds that the door strike will be open for on access granted
   - doorbellCcTime - float - optional, default 0.1 - seconds that doorbell contact closure will be closed/opened for

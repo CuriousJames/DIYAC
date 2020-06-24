@@ -16,9 +16,9 @@ import threading
 #  lastInputTime - used for allowing a timeout and other such stuff
 #  delimiter - start/stop key - can only be # or *
 #  timeOut - seconds before timeout occurs and state should be returned to ready
-#  bruteForceThresholdAttempts - max failed attempts within the bruteForceLockoutTime before lockout
+#  bruteForceThresholdAttempts - max failed attempts within the bruteForceThresholdTime before lockout
 #  bruteForceThresholdTime - seconds of time for above number of attemps to occur within for lockout
-#  bruteForceLockoutTime - seconds that the lockout will be enforced for
+#  lockoutTime - seconds that the bruteforce & overspeed lockout will be enforced for
 #  bruteForceLockoutStart - time in seconds of last lockout start
 #  previousAttemps - list of times of last 3 attempts
 #
