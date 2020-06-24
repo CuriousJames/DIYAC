@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import time
-import pigpio
+try:
+    import pigpio
+except:
+    print("*** PiGPIO not found - please run the following command to install it ***")
+    print("sudo apt-get install pigpio python-pigpio python3-pigpio)
 try:
     import wiegand
 except:
