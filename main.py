@@ -4,7 +4,7 @@ try:
     import pigpio
 except:
     print("*** PiGPIO not found - please run the following command to install it ***")
-    print("sudo apt-get install pigpio python-pigpio python3-pigpio)
+    print("sudo apt-get install pigpio python-pigpio python3-pigpio\n")
 try:
     import wiegand
 except:
