@@ -3,11 +3,10 @@
 # Human readable name of the unit
 Description=diyac
 
-
 [Service]
 
 # Command to execute when the service is started
-ExecStart=/usr/bin/python /home/pi/DoorPi/main.py
+ExecStart=/usr/bin/python /home/pi/diyac/main.py
 # Command to reload the allowedTokens file
 ExecReload=/bin/kill -HUP $MAINPID
 # Command for stopping
