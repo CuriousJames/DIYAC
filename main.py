@@ -79,6 +79,7 @@ def cleanup():
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
 def sigint_handler(sig, frame):
+    print()  # So the logger line is in line with the other logger lines
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
     sys.exit(0)
 
