@@ -259,7 +259,7 @@ class inputHandler:
         # run the thread function
         # but only if it's not already locked
         if self.lockout["state"] != "locked":
-            lockoutThread = threading.Thread(target=self.lockoutThreadFunc, args=("bruteforce",))
+            lockoutThread = threading.Thread(name='lockoutThread', target=self.lockoutThreadFunc, args=("bruteforce",))
             lockoutThread.start()
 
         # done

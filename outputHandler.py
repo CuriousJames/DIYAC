@@ -111,7 +111,7 @@ class outputHandler:
     # open and close the door
     # this is for when a token has been read and approved
     def openDoor(self):
-        openDoorThread = threading.Thread(target=self.openDoorThreadFunc)
+        openDoorThread = threading.Thread(name='openDoorThread', target=self.openDoorThreadFunc)
         openDoorThread.start()
 
     def openDoorThreadFunc(self):

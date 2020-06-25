@@ -199,7 +199,7 @@ def cbf(gpio, level, tick):
 
     # if it's the doorbell button, ring the doorbell
     if gpio == p.pins["doorbellButton"] and level == 0:
-        ringDoorbellThread = threading.Thread(target=outH.ringDoorbell)
+        ringDoorbellThread = threading.Thread(name='doorbellThread', target=outH.ringDoorbell)
         ringDoorbellThread.start()
 
 
