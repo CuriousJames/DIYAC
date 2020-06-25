@@ -46,7 +46,9 @@ import threading
 #   called by wiegand library, process & translate input from reader
 #   includes translation from incoming int to hex string
 #
-class inputHandler :
+
+
+class inputHandler:
     # vars
 
     params = {
@@ -63,13 +65,12 @@ class inputHandler :
     lockout = {"state": "unlocked"}
     previousAttempts = []
 
-
     #
     # init
     # this is mostly to ge lockout bits from settings
-    def __init__(self, settings, logger, tokens, outputHandler) :
+    def __init__(self, settings, logger, tokens, outputHandler):
         # get logger
-        #global l
+        # global l
 
         # internalise settings, tokens and logger
         self.settings = settings
@@ -78,25 +79,24 @@ class inputHandler :
         self.outputHandler = outputHandler
 
         # see if settings are set
-        if self.settings.allSettings == False :
+        if self.settings.allSettings is False:
             return
 
         # the settings we're going to get are
         settingsToGet = ["delimiter", "timeout", "bruteforceThresholdTime", "bruteforceThresholdAttempts", "overspeedThresholdTime", "lockoutTime"]
         # make sure they exist
         # if exist, update params list
-        for s in settingsToGet :
-            try :
+        for s in settingsToGet:
+            try:
                 self.settings.allSettings["inputHandling"][s]
-            except :
+            except:
                 pass
-            else :
+            else:
                 self.logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
                 self.params[s] = self.settings.allSettings["inputHandling"][s]
 
         # done
         return
-
 
     #
     # function to be run with each incoming bit
@@ -124,31 +124,31 @@ class inputHandler :
     #   throw into inputBuffer
     #   update lastInputTime
     #
-    def newNumpadInput(self, rx) :
 
+    def newNumpadInput(self, rx):
         # make logger available
-        #global l
+        # global l
 
         # set time
         timeNow = time.time()
 
         # if not reading and rx is not the start/stop delimiter, do nothin
-        if self.numpadState == "ready" and rx != self.params["delimiter"] :
+        if self.numpadState == "ready" and rx != self.params["delimiter"]:
             self.logger.log("DBUG", "key press before the start key, ignoring", {"key": rx})
             return
 
         # start of input string
-        if self.numpadState == "ready" and rx == self.params["delimiter"] :
+        if self.numpadState == "ready" and rx == self.params["delimiter"]:
             self.logger.log("DBUG", "new keypad string started by delimiter", {"timeNow": timeNow})
             self.numpadState = "reading"
             self.numpadLastInputTime = timeNow
             return
 
         # if mid way through reading
-        if self.numpadState == "reading" :
+        if self.numpadState == "reading":
 
             # if over timeout
-            if self.numpadLastInputTime + self.params["timeout"] < timeNow :
+            if self.numpadLastInputTime + self.params["timeout"] < timeNow:
                 # log
                 logData = {"timeNow": timeNow, "lastInputTime": self.numpadLastInputTime}
                 self.logger.log("DBUG", "new entry is after timeout limit, resetting and going again", logData)
@@ -163,7 +163,7 @@ class inputHandler :
                 return
 
             # if delimiter, we have an end of input string
-            if rx == self.params["delimiter"] :
+            if rx == self.params["delimiter"]:
                 # run comparator
                 self.checkInput(self.inputBuffer, "code")
                 # clear up
@@ -178,7 +178,7 @@ class inputHandler :
             #  if locked out by overspeed - die
             #  add it onto the end of the input buffer
             self.calculateNewOverspeedLockout()
-            if self.lockout["state"] == "locked" :
+            if self.lockout["state"] == "locked":
                 if self.lockout["type"] == "overspeed":
                     self.logger.log("DBUG", "overspeed - numpad input ignored")
                     return
@@ -186,26 +186,25 @@ class inputHandler :
             self.numpadLastInputTime = timeNow
             return
 
-
     #
     # check input
     # this if for a fully formed input to be checked/approved by lockout and then token checked
     #
-    def checkInput(self, rx, rxType) :
+    def checkInput(self, rx, rxType):
         # add attempt to previousAttempts
         self.addAttempt()
 
         # check the lockout, bail if locked
-        if self.checkLockout() == "locked" :
+        if self.checkLockout() == "locked":
             self.logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
             return
 
         # check the token, true if approved, false if denied
         tokenCheckOutput = self.tokens.checkToken(rx, rxType)
-        if tokenCheckOutput["allow"]  == True :
+        if tokenCheckOutput["allow"] is True:
             self.logger.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": tokenCheckOutput["user"]})
             self.outputHandler.openDoor()
-        else :
+        else:
             self.logger.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
 
         # done
@@ -215,89 +214,85 @@ class inputHandler :
     # add attempt into previousAttempts
     # remove last value if more than 3
     #
-    def addAttempt(self) :
+    def addAttempt(self):
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
-        if len(self.previousAttempts) == self.params["bruteforceThresholdAttempts"] :
+        if len(self.previousAttempts) == self.params["bruteforceThresholdAttempts"]:
             del self.previousAttempts[0]
         # append new time
         self.previousAttempts.append(timeNow)
 
-
     #
     # lockout
-    def checkLockout(self) :
+    def checkLockout(self):
         # if already locked, DENY
-        if self.lockout["state"] == "locked" :
+        if self.lockout["state"] == "locked":
             return "locked"
 
         # see if a new lockout should be started by bruteforce
-        if self.calculateNewBruteforceLockout() == "locked" :
+        if self.calculateNewBruteforceLockout() == "locked":
             return "locked"
 
         # see if we need lockout from overspeed input
-        if self.calculateNewOverspeedLockout() == "locked" :
+        if self.calculateNewOverspeedLockout() == "locked":
             return "locked"
 
         # it's all easy
         return "unlocked"
 
-
     #
     # calculate if there should be a lockout based on information from self.previousAttempts
     # if length of previousAttemps is below threshold, do nothing
-    def calculateNewBruteforceLockout(self) :
+    def calculateNewBruteforceLockout(self):
         # time
         timeNow = time.time()
 
         # if not at threshold, do nothing
-        if len(self.previousAttempts) < self.params["bruteforceThresholdAttempts"] :
+        if len(self.previousAttempts) < self.params["bruteforceThresholdAttempts"]:
             return "no change"
 
         # check by time of earliest chronological entry,
-        if self.previousAttempts[0] + self.params["bruteforceThresholdTime"] < timeNow :
+        if self.previousAttempts[0] + self.params["bruteforceThresholdTime"] < timeNow:
             return "no change"
 
         # that must mean we're within the threshold time and attempts, initiate lockout!
         # run the thread function
         # but only if it's not already locked
-        if self.lockout["state"] != "locked" :
-            lockoutThread=threading.Thread(target=self.lockoutThreadFunc, args=("bruteforce",))
+        if self.lockout["state"] != "locked":
+            lockoutThread = threading.Thread(target=self.lockoutThreadFunc, args=("bruteforce",))
             lockoutThread.start()
 
         # done
         return "locked"
-
 
     #
     # new lockout based on overspeed input?
     #
-    def calculateNewOverspeedLockout(self) :
+    def calculateNewOverspeedLockout(self):
         # time
         timeNow = time.time()
 
         # make sure there was already an input
-        if self.numpadLastInputTime == None :
+        if self.numpadLastInputTime is None:
             return "no change"
 
         # test time
-        if self.numpadLastInputTime + self.params["overspeedThresholdTime"] < timeNow :
+        if self.numpadLastInputTime + self.params["overspeedThresholdTime"] < timeNow:
             return "no change"
 
         # lets fuckin lock it oot
-        if self.lockout["state"] != "locked" :
-            lockoutThread=threading.Thread(target=self.lockoutThreadFunc, args=("overspeed",))
+        if self.lockout["state"] != "locked":
+            lockoutThread = threading.Thread(target=self.lockoutThreadFunc, args=("overspeed",))
             lockoutThread.start()
 
         # done
         return "locked"
-
 
     #
     # lockout thread
     #  a thread that will just sit for the time lockout
     #
-    def lockoutThreadFunc(self, method) :
+    def lockoutThreadFunc(self, method):
         # init
         timeNow = time.time()
         # start
@@ -310,7 +305,6 @@ class inputHandler :
         self.lockout = {"state": "unlocked"}
         self.previousAttempts = []
         return
-
 
     #
     # this function is called by the wiegand library when it has read something
@@ -334,22 +328,21 @@ class inputHandler :
 
         #
         # log
-        self.logger.log("DBUG", "New read", {"bits":bits, "code":code})
+        self.logger.log("DBUG", "New read", {"bits": bits, "code": code})
 
         #
         # we have a card
         if bits == 34:
             # make input into a hex string
             #
-            input = str(format(code, '#036b')) # make binary string
+            input = str(format(code, '#036b'))  # make binary string
             input = input[3:]  # trim '0b' and first parity bit
-            input = input[:-1] # trim last parity bit
-            output = input[24:] + input[16:24] + input[8:16] + input[:8] # re-order bytes
-            output = int(output, 2) # change to integer - required for doing the change to hex
-            output = format(output, '#010x') # make hex string
-            output = output[2:] # trim "0x"
+            input = input[:-1]  # trim last parity bit
+            output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
+            output = int(output, 2)  # change to integer - required for doing the change to hex
+            output = format(output, '#010x')  # make hex string
+            output = output[2:]  # trim "0x"
             self.logger.log("DEBUG", "output from formatting", output)
-
             self.checkInput(output, "card")
         elif bits == 4:
             # someone pressed a button
@@ -358,16 +351,16 @@ class inputHandler :
             #  run numpadinput function
 
             # little check - hint that wiegand wires may not be correct way around
-            if code > 11 :
+            if code > 11:
                 self.logger.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
 
             # Tidy up the input - change * and #, or convert to string
             if code == 10:
-                key="*"
+                key = "*"
             elif code == 11:
-                key="#"
+                key = "#"
             else:
-                key=str(code)
+                key = str(code)
             self.logger.log("DBUG", "Keypad key pressed", key)
 
             # run through the keypad checker

@@ -48,9 +48,11 @@ import threading
 #  setDoorbellOutState(state)
 #   sets each output as described in doorbellOutputs
 #
-class outputHandler :
-    doorRinging=False
-    doorbellCount=0
+
+
+class outputHandler:
+    doorRinging = False
+    doorbellCount = 0
     doorbellOutputs = [
         {
             "name": "doorbell12",
@@ -72,7 +74,7 @@ class outputHandler :
     #  internalise some things
     #  set initial state of some outputs
     #  get anything useful from settings
-    def __init__(self, settings, logger, pi, pinDef) :
+    def __init__(self, settings, logger, pi, pinDef):
         # internalise the stuff
         self.settings = settings
         self.logger = logger
@@ -80,36 +82,36 @@ class outputHandler :
         self.pinDef = pinDef
 
         # set some outputs
-        try :
-            pi.write(self.pinDef.pins["doorStrike"],0)
-            pi.write(self.pinDef.pins["doorbell12"],0)
-            pi.write(self.pinDef.pins["doorbellCc"],0)
-            pi.write(self.pinDef.pins["spareLed"],0)
-            pi.write(self.pinDef.pins["readerLed"],1)
-            pi.write(self.pinDef.pins["readerBuzz"],1)
-            pi.write(self.pinDef.pins["piActiveLed"],1)
-        except :
+        try:
+            pi.write(self.pinDef.pins["doorStrike"], 0)
+            pi.write(self.pinDef.pins["doorbell12"], 0)
+            pi.write(self.pinDef.pins["doorbellCc"], 0)
+            pi.write(self.pinDef.pins["spareLed"], 0)
+            pi.write(self.pinDef.pins["readerLed"], 1)
+            pi.write(self.pinDef.pins["readerBuzz"], 1)
+            pi.write(self.pinDef.pins["piActiveLed"], 1)
+        except:
             self.logger.log("ERRR", "There was an issue setting output pins")
 
         # get settings
         settingsToGet = ["doorOpenTime", "doorbellCcTime"]
-        if self.settings.allSettings != False :
-            for s in settingsToGet :
-                try :
+        if self.settings.allSettings is False:
+            for s in settingsToGet:
+                try:
                     self.settings.allSettings["outputHandling"][s]
-                except :
+                except:
                     pass
-                else :
+                else:
                     self.params[s] = self.settings.allSettings["outputHandling"][s]
-                    self.logger.log("INFO", "new setting for output handling", {"parameter": s, "value": self.params[s]} )
+                    self.logger.log("INFO", "new setting for output handling", {"parameter": s, "value": self.params[s]})
             # done
         return
 
     #
     # open and close the door
-    #  this is for when a token has been read and approved
+    # this is for when a token has been read and approved
     def openDoor(self):
-        openDoorThread=threading.Thread(target=self.openDoorThreadFunc)
+        openDoorThread = threading.Thread(target=self.openDoorThreadFunc)
         openDoorThread.start()
 
     def openDoorThreadFunc(self):
@@ -119,15 +121,15 @@ class outputHandler :
         # wait
         time.sleep(self.params["doorOpenTime"])
 
-        #Now let's warn that the door is about to close by flashing the Reader's LED
-        #l.log("DBUG", "Door Closing soon")
-        #i = 5
-        #while i < 5:
-            #pi.write(p.pins["readerLed"],1)
-            #time.sleep(0.1)
-            #pi.write(p.pins["readerLed"],0)
-            #time.sleep(0.1)
-            #i += 1
+        # Now let's warn that the door is about to close by flashing the Reader's LED
+        # l.log("DBUG", "Door Closing soon")
+        # i = 5
+        # while i < 5:
+        #   pi.write(p.pins["readerLed"],1)
+        #   time.sleep(0.1)
+        #   pi.write(p.pins["readerLed"],0)
+        #   time.sleep(0.1)
+        #   i += 1
 
         # close
         self.setDoor("closed")
@@ -135,76 +137,68 @@ class outputHandler :
         # done
         return
 
-
-    #
     # set the door to an open or closed state
-    #  will do led and strike
-    #
-    def setDoor(self, state) :
+    # will do led and strike
+    def setDoor(self, state):
         # error state
-        if state != "open" and state != "closed" :
+        if state != "open" and state != "closed":
             self.logger.log("WARN", "No state set for changing door state")
             return
         # open
-        if state == "open" :
+        if state == "open":
             self.logger.log("DBUG", "Opening door")
             pinState = [{"name": "doorStrike", "state": 1}, {"name": "readerLed", "state": 0}]
-        #closed
-        if state == "closed" :
+        # closed
+        if state == "closed":
             self.logger.log("DBUG", "Closing door")
             pinState = [{"name": "doorStrike", "state": 0}, {"name": "readerLed", "state": 1}]
         # do the pins
-        for pin in pinState :
+        for pin in pinState:
             self.pi.write(self.pinDef.pins[pin["name"]], pin["state"])
-
 
     # make the doorbell do a ringing
     def ringDoorbell(self):
-        self.doorbellCount+=1
+        self.doorbellCount += 1
         self.logger.log("DBUG", "******* Bell Count *******", self.doorbellCount)
 
-        if self.doorRinging == False:
-            self.doorRinging=True
+        if self.doorRinging is False:
+            self.doorRinging = True
             self.logger.log("INFO", "Start Doorbell")
 
             self.doorbellHit()
 
-            #Wait to give a break before hearing more bell, even if the button is pressed again
+            # Wait to give a break before hearing more bell, even if the button is pressed again
             time.sleep(2)
 
-            self.doorRinging=False
+            self.doorRinging = False
             self.logger.log("INFO", "Stop Doorbell")
-
         else:
             self.logger.log("INFO", "NOT Ringing doorbell - it's already ringing")
-
         return
 
+    def doorbellHit(self):
+        # Some kind of nice-enough doorbell ring pattern
+        self.setDoorbellOutState(1)
+        time.sleep(0.7)
+        self.setDoorbellOutState(0)
+        time.sleep(0.3)
+        self.setDoorbellOutState(1)
+        time.sleep(0.4)
+        self.setDoorbellOutState(0)
+        time.sleep(0.2)
+        self.setDoorbellOutState(1)
+        time.sleep(0.4)
+        self.setDoorbellOutState(0)
 
-    def doorbellHit(self) :
-            # Some kind of nice-enough doorbell ring pattern
-            self.setDoorbellOutState(1)
-            time.sleep(0.7)
-            self.setDoorbellOutState(0)
-            time.sleep(0.3)
-            self.setDoorbellOutState(1)
-            time.sleep(0.4)
-            self.setDoorbellOutState(0)
-            time.sleep(0.2)
-            self.setDoorbellOutState(1)
-            time.sleep(0.4)
-            self.setDoorbellOutState(0)
-
-
-    def setDoorbellOutState(self, state) :
-        if state != 1 and state != 0 :
+    def setDoorbellOutState(self, state):
+        if state != 1 and state != 0:
             return
 
-        for out in self.doorbellOutputs :
+        for out in self.doorbellOutputs:
             # set state
             newState = state
             # invert if necessary
-            if out["inverted"] == True :
+            if out["inverted"] is True:
                 newState ^= 1
             # do the output
             self.pi.write(self.pinDef.pins[out["name"]], newState)

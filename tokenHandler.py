@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import os # useful for file operations
-import json # for gettings settings and tokens
+import os  # useful for file operations
+import json  # for gettings settings and tokens
 
 #
 # Tokens
@@ -16,23 +16,22 @@ import json # for gettings settings and tokens
 #  __init__(settings, logger)
 #   store settigns and logger internally for later use
 #   run getAllowedTokens()
-
-#  getAllowedTokens()
+#   getAllowedTokens()
 #
-class tokenHandler :
+
+
+class tokenHandler:
     # vars
     allowedTokens = False
-
 
     #
     # initialisation function
     # just sets vars for settings and logger
     #
-    def __init__(self, settings, logger) :
+    def __init__(self, settings, logger):
         self.settings = settings
         self.logger = logger
         self.getAllowedTokens()
-
 
     #
     # function to make var of allowed tokens
@@ -53,7 +52,7 @@ class tokenHandler :
         # remove duplicates
 
         # if settings haven't worked, return
-        if self.settings.allSettings == False:
+        if self.settings.allSettings is False:
             self.logger.log("WARN", "no settings - will not get allowedTokens")
             return
 
@@ -69,40 +68,40 @@ class tokenHandler :
         self.logger.log("DBUG", "AllowedTokens: list of tokens", self.allowedTokens)
         return
 
-    def loadFromFile(self) :
+    def loadFromFile(self):
         # set file path
         #
         # if tokens file exists
-        ## open/read+decode/close
-        ## set allowedTokens
-        ## if problem
-        ### error handling
-        ### return
+        #  open/read+decode/close
+        #  set allowedTokens
+        #  if problem
+        #   error handling
+        #   return
         #
         # if no tokens file
-        ## error handling
-        ## return
+        #  error handling
+        #  return
 
         # check file path exists
         # if relative, make absolute
         # open / read / decode / close
-        try :
+        try:
             self.settings.allSettings["allowedTokens"]["path"]
-        except :
+        except:
             self.logger.log("WARN", "Allowed tokens file path not set in settings")
             return
 
-        if self.settings.allSettings["allowedTokens"]["path"][0] != "/" :
+        if self.settings.allSettings["allowedTokens"]["path"][0] != "/":
             allowedTokensFilePath = self.settings.allSettings["root"] + self.settings.allSettings["allowedTokens"]["path"]
-        else :
+        else:
             allowedTokensFilePath = self.settings.allSettings["allowedTokens"]["path"]
 
         # open / read / decode / close
-        if os.path.exists(allowedTokensFilePath) :
+        if os.path.exists(allowedTokensFilePath):
             # open
             try:
                 allowedTokensFile = open(allowedTokensFilePath, "r")
-            except OSError as err :
+            except OSError as err:
                 self.logger.log("WARN", "os error while opening allowedTokens file", err)
             except:
                 self.logger.log("WARN", "unknown error while opening allowedTokens file")
@@ -111,7 +110,7 @@ class tokenHandler :
             # read + decode
             try:
                 self.allowedTokens = json.load(allowedTokensFile)
-            except ValueError as err :
+            except ValueError as err:
                 self.logger.log("WARN", "JSON Decode error while reading allowedTokens file", err)
             except:
                 self.logger.log("WARN", "unknown error while reading/decoding allowedTokens file")
@@ -119,11 +118,10 @@ class tokenHandler :
             # close
             try:
                 allowedTokensFile.close()
-            except OSError as err :
+            except OSError as err:
                 self.logger.log("WARN", "os error while closing allowedTokens file:", err)
             except:
                 self.logger.log("WARN", "unknown error while closing allowedTokens file")
-
         else:
             self.logger.log("WARN", "allowedTokens file does not exist")
             return
@@ -134,15 +132,15 @@ class tokenHandler :
     #  don't worry, it's a music joke
     # move all keys of "value" to "token"
     # backwards compatibility
-    def moveValueToToken(self) :
+    def moveValueToToken(self):
         # sanity
-        if self.allowedTokens == False :
+        if self.allowedTokens is False:
             return
 
         # iterate
-        for i in self.allowedTokens :
+        for i in self.allowedTokens:
             # if value exists, copy to token and then delete
-            if "value" in i :
+            if "value" in i:
                 i["token"] = i["value"]
                 del i["value"]
 
@@ -155,86 +153,84 @@ class tokenHandler :
     #  remove from allowedTokens if no type set
     #  add empty user string if user not set
     #
-    def sanitiseAllowedTokens(self) :
+    def sanitiseAllowedTokens(self):
         # sanity
-        if self.allowedTokens == False :
+        if self.allowedTokens is False:
             return
 
         indexesToDelete = []
 
         # check for no or invalid token
         counter = 0
-        for i in self.allowedTokens :
+        for i in self.allowedTokens:
             # if token not set
-            if "token" not in i :
+            if "token" not in i:
                 indexesToDelete.append(counter)
                 self.logger.log("WARN", "AllowedTokens - entry without token, will not be used", i)
             # if token is empty string
-            if "token" in i :
-                if i["token"] == "" :
+            if "token" in i:
+                if i["token"] == "":
                     indexesToDelete.append(counter)
                     self.logger.log("WARN", "AllowedTokens - entry with token of 0 length, will not be used", i)
             counter += 1
 
         # if entries have been marked for delete, DELETE THEM
-        if not indexesToDelete :
+        if not indexesToDelete:
             pass
         else:
-            indexesToDelete.sort(reverse=True) # have to sort and do from the highest index first
-            for ind in indexesToDelete :
+            indexesToDelete.sort(reverse=True)  # have to sort and do from the highest index first
+            for ind in indexesToDelete:
                 del self.allowedTokens[ind]
 
         # user cleaning
-        for i in self.allowedTokens :
-            if "user" not in i :
+        for i in self.allowedTokens:
+            if "user" not in i:
                 i["user"] = "USER NOT GIVEN"
                 self.logger.log("WARN", "AllowedTokens - user not set", i)
 
         # done
         return
 
-
     #
     # format token values
     #  remove ":"
     #  make lowercase
-    def formatTokens(self) :
-        if self.allowedTokens == False :
+    def formatTokens(self):
+        if self.allowedTokens is False:
             return
         # remove ":" and make lowercase
-        for tkn in self.allowedTokens :
+        for tkn in self.allowedTokens:
             # check token is there
-            if "token" not in tkn :
+            if "token" not in tkn:
                 continue
             # do the operation
             tkn["token"] = tkn["token"].replace(":", "")
             tkn["token"] = tkn["token"].lower()
         return
 
-
     #
     # for mifare ultralight and other tokens that are more than 4 bytes long
     #
-    def transformOverlengthTokens(self) :
-        if self.allowedTokens == False :
+    def transformOverlengthTokens(self):
+        if self.allowedTokens is False:
             return
         # Perform transform for mifare ultralight
-        for tkn in self.allowedTokens :
+        for tkn in self.allowedTokens:
             # check token is there
-            if "token" not in tkn :
+            if "token" not in tkn:
                 continue
             #
             # do some transforming here
             # Wiegand readers ONLY read the first 3 bytes from cards with more than 4 bytes of ID
             # So we need to transform the ID to what the reader is capable of reading (and how it reads it - it reads '88' and then the first 3 bytes)
-            if len(tkn["token"]) >8:
+            if len(tkn["token"]) > 8:
                 tkn["token"] = "88" + tkn["token"][:6]
         return
 
     #
     # remove duplicate tokens
     #  because having duplicates would be bad
-    def removeDuplicateTokens(self) :
+    def removeDuplicateTokens(self):
         #  i and j are both index counters
         #  iterate allowed tokens
         #   iterate again to compare
@@ -246,7 +242,7 @@ class tokenHandler :
         #    delete the duplicates
 
         # die if nothing there
-        if self.allowedTokens == False :
+        if self.allowedTokens is False:
             return
 
         # initialise
@@ -254,15 +250,15 @@ class tokenHandler :
 
         # main iterate
         i = 0
-        for original in self.allowedTokens :
+        for original in self.allowedTokens:
             # second iterate
             j = 0
             for check in self.allowedTokens:
                 # check token is there
-                if "token" not in original or "token" not in check :
+                if "token" not in original or "token" not in check:
                     continue
                 # if tokens match, types match, it's not the same entry, and not listed in duplicate indexes
-                if original["token"] == check["token"] and original["type"] == check["type"] and i != j  and i not in duplicateIndexes:
+                if original["token"] == check["token"] and original["type"] == check["type"] and i != j and i not in duplicateIndexes:
                     # log - it only takes 3 lines because it wou;'dnt nicely fit on one
                     logData = {"token": self.allowedTokens[j]["token"], "type": self.allowedTokens[j]["type"], "user": self.allowedTokens[j]["user"]}
                     self.logger.log("WARN", "AllowedTokens - duplicate token found", logData)
@@ -276,29 +272,28 @@ class tokenHandler :
             i += 1
 
         # if there's duplicates listed, delete them
-        if not duplicateIndexes :
+        if not duplicateIndexes:
             pass
         else:
-            duplicateIndexes.sort(reverse=True) # have to sort and do from the highest index first
-            for dup in duplicateIndexes :
+            duplicateIndexes.sort(reverse=True)  # have to sort and do from the highest index first
+            for dup in duplicateIndexes:
                 del self.allowedTokens[dup]
 
         # done
         return
 
-
     #
     # check incoming code against list of allowed tokens
     #  if match, open door
     #  if not match, shoot whoever entered it
-    def checkToken(self, rx, rxType) :
-        if self.allowedTokens == False :
+    def checkToken(self, rx, rxType):
+        if self.allowedTokens is False:
             self.logger.log("INFO", "ACCESS DENIED - no available tokens list")
             return
 
-        for t in self.allowedTokens :
-            if t["type"] == rxType :
-                if t["token"] == rx :
+        for t in self.allowedTokens:
+            if t["type"] == rxType:
+                if t["token"] == rx:
                     return {"allow": True, "user": t["user"]}
         # all done
         return {"allow": False}

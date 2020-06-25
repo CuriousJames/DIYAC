@@ -2,12 +2,12 @@
 import time
 try:
     import pigpio
-except:
+except ImportError:
     print("*** PiGPIO not found - please run the following command to install it ***")
     print("sudo apt-get install pigpio python-pigpio python3-pigpio\n")
 try:
     import wiegand
-except:
+except ImportError:
     print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
     print("This should do the trick, assuming you're in the root directory now:")
     print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
@@ -16,20 +16,18 @@ except:
     exit()
 import atexit
 import threading
-import os # useful for file operations
-import json # for gettings settings and tokens
-import logging # our own logging module
-import inputHandler # our own input handling module
+import logging  # our own logging module
+import inputHandler  # our own input handling module
 import outputHandler
-import tokenHandler # our ouwn token hangling module
+import tokenHandler  # our ouwn token hangling module
 import settingsHandler
-import pinDef # our own pin definition module
-import signal # for nice exit
-import sys # for nice exit
+import pinDef  # our own pin definition module
+import signal  # for nice exit
+import sys  # for nice exit
 import subprocess
 try:
     import sdnotify
-except:
+except ImportError:
     print("*** sdnotify module not installed - this is required ***\n")
     print("Please try this to install:")
     print("sudo apt-get install python-pip")
@@ -64,17 +62,16 @@ def cleanup():
     l.log("DBUG", "cleanup started")
 
     # close the door
-    try :
+    try:
         outH.doorState("closed")
-    except :
+    except:
         l.log("WARN", "Unable to close the door")
     # release gpio resources
-    try :
+    try:
         pi.stop()
-    except :
+    except:
         pass
-
-    #log
+    # log
     l.log("ERRR", "program shutdown")
 
 
@@ -84,6 +81,7 @@ def cleanup():
 def sigint_handler(sig, frame):
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
     sys.exit(0)
+
 
 # SIGHUP handler
 # to reload tokens
@@ -123,19 +121,19 @@ def init():
     # if not connected
     #  exit
     stat = subprocess.call("systemctl status pigpiod > /dev/null", shell=True)
-    if stat != 0 :
+    if stat != 0:
         l.log("WARN", "PIGPIOD is not running, will try to start")
         subprocess.call("sudo systemctl start pigpiod > /dev/null", shell=True)
         stat = subprocess.call("service pigpiod status > /dev/null", shell=True)
-        if stat != 0 :
+        if stat != 0:
             l.log("ERRR", "Unable to start pigpiod daemon")
             sys.exit()
-        else :
+        else:
             l.log("INFO", "Starting pigpiod daemon successful")
     global pi
     pi = pigpio.pi()
     if not pi.connected:
-        l.log("ERRR","PiGPIO - Unable to connect")
+        l.log("ERRR", "PiGPIO - Unable to connect")
         exit()
 
     # set tokens
@@ -154,8 +152,8 @@ def init():
     global inH
     inH = inputHandler.inputHandler(s, l, tokens, outH)
 
-    pi.set_glitch_filter(p.pins["doorbellButton"],100000)
-    pi.set_glitch_filter(p.pins["doorSensor"],50000)
+    pi.set_glitch_filter(p.pins["doorbellButton"], 100000)
+    pi.set_glitch_filter(p.pins["doorSensor"], 50000)
 
     pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
     pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
@@ -163,7 +161,7 @@ def init():
     time.sleep(0.1)
 
     # register these GPIO pins to run cbf on rising or falling edge
-    global cb1,cb2,cb3,cb4
+    global cb1, cb2, cb3, cb4
     cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
     cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
 
@@ -184,7 +182,7 @@ def init():
 def keepAlive():
     while True:
         time.sleep(9999)
-        #Just keeping the python fed (slithering)
+        # Just keeping the python fed (slithering)
         l.log("INFO", "boppity")
 
 
@@ -194,14 +192,14 @@ def cbf(gpio, level, tick):
     # log
     # see if we know which pin it is
     logData = {"gpio": gpio, "level": level}
-    for pin in p.pins :
-        if p.pins[pin] == gpio :
+    for pin in p.pins:
+        if p.pins[pin] == gpio:
             logData["name"] = pin
     l.log("DBUG", "GPIO Change", logData)
 
     # if it's the doorbell button, ring the doorbell
     if gpio == p.pins["doorbellButton"] and level == 0:
-        ringDoorbellThread=threading.Thread(target=outH.ringDoorbell)
+        ringDoorbellThread = threading.Thread(target=outH.ringDoorbell)
         ringDoorbellThread.start()
 
 

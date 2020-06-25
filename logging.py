@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import datetime # used for logging
-import sys # for checking python type for ansi escape
-import json # for outputting pretty strings from data
+import datetime  # used for logging
+import json  # for outputting pretty strings from data
 import syslog
 
 #
@@ -69,6 +68,7 @@ import syslog
 #   if it is, return the index
 #
 
+
 class logger:
     # let's have some default vars
     levelTable = ["DBUG", "INFO", "NOTE", "WARN", "ERRR", "NONE"]
@@ -109,9 +109,9 @@ class logger:
     ]
     settings = False
 
-    def __init__(self,settings=False) :
+    def __init__(self, settings=False):
         # if there's no settings, only use defaults
-        if settings == False :
+        if settings is False:
             self.log("INFO", "Logger started without settings, will use defaults")
             return
 
@@ -119,21 +119,21 @@ class logger:
         self.settings = settings
 
         # if no settings, there's nothing more can be done
-        if self.settings.allSettings == False :
+        if self.settings.allSettings is False:
             self.log("WARN", "no settings - no logging to file, display logging will be INFO")
             return
 
         # do some loading
         self.loadSettings()
 
-    def loadSettings(self, settings=False) :
+    def loadSettings(self, settings=False):
         # sanity check
-        if settings == False and self.settings == False :
+        if settings is False and self.settings is False:
             self.log("WARN", "logger load settings - no settings given and no settings available")
             return
 
         # load settings if there's new settings
-        if settings != False :
+        if settings is not False:
             self.settings = settings
 
         # make some loading happen
@@ -141,22 +141,19 @@ class logger:
         self.setLogToFileSettings()
         self.setLogToSyslogSettings()
 
-
-    def setLogToSyslogSettings(self) :
+    def setLogToSyslogSettings(self):
         # this will only get the level for output to syslog
         # might have more in future
-        try :
+        try:
             self.settings.allSettings["logging"]["syslog"]["level"]
-        except :
+        except:
             pass
-        else :
+        else:
             # make sure it's a valid value, then set
-            if self.settings.allSettings["logging"]["syslog"]["level"] in self.levelTable :
+            if self.settings.allSettings["logging"]["syslog"]["level"] in self.levelTable:
                 self.syslogLevel = self.settings.allSettings["logging"]["syslog"]["level"]
 
-
-
-    def setLogToDisplaySettings(self) :
+    def setLogToDisplaySettings(self):
         #
         # get display settings
         #  if not exist - NONE
@@ -164,37 +161,36 @@ class logger:
         #
 
         # check if colour enabled
-        try :
+        try:
             self.settings.allSettings["logging"]["display"]["colour"]
-        except :
+        except:
             pass
-        else :
+        else:
             # the if is only here to validate input
-            if self.settings.allSettings["logging"]["display"]["colour"] == True :
+            if self.settings.allSettings["logging"]["display"]["colour"] is True:
                 # set the vairbale
                 self.displayColour = True
 
         # make sure it exists
-        try :
+        try:
             self.settings.allSettings["logging"]["display"]["level"]
-        except NameError :
-            self.log("INFO","display logging level not set - no logs will be printed to stdout")
+        except NameError:
+            self.log("INFO", "display logging level not set - no logs will be printed to stdout")
             self.displayLevel = "NONE"
             return
 
         # make sure it's in levelTable
-        if self.settings.allSettings["logging"]["display"]["level"] in self.levelTable :
+        if self.settings.allSettings["logging"]["display"]["level"] in self.levelTable:
             self.displayLevel = self.settings.allSettings["logging"]["display"]["level"]
             self.log("INFO", "display logging level set", {"level": self.displayLevel})
-        else :
+        else:
             self.log("WARN", "display logging level is incorrect - no more logs to stdout", {"value in settings": self.settings.allSettings["logging"]["display"]["level"]})
             self.displayLevel = "NONE"
 
         # done
         return
 
-
-    def setLogToFileSettings(self) :
+    def setLogToFileSettings(self):
         #
         # file logging
         # note - fileLevel is stored as temporary until the end
@@ -206,9 +202,9 @@ class logger:
         #
 
         # test exists
-        try :
+        try:
             self.settings.allSettings["logging"]["file"]["level"]
-        except NameError :
+        except NameError:
             self.log("INFO", "file logging level not set - no logs will be printed to file")
             self.fileLevel = "NONE"
             return
@@ -217,37 +213,37 @@ class logger:
         tmpFileLevel = "NONE"
 
         # czech in levelTable
-        if self.settings.allSettings["logging"]["file"]["level"] in self.levelTable :
+        if self.settings.allSettings["logging"]["file"]["level"] in self.levelTable:
             tmpFileLevel = self.settings.allSettings["logging"]["file"]["level"]
             self.log("INFO", "file logging level set", {"level": tmpFileLevel})
-        else :
+        else:
             self.fileLevel = "NONE"
             self.log("WARN", "file logging level is incorrect in settings", {"value": self.settings.allSettings["logging"]["file"]["level"]})
             return
 
         # see if it's none, if so we don't need to do anything more
-        if tmpFileLevel == "NONE" :
+        if tmpFileLevel == "NONE":
             return
 
         # test if path set
-        try :
+        try:
             self.settings.allSettings["logging"]["file"]["path"]
-        except NameError :
+        except NameError:
             # not set, no log to file and return
             self.log("WARN", "File path not set - no logs to file")
             self.fileLevel = "NONE"
             return
-        else :
+        else:
             self.filePath = self.settings.allSettings["logging"]["file"]["path"]
 
         # change path to absolute if necessary
-        if self.filePath[0] != "/" :
+        if self.filePath[0] != "/":
             # still gotta test settings["root"] exists
-            try :
+            try:
                 self.settings.allSettings["root"]
             except NameError:
                 self.log("DBUG", "root dir not in settings - will use relative path for log file")
-            else :
+            else:
                 self.filePath = self.settings.allSettings["root"] + self.filePath
         self.log("DBUG", "log file path set ", {"path": self.filePath})
 
@@ -265,7 +261,7 @@ class logger:
         try:
             # try to close file
             f.close()
-        except :
+        except:
             # unable to close file
             self.log("WARN", "unable to close log file - will not perform logging to file")
             self.fileLevel = "NONE"
@@ -277,8 +273,7 @@ class logger:
         # done
         return
 
-
-    def log(self, lvl, msg, data="NoLoggingDataGiven") :
+    def log(self, lvl, msg, data="NoLoggingDataGiven"):
         # check level is in levelTable
         # get time
         # format
@@ -292,9 +287,9 @@ class logger:
         #  close
 
         # check in levelTable
-        if lvl in self.levelTable :
+        if lvl in self.levelTable:
             pass
-        else :
+        else:
             return
 
         # time
@@ -308,14 +303,13 @@ class logger:
         self.logToFile(isoTime, lvl, msg, data)
         return
 
-
-    def logToSyslog(self, lvl, msg) :
+    def logToSyslog(self, lvl, msg):
         # sanity
-        if self.syslogLevel == "NONE" :
+        if self.syslogLevel == "NONE":
             return
 
         # level compare
-        if self.checkLevel("syslog", lvl) == False:
+        if self.checkLevel("syslog", lvl) is False:
             return
 
         # make a string
@@ -328,28 +322,27 @@ class logger:
         # done
         return
 
-
-    def logToDisplay(self, isoTime, lvl, msg, data) :
+    def logToDisplay(self, isoTime, lvl, msg, data):
         # sanity
-        if self.displayLevel == "NONE" :
+        if self.displayLevel == "NONE":
             return
 
         # level compare
-        if self.checkLevel("display", lvl) == False:
+        if self.checkLevel("display", lvl) is False:
             return
 
         # make output string
         outStr = isoTime + " [" + lvl + "] " + msg
 
         # pretty-up the data and put into output string - if it's there
-        if data != "NoLoggingDataGiven" :
+        if data != "NoLoggingDataGiven":
             data = self.dataFormat("display", data)
             outStr += " - " + data
 
         # apply colour
-        if self.displayColour == True :
-            iln = self.inList(lvl, self.levelTable) # just to make the next line not horribly long
-            colStr = self.ansiEscape + self.colourLookup[iln]["style"] +";"+ self.colourLookup[iln]["colour"] +";"+ self.colourLookup[iln]["bg"] +"m"
+        if self.displayColour is True:
+            iln = self.inList(lvl, self.levelTable)  # just to make the next line not horribly long
+            colStr = self.ansiEscape + self.colourLookup[iln]["style"] + ";" + self.colourLookup[iln]["colour"] + ";" + self.colourLookup[iln]["bg"] + "m"
             outStr = colStr + outStr + self.ansiEscape + "0;0;0m"
 
         # do an output
@@ -358,100 +351,96 @@ class logger:
         # done
         return
 
-
-    def logToFile(self, isoTime, lvl, msg, data) :
+    def logToFile(self, isoTime, lvl, msg, data):
         # sanity
-        if self.fileLevel == "NONE" :
+        if self.fileLevel == "NONE":
             return
 
         # level compare
-        if self.checkLevel("file", lvl) == False :
+        if self.checkLevel("file", lvl) is False:
             return
 
         # make output string
         outStr = isoTime + " [" + lvl + "] " + msg
 
         # pretty-up the data and put into output string - if it's there
-        if data != "NoLoggingDataGiven" :
+        if data != "NoLoggingDataGiven":
             data = self.dataFormat("display", data)
             outStr += " - " + data
 
         # do an output
-        try :
+        try:
             f = open(self.filePath, "a")
             f.write(outStr + "\n")
             f.close()
-        except :
+        except:
             pass
-
 
     #
     # see if the incoming message is of sufficient level to log
     #
-    def checkLevel(self, destination, incomingLevel) :
+    def checkLevel(self, destination, incomingLevel):
         # sanity check
-        if destination != "syslog" and destination != "display" and destination != "file" :
+        if destination != "syslog" and destination != "display" and destination != "file":
             return False
 
         # syslog
-        if destination == "syslog" :
+        if destination == "syslog":
             currentLevelNumber = self.inList(self.syslogLevel, self.levelTable)
         # display
-        if destination == "display" :
+        if destination == "display":
             currentLevelNumber = self.inList(self.displayLevel, self.levelTable)
         # file
-        if destination == "file" :
+        if destination == "file":
             currentLevelNumber = self.inList(self.fileLevel, self.levelTable)
 
         # get number for incoming
         incomingLevelNumber = self.inList(incomingLevel, self.levelTable)
 
         # compare
-        if incomingLevelNumber >= currentLevelNumber :
+        if incomingLevelNumber >= currentLevelNumber:
             return True
 
         # done, and we don't want to log the message to this destination
         return False
-
 
     #
     # format data into a nice string
     #  TODO
     #  redact things should happen here
     #
-    def dataFormat(self, destination, data) :
-        if destination == "syslog" :
-            try :
+    def dataFormat(self, destination, data):
+        if destination == "syslog":
+            try:
                 data = json.dumps(data)
-            except :
+            except:
                 data = format(data)
-        if destination == "display" :
-            try :
+        if destination == "display":
+            try:
                 data = json.dumps(data)
-            except :
+            except:
                 data = format(data)
-        if destination == "file" :
-            try :
+        if destination == "file":
+            try:
                 data = json.dumps(data)
-            except :
+            except:
                 data = format(data)
         return data
-
 
     #
     # helper function
     #  returns false if not in list
     #  returns index if it is in the list
-    def inList(self, needle, haystack) :
+    def inList(self, needle, haystack):
         # do some checking
-        if needle in haystack :
+        if needle in haystack:
             # loop through
             i = 0
-            for x in haystack :
-                if x == needle :
+            for x in haystack:
+                if x == needle:
                     return i
-                else :
+                else:
                     i += 1
-        else :
+        else:
             # needle is not in haystack
             return False
