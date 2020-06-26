@@ -175,6 +175,9 @@ def init():
     global w
     w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
 
+    global keepAliveCounter
+    keepAliveCounter = 1
+
     # state ready
     notify = sdnotify.SystemdNotifier()
     notify.notify("READY=1")
@@ -182,11 +185,17 @@ def init():
 
 
 def keepAlive():
+    global keepAliveCounter
     while True:
         time.sleep(1)
         # Just keeping the python fed (slithering)
-        l.log("DBUG", "boppity")
         outH.switchPiActiveLed()
+        # Don't spam the console or log file - only log every tenth hit of keep alive
+        if keepAliveCounter == 10:
+            l.log("DBUG", "Bopity - Program still running OK")
+            keepAliveCounter = 1
+        else:
+            keepAliveCounter += 1
 
 
 #
