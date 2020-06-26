@@ -25,6 +25,7 @@ import pinDef  # our own pin definition module
 import signal  # for nice exit
 import sys  # for nice exit
 import subprocess
+import os  # used for systemd related ops
 try:
     import sdnotify
 except ImportError:
@@ -72,6 +73,11 @@ def cleanup():
     except Exception as e:
         l.log("WARN", "Unable to stop PiGPIO conenction", e)
         pass
+
+    # systemd out
+    notify = sdnotify.SystemdNotifier()
+    notify.notify("READY=0")
+
     # log
     l.log("ERRR", "program shutdown")
 
@@ -80,7 +86,8 @@ def cleanup():
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
 def sigint_handler(sig, frame):
-    print()  # So the logger line is in line with the other logger lines
+    global notify
+    notify.notify("STOPPING=1")
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
     sys.exit(0)
 
@@ -88,8 +95,11 @@ def sigint_handler(sig, frame):
 # SIGHUP handler
 # to reload tokens
 def sighup_handler(sig, frame):
+    global notify
+    notify.notify("RELOADING=1")
     l.log("NOTE", "SIGHUP received, will reload tokens")
     tokens.getAllowedTokens()
+    notify.notify("READY=1")
     return
 
 
@@ -97,9 +107,19 @@ def sighup_handler(sig, frame):
 # initialisation
 #
 def init():
+    # get our run mode - find out if daemon
+    global runMode
+    for i in sys.argv:
+        if i == "--daemon":
+            runMode = "daemon"
+        else:
+            runMode = "normal"
+    if os.environ.get("LAUNCHED_BY_SYSTEMD") == "1":
+        runMode = "daemon"
+
     # start logging
     global l
-    l = logging.logger()
+    l = logging.logger(runMode=runMode)
     l.log("NOTE", "DIYAC starting")
 
     # stuff for a nice clean exit
@@ -166,7 +186,6 @@ def init():
     global cb1, cb2, cb3, cb4
     cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
     cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
-
     cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
     cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
 
@@ -177,14 +196,15 @@ def init():
 
     global keepAliveCounter
     keepAliveCounter = 1
-
     # state ready
+    global notify
     notify = sdnotify.SystemdNotifier()
     notify.notify("READY=1")
-    l.log("INFO", "DIYAC running")
+    l.log("NOTE", "DIYAC running")
 
 
 def keepAlive():
+    global notify
     global keepAliveCounter
     while True:
         time.sleep(1)
@@ -193,6 +213,7 @@ def keepAlive():
         # Don't spam the console or log file - only log every tenth hit of keep alive
         if keepAliveCounter == 10:
             l.log("DBUG", "Bopity - Program still running OK")
+            notify.notify("WATCHDOG=1")
             keepAliveCounter = 1
         else:
             keepAliveCounter += 1

@@ -109,7 +109,12 @@ class logger:
     ]
     settings = False
 
-    def __init__(self, settings=False):
+    def __init__(self, settings=False, runMode="normal"):
+        # run mode - stop output to display
+        self.runMode = runMode
+        if self.runMode == "daemon":
+            self.displayLevel = "NONE"
+
         # if there's no settings, only use defaults
         if settings is False:
             self.log("INFO", "Logger started without settings, will use defaults")
@@ -159,6 +164,11 @@ class logger:
         #  if not exist - NONE
         #  make sure it's in the allowed list
         #
+
+        # if running as a daemon - none
+        if self.runMode == "daemon":
+            self.displayLevel = "NONE"
+            return
 
         # check if colour enabled
         try:
