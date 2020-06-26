@@ -88,6 +88,7 @@ def cleanup():
 def sigint_handler(sig, frame):
     global notify
     notify.notify("STOPPING=1")
+    print()
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
     sys.exit(0)
 
