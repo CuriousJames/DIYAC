@@ -91,8 +91,8 @@ class outputHandler:
             pi.write(self.pinDef.pins["readerLed"], 1)
             pi.write(self.pinDef.pins["readerBuzz"], 1)
             pi.write(self.pinDef.pins["piActiveLed"], 1)
-        except:
-            self.logger.log("ERRR", "There was an issue setting output pins")
+        except Exception as e:
+            self.logger.log("ERRR", "There was an issue setting output pins", e)
 
         # get settings
         settingsToGet = ["doorOpenTime", "doorbellCcTime"]
@@ -100,7 +100,8 @@ class outputHandler:
             for s in settingsToGet:
                 try:
                     self.settings.allSettings["outputHandling"][s]
-                except:
+                except Exception as e:
+                    self.logger.log("WARN", "unable to read setting", e)
                     pass
                 else:
                     self.params[s] = self.settings.allSettings["outputHandling"][s]
@@ -116,6 +117,7 @@ class outputHandler:
             self.piActiveLed = "on"
             self.pi.write(self.pinDef.pins["piActiveLed"], 1)
         return
+
     #
     # open and close the door
     # this is for when a token has been read and approved

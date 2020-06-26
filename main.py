@@ -64,12 +64,13 @@ def cleanup():
     # close the door
     try:
         outH.doorState("closed")
-    except:
-        l.log("WARN", "Unable to close the door")
+    except Exception as e:
+        l.log("WARN", "Unable to close the door", e)
     # release gpio resources
     try:
         pi.stop()
-    except:
+    except Exception as e:
+        l.log("WARN", "Unable to stop PiGPIO conenction", e)
         pass
     # log
     l.log("ERRR", "program shutdown")
