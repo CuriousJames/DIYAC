@@ -182,9 +182,10 @@ def init():
 
 def keepAlive():
     while True:
-        time.sleep(9999)
+        time.sleep(1)
         # Just keeping the python fed (slithering)
-        l.log("INFO", "boppity")
+        l.log("DBUG", "boppity")
+        outH.switchPiActiveLed()
 
 
 #

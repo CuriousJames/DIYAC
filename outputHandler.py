@@ -80,6 +80,7 @@ class outputHandler:
         self.logger = logger
         self.pi = pi
         self.pinDef = pinDef
+        self.piActiveLed = "on"
 
         # set some outputs
         try:
@@ -107,6 +108,14 @@ class outputHandler:
             # done
         return
 
+    def switchPiActiveLed(self):
+        if self.piActiveLed == "on":
+            self.piActiveLed = "off"
+            self.pi.write(self.pinDef.pins["piActiveLed"], 0)
+        elif self.piActiveLed == "off":
+            self.piActiveLed = "on"
+            self.pi.write(self.pinDef.pins["piActiveLed"], 1)
+        return
     #
     # open and close the door
     # this is for when a token has been read and approved
