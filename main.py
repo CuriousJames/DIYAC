@@ -35,6 +35,7 @@ except ImportError:
     print("pip3 install sdnotify\n")
     exit()
 
+
 #
 # file synopsis
 #
