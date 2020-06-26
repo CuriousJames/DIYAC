@@ -280,9 +280,9 @@ class inputHandler:
         if self.numpadLastInputTime + self.params["overspeedThresholdTime"] < timeNow:
             return "no change"
 
-        # lets fuckin lock it oot
+        # lets lock it oot
         if self.lockout["state"] != "locked":
-            lockoutThread = threading.Thread(target=self.lockoutThreadFunc, args=("overspeed",))
+            lockoutThread = threading.Thread(name='lockoutThread', target=self.lockoutThreadFunc, args=("overspeed",))
             lockoutThread.start()
 
         # done
