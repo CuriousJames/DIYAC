@@ -35,12 +35,12 @@ The hard way (hopefully there will be a script to do this and more soon!)
 
 1. If '/home/pi/diyac' IS your diyac folder location:
      1. `sudo systemctl link /home/pi/diyac/diyac.service`
-     2. `sudo reboot`
 2. If '/home/pi/diyac' is NOT your diyac folder location:
      1. change the 'ExecStart' line in 'diyac.service' to 'ExecStart=/usr/bin/python3 /your/diyac/folder/location/main.py'
      2. `sudo systemctl link /your/diyac/folder/location/diyac.service`
-3. sudo reboot
-4. Done - The service will now run on startup of the Pi
+4. `sudo systemctl enable diyac.service`
+5. `sudo reboot`
+6. Done - The service will now run on startup of the Pi
 
 ## Settings ##
 
