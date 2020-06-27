@@ -74,6 +74,11 @@ Systemd integration - https://www.freedesktop.org/software/systemd/man/systemd.s
 
 ## Installing the service ##
 The hard way (hopefully there will be a script to do this and more soon!)
-1. `sudo systemctl link /installation/path/diyac.service`
-2. `sudo systemctl enable diyac.service`
-3. `sudo systemctl start diyac.service`
+* If '/home/pi/diyac' IS your diyac folder location:
+1. `sudo systemctl link /home/pi/diyac/diyac.service`
+2. `sudo reboot`
+* If '/home/pi/diyac' is NOT your diyac folder location:
+1. If '/home/pi/diyac' is NOT your diyac folder location you must change the 'ExecStart' line to 'ExecStart=/usr/bin/python3 /your/diyac/folder/location/main.py'
+2. If '/home/pi/diyac' IS your diyac folder location: `sudo systemctl link /your/diyac/folder/location/diyac.service`
+3. `sudo reboot`
+* The service will now run on startup of the Pi
