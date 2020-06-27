@@ -78,7 +78,7 @@ def cleanup():
     notify.notify("READY=0")
 
     # log
-    l.log("ERRR", "program shutdown")
+    l.log("ERRR", "Program shutdown cleanly")
     sys.exit(0)
 
 
@@ -86,11 +86,13 @@ def cleanup():
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
 def sigInt_handler(sig, frame):
-    global notify
-    notify.notify("STOPPING=1")
+    global flagExit
+    # No need to notify system - as this should only be called
+    # only from cmdline running of the program
     print()
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
-    cleanup()
+    flagExit = True
+    return
 
 
 #
@@ -103,8 +105,8 @@ def sigTerm_handler(sig, frame):
     # so inhibit the subsequent signals
     if flagExit is False:
         notify.notify("STOPPING=1")
-        flagExit = True
         l.log("NOTE", "SIGTERM - Service Stop received, will exit")
+        flagExit = True
     return
 
 
