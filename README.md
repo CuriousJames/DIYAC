@@ -74,6 +74,6 @@ Systemd integration - https://www.freedesktop.org/software/systemd/man/systemd.s
 
 ## Installing the service ##
 The hard way (hopefully there will be a script to do this and more soon!)
-1: sudo systemctl link /installation/path/diyac.service
-2: sudo systemctl enable diyac.service
-3: sudo systemctl start diyac.service
+1. `sudo systemctl link /installation/path/diyac.service`
+2. `sudo systemctl enable diyac.service`
+3. `sudo systemctl start diyac.service`
