@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import time
-import atexit
 import threading
 import logging  # our own logging module
 import inputHandler  # our own input handling module
@@ -64,7 +63,7 @@ def cleanup():
 
     # close the door
     try:
-        outH.doorState("closed")
+        outH.setDoor("closed")
     except Exception as e:
         l.log("WARN", "Unable to close the door", e)
     # release gpio resources
@@ -80,25 +79,41 @@ def cleanup():
 
     # log
     l.log("ERRR", "program shutdown")
+    sys.exit(0)
 
 
 #
 # exit from sigint
 #  allows for nice logging of exit by ctrl-c
-def sigint_handler(sig, frame):
+def sigInt_handler(sig, frame):
     global notify
     notify.notify("STOPPING=1")
     print()
     l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
-    sys.exit(0)
+    cleanup()
+
+
+#
+# exit from sigterm
+#  allows for nice logging of exit by service stop
+def sigTerm_handler(sig, frame):
+    global notify
+    global flagExit
+    # For some reason systemctl sends the sigterm singal at least twice
+    # so inhibit the subsequent signals
+    if flagExit is False:
+        notify.notify("STOPPING=1")
+        flagExit = True
+        l.log("NOTE", "SIGTERM - Service Stop received, will exit")
+    return
 
 
 # SIGHUP handler
 # to reload tokens
-def sighup_handler(sig, frame):
+def sigHup_handler(sig, frame):
     global notify
     notify.notify("RELOADING=1")
-    l.log("NOTE", "SIGHUP received, will reload tokens")
+    l.log("NOTE", "SIGHUP - Service Reload received, will reload tokens")
     tokens.getAllowedTokens()
     notify.notify("READY=1")
     return
@@ -110,6 +125,8 @@ def sighup_handler(sig, frame):
 def init():
     # get our run mode - find out if daemon
     global runMode
+    global flagExit
+    flagExit = False
     for i in sys.argv:
         if i == "--daemon":
             runMode = "daemon"
@@ -124,9 +141,9 @@ def init():
     l.log("NOTE", "DIYAC starting")
 
     # stuff for a nice clean exit
-    atexit.register(cleanup)
-    signal.signal(signal.SIGINT, sigint_handler)
-    signal.signal(signal.SIGHUP, sighup_handler)
+    signal.signal(signal.SIGINT, sigInt_handler)
+    signal.signal(signal.SIGTERM, sigTerm_handler)
+    signal.signal(signal.SIGHUP, sigHup_handler)
 
     # get all the settings
     s = settingsHandler.settingsHandler(l)
@@ -202,12 +219,15 @@ def init():
     notify = sdnotify.SystemdNotifier()
     notify.notify("READY=1")
     l.log("NOTE", "DIYAC running")
+    import getpass
+    l.log("DBUG", "Running program as", getpass.getuser())
 
 
 def keepAlive():
     global notify
     global keepAliveCounter
-    while True:
+    global flagExit
+    while not flagExit:
         time.sleep(1)
         # Just keeping the python fed (slithering)
         outH.switchPiActiveLed()
@@ -218,6 +238,8 @@ def keepAlive():
             keepAliveCounter = 1
         else:
             keepAliveCounter += 1
+    # Time to cleanup just before the program shuts down
+    cleanup()
 
 
 #

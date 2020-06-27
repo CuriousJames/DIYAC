@@ -9,7 +9,7 @@ ExecStart=/usr/bin/python3 /home/pi/diyac/main.py
 # Command to reload the allowedTokens file
 ExecReload=/bin/kill -HUP $MAINPID
 # Command for stopping
-ExecStop=/bin/kill -INT $MAINPID
+ExecStop=/bin/kill -TERM $MAINPID
 
 # Disable Python's buffering of STDOUT and STDERR, so that output from the
 # service shows up immediately in systemd's logs
@@ -18,7 +18,7 @@ Environment=PYTHONUNBUFFERED=1
 Environment=LAUNCHED_BY_SYSTEMD=1
 TimeoutStartSec=5
 TimeoutStopSec=5
-WatchdogSec=14
+WatchdogSec=12
 WatchdogSignal=SIGINT
 
 # Automatically restart the service if it crashes
