@@ -17,14 +17,14 @@ try:
 except ImportError:
     print("*** sdnotify module not installed - this is required ***\n")
     print("Please try this to install:")
-    print("sudo apt-get install python-pip")
-    print("pip3 install sdnotify\n")
+    print("sudo apt-get update && sudo apt-get install python3-pip -y && sudo pip3 install sdnotify")
     exit()
 try:
     import pigpio
 except ImportError:
     print("*** PiGPIO not found - please run the following command to install it ***")
-    print("sudo apt-get install pigpio python-pigpio python3-pigpio\n")
+    print("sudo apt-get update && sudo apt-get install pigpio python-pigpio python3-pigpio\n")
+    exit()
 try:
     import wiegand
 except ImportError:

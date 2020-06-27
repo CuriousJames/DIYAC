@@ -10,6 +10,7 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
 * Wiegand.py put in the root directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
 * Enable PiGPIO on the Pi (just do this once and it will start automatically on boot) `sudo systemctl enable pigpiod`
 * allow sudo group to run systemctl start pigpiod without password
+* install pip3 `sudo apt-get update && sudo apt-get install python3-pip`
 * install python sdnotify `pip3 install sdnotify`
 ## Settings ##
 - root - str - optional, default to where reader.py is - path to project root
