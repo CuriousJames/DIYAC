@@ -1,19 +1,5 @@
 #!/usr/bin/env python
 import time
-try:
-    import pigpio
-except ImportError:
-    print("*** PiGPIO not found - please run the following command to install it ***")
-    print("sudo apt-get install pigpio python-pigpio python3-pigpio\n")
-try:
-    import wiegand
-except ImportError:
-    print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
-    print("This should do the trick, assuming you're in the root directory now:")
-    print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
-    print("unzip wiegand_py.zip")
-    print("rm -rf wiegand_old.py wiegand_py.zip\n")
-    exit()
 import atexit
 import threading
 import logging  # our own logging module
@@ -34,7 +20,20 @@ except ImportError:
     print("sudo apt-get install python-pip")
     print("pip3 install sdnotify\n")
     exit()
-
+try:
+    import pigpio
+except ImportError:
+    print("*** PiGPIO not found - please run the following command to install it ***")
+    print("sudo apt-get install pigpio python-pigpio python3-pigpio\n")
+try:
+    import wiegand
+except ImportError:
+    print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
+    print("This should do the trick, assuming you're in the root directory now:")
+    print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
+    print("unzip wiegand_py.zip")
+    print("rm -rf wiegand_old.py wiegand_py.zip\n")
+    exit()
 
 #
 # file synopsis
