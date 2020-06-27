@@ -16,9 +16,35 @@ import json  # for gettings settings and tokens
 #  __init__(settings, logger)
 #   store settigns and logger internally for later use
 #   run getAllowedTokens()
-#   getAllowedTokens()
 #
-
+#  getAllowedTokens()
+#   load tokens from file
+#   perform validity/sanity/other checks
+#   store tokens
+#
+#  loadFromFile()
+#   load tokens in from file specified in settings
+#
+#  moveValueToToked()
+#   for backwards compatibility
+#   any tokens that are stored under "value" will be moved under "token"
+#
+#  sanitiseAllowedTokens
+#   remove any entries from allowedTokes that are not set or otherwise invalid
+#
+#  formatTokens()
+#   remove ":" and make lowercase
+#
+#  transformOverlengthTokens()
+#   for ultraligh and other tokens that are more than 4 bytes long
+#   becuase 24 bit wiegand won't return correct values
+#
+#  removeDuplicateTokens()
+#   does exactly what it says on the tin
+#
+#  checkToken(token, tokenType)
+#   return true if given token is in allowedTokens
+#   otherwise return false
 
 class tokenHandler:
     # vars
