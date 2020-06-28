@@ -15,7 +15,7 @@ import sys
 #
 # Functions:
 #
-#  __init__(settings, logger)
+#  __init__(systemHandler, settings, logger)
 #   setup the usable pin defs
 #   get from pcb version
 #   get from custom - this will overwrite any pcb defaults
@@ -96,9 +96,10 @@ class pinDef:
     #
     # function to get pins from settings
     #
-    def __init__(self, settings, logger):
+    def __init__(self, systemHandler, settings, logger):
 
         # internalise settings and logger
+        self.systemHandler = systemHandler
         self.logger = logger
         self.settings = settings
 
@@ -114,7 +115,7 @@ class pinDef:
             if self.pins[p] is None:
                 if p in criticalPins:
                     self.logger.log("ERRR", "Critical pin not defined", {"pin": p})
-                    sys.exit()
+                    self.systemHandler.quit(code=1, status="Failed - Critical pin not defined")
                 else:
                     self.logger.log("WARN", "pin not defined", {"pin": p})
 

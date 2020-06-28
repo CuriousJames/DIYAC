@@ -7,6 +7,7 @@ import outputHandler
 import tokenHandler  # our ouwn token hangling module
 import settingsHandler
 import pinDef  # our own pin definition module
+import systemHandler
 import signal  # for nice exit
 import sys  # for nice exit
 import subprocess
@@ -73,64 +74,20 @@ def cleanup():
         l.log("WARN", "Unable to stop PiGPIO conenction", e)
         pass
 
-    # systemd out
-    notify = sdnotify.SystemdNotifier()
-    notify.notify("READY=0")
-    notify.notify("ERRNO=7")
-    notify.notify("STATUS=FailNowCleaning")
-
-    # log
-    l.log("ERRR", "Program shutdown cleanly")
-    sys.exit(2)
-
-
-#
-# exit from sigint
-#  allows for nice logging of exit by ctrl-c
-def sigInt_handler(sig, frame):
-    global flagExit
-    # No need to notify system - as this should only be called
-    # only from cmdline running of the program
-    print()
-    l.log("NOTE", "SIGINT (CTRL-C) received, will exit")
-    flagExit = True
-    return
-
-
-#
-# exit from sigterm
-#  allows for nice logging of exit by service stop
-def sigTerm_handler(sig, frame):
-    global notify
-    global flagExit
-    # For some reason systemctl sends the sigterm singal at least twice
-    # so inhibit the subsequent signals
-    if flagExit is False:
-        notify.notify("STOPPING=1")
-        l.log("NOTE", "SIGTERM - Service Stop received, will exit")
-        flagExit = True
-    return
-
 
 # SIGHUP handler
 # to reload tokens
-def sigHup_handler(sig, frame):
-    global notify
-    notify.notify("RELOADING=1")
-    l.log("NOTE", "SIGHUP - Service Reload received, will reload tokens")
+def sigHup_callback():
     tokens.getAllowedTokens()
-    notify.notify("READY=1")
     return
+
 
 
 #
 # initialisation
 #
 def init():
-    # systemd notifier
-    global notify
-    notify = sdnotify.SystemdNotifier()
-
+    
     # exit flag
     global flagExit
     flagExit = False
@@ -150,13 +107,16 @@ def init():
     l = logging.logger(runMode=runMode)
     l.log("NOTE", "DIYAC starting")
 
-    # stuff for a nice clean exit
-    signal.signal(signal.SIGINT, sigInt_handler)
-    signal.signal(signal.SIGTERM, sigTerm_handler)
-    signal.signal(signal.SIGHUP, sigHup_handler)
+    # systemHandler
+    global sysH
+    sysH = systemHandler.systemHandler(l)
+    sysH.setup("sigInt", runQuit=True)
+    sysH.setup("sigTerm", runQuit=True)
+    sysH.setup("sigHup", sigHup_callback, runQuit=False)
+    sysH.setup("quit", cleanup)
 
     # get all the settings
-    s = settingsHandler.settingsHandler(l, notify)
+    s = settingsHandler.settingsHandler(sysH, l)
 
     # update the logger with new settings
     l.loadSettings(s)
@@ -177,30 +137,30 @@ def init():
         stat = subprocess.call("service pigpiod status > /dev/null", shell=True)
         if stat != 0:
             l.log("ERRR", "Unable to start pigpiod daemon")
-            sys.exit()
+            sysH.quit(code=1, status="Fail - PIGPIO not started and unable to start")
         else:
             l.log("INFO", "Starting pigpiod daemon successful")
     global pi
     pi = pigpio.pi()
     if not pi.connected:
         l.log("ERRR", "PiGPIO - Unable to connect")
-        exit()
+        sysH.quit(code=1, status="Failed - unable to connect to PIGPIOD")
 
     # set tokens
     global tokens
-    tokens = tokenHandler.tokenHandler(s, l)
+    tokens = tokenHandler.tokenHandler(sysH, s, l)
 
     # pin definitions
     global p
-    p = pinDef.pinDef(s, l)
+    p = pinDef.pinDef(sysH, s, l)
 
     # output handler (settings, logger, gpio, pins
     global outH
-    outH = outputHandler.outputHandler(s, l, pi, p)
+    outH = outputHandler.outputHandler(sysH, s, l, pi, p)
 
     # Input handler
     global inH
-    inH = inputHandler.inputHandler(s, l, tokens, outH)
+    inH = inputHandler.inputHandler(sysH, s, l, tokens, outH)
 
     pi.set_glitch_filter(p.pins["doorbellButton"], 100000)
     pi.set_glitch_filter(p.pins["doorSensor"], 50000)
@@ -222,36 +182,33 @@ def init():
     global w
     w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
 
-    global keepAliveCounter
-    keepAliveCounter = 1
-    
     # state ready
-    notify.notify("READY=1")
-    notify.notify("STATUS=Running")
+    sysH.notifyUp("READY=1")
+    sysH.notifyUp("STATUS=Running")
     l.log("NOTE", "DIYAC running")
     import getpass
     l.log("DBUG", "Running program as user", getpass.getuser())
 
 
 def keepAlive():
-    global notify
-    global keepAliveCounter
-    global flagExit
-    while not flagExit:
+    # init
+    global sysH
+    global outH
+    keepAliveCounter = 0
+    # GO!
+    while 1:
+        # wait
         time.sleep(1)
-        # Just keeping the python fed (slithering)
+        # flash
         outH.switchPiActiveLed()
-        # Don't spam the console or log file - only log every tenth hit of keep alive
+        # hit the systemd watchdog every 10 seconds
         if keepAliveCounter == 10:
-            l.log("DBUG", "Bopity - Program still running OK")
-            notify.notify("WATCHDOG=1")
+            #l.log("DBUG", "Bopity - Program still running OK")
+            sysH.notifyUp("WATCHDOG=1")
             keepAliveCounter = 1
         else:
             keepAliveCounter += 1
-    # Time to cleanup just before the program shuts down
-    cleanup()
-
-
+    return
 #
 # callback function that is hit whenever the GPIO changes
 def cbf(gpio, level, tick):

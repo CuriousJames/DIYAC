@@ -68,11 +68,12 @@ class inputHandler:
     #
     # init
     # this is mostly to ge lockout bits from settings
-    def __init__(self, settings, logger, tokens, outputHandler):
+    def __init__(self, systemHandler, settings, logger, tokens, outputHandler):
         # get logger
         # global l
 
         # internalise settings, tokens and logger
+        self.systemHandler = systemHandler
         self.settings = settings
         self.logger = logger
         self.tokens = tokens

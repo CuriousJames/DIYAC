@@ -18,7 +18,7 @@ import threading
 #
 # Functions:
 #
-#  __init__(settings, logger, pi, pinDef)
+#  __init__(systemHandler, settings, logger, pi, pinDef)
 #   store objects for later use
 #   set initial state of some outputs
 #   get parameters from settings
@@ -74,8 +74,9 @@ class outputHandler:
     #  internalise some things
     #  set initial state of some outputs
     #  get anything useful from settings
-    def __init__(self, settings, logger, pi, pinDef):
+    def __init__(self, systemHandler, settings, logger, pi, pinDef):
         # internalise the stuff
+        self.systemHandler = systemHandler
         self.settings = settings
         self.logger = logger
         self.pi = pi

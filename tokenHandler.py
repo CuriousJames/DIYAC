@@ -13,7 +13,7 @@ import json  # for gettings settings and tokens
 #
 # Functions:
 #
-#  __init__(settings, logger)
+#  __init__(systemHandler, settings, logger)
 #   store settigns and logger internally for later use
 #   run getAllowedTokens()
 #
@@ -54,7 +54,8 @@ class tokenHandler:
     # initialisation function
     # just sets vars for settings and logger
     #
-    def __init__(self, settings, logger):
+    def __init__(self, systemHandler, settings, logger):
+        self.systemHandler = systemHandler
         self.settings = settings
         self.logger = logger
         self.getAllowedTokens()
