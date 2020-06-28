@@ -97,6 +97,13 @@ class inputHandler:
                 self.logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
                 self.params[s] = self.settings.allSettings["inputHandling"][s]
 
+        # initialise some pins for pullup and glitchfilter
+        pi.set_glitch_filter(p.pins["doorbellButton"], 100000)
+        pi.set_glitch_filter(p.pins["doorSensor"], 50000)
+
+        pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
+        pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
+
         # done
         return
 

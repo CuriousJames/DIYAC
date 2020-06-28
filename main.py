@@ -162,12 +162,6 @@ def init():
     global inH
     inH = inputHandler.inputHandler(sysH, s, l, tokens, outH)
 
-    pi.set_glitch_filter(p.pins["doorbellButton"], 100000)
-    pi.set_glitch_filter(p.pins["doorSensor"], 50000)
-
-    pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
-    pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
-
     time.sleep(0.1)
 
     # register these GPIO pins to run cbf on rising or falling edge
