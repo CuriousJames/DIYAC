@@ -22,12 +22,22 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
 
 ## Pre-requisits ##
 
-- Raspberry Pi (ideally 2 or up)
-- Wiegand.py put in the root directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
-- Enable PiGPIO on the Pi (just do this once and it will start automatically on boot) `sudo systemctl enable pigpiod`
-- allow sudo group to run systemctl start pigpiod without password
-- install pip3 `sudo apt-get update && sudo apt-get install python3-pip`
-- install python sdnotify `pip3 install sdnotify`
+- Hardware
+  - Raspberry Pi (ideally 2 or up)
+- Software
+  - Wiegand.py put in the project directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
+    - `wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip`
+    - `unzip wiegand_py.zip`
+  - Enable PiGPIO on the Pi (just do this once and it will start automatically on boot)
+    - `sudo systemctl enable pigpiod`
+  - SD Notify
+    - with pip3
+      - install pip3 `sudo apt-get update && sudo apt-get install python3-pip`
+      - install python sdnotify `pip3 install sdnotify`
+    - with apt
+      - `sudo apt install python3-sdnotify`
+- Config
+  - allow sudo group to run systemctl start pigpiod without password
 
 ## Installing the service ##
 
