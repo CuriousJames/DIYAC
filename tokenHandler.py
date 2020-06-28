@@ -315,7 +315,7 @@ class tokenHandler:
     def checkToken(self, rx, rxType):
         if self.allowedTokens is False:
             self.logger.log("INFO", "ACCESS DENIED - no available tokens list")
-            return
+            return {"allow": False}
 
         for t in self.allowedTokens:
             if t["type"] == rxType:
