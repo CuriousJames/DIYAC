@@ -6,3 +6,4 @@ Experimental/
 settings.json
 logFile
 *.pyc
+.mypy_cache/
