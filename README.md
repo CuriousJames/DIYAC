@@ -122,6 +122,13 @@ Log levels are as follows:
 
 All levels are equivalent to linux syslog levels.
 
+# code notes #
+
+## systemHandler ##
+
+Because systemHandler is designed to be used by various things, it's a bit flexible.
+Importantly, the quit function and signal handlers can be set up with a callback, so that project specific instructions can be defined in the main body of code without having to change anything within systemHandler (hopefully)
+
 ## Resources ##
 
 Systemd integration - <https://www.freedesktop.org/software/systemd/man/systemd.service.html>
