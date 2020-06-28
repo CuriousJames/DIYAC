@@ -390,19 +390,18 @@ class logger:
     # see if the incoming message is of sufficient level to log
     #
     def checkLevel(self, destination, incomingLevel):
-        # sanity check
-        if destination != "syslog" and destination != "display" and destination != "file":
-            return False
-
         # syslog
         if destination == "syslog":
             currentLevelNumber = self.inList(self.syslogLevel, self.levelTable)
         # display
-        if destination == "display":
+        elif destination == "display":
             currentLevelNumber = self.inList(self.displayLevel, self.levelTable)
         # file
-        if destination == "file":
+        elif destination == "file":
             currentLevelNumber = self.inList(self.fileLevel, self.levelTable)
+        # sanity check
+        else:
+            return False
 
         # get number for incoming
         incomingLevelNumber = self.inList(incomingLevel, self.levelTable)
@@ -410,9 +409,9 @@ class logger:
         # compare
         if incomingLevelNumber >= currentLevelNumber:
             return True
-
         # done, and we don't want to log the message to this destination
-        return False
+        else:
+            return False
 
     #
     # format data into a nice string
@@ -425,16 +424,19 @@ class logger:
                 data = json.dumps(data)
             except:
                 data = format(data)
-        if destination == "display":
+        elif destination == "display":
             try:
                 data = json.dumps(data)
             except:
                 data = format(data)
-        if destination == "file":
+        elif destination == "file":
             try:
                 data = json.dumps(data)
             except:
                 data = format(data)
+        else:
+            data = False
+            self.log("WARN", "Logging - Unable to format data - destination not specified")
         return data
 
     #
