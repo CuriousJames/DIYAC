@@ -60,6 +60,7 @@ except ImportError:
 # makes things clean at exit
 #
 def cleanup():
+    # log
     l.log("DBUG", "cleanup started")
 
     # close the door
@@ -67,12 +68,22 @@ def cleanup():
         outH.setDoor("closed")
     except Exception as e:
         l.log("WARN", "Unable to close the door", e)
+        
+    # turn off the active led
+    try:
+        outH.switchPiActiveLed("off")
+    except Exception as e:
+        l.log("WARN", "Unable to turn off active led", e)
+        
     # release gpio resources
     try:
         pi.stop()
     except Exception as e:
         l.log("WARN", "Unable to stop PiGPIO conenction", e)
         pass
+
+    # done
+    return
 
 
 # SIGHUP handler

@@ -110,7 +110,19 @@ class outputHandler:
             # done
         return
 
-    def switchPiActiveLed(self):
+    def switchPiActiveLed(self, state=False):
+        # if state is specified
+        if state != False:
+            if state == "on":
+                self.piActiveLed = "on"
+                self.pi.write(self.pinDef.pins["piActiveLed"], 1)
+                pass
+            if state == "off":
+                self.piActiveLed = "off"
+                self.pi.write(self.pinDef.pins["piActiveLed"], 0)
+                pass
+            return
+        # state not specified, do a toggle
         if self.piActiveLed == "on":
             self.piActiveLed = "off"
             self.pi.write(self.pinDef.pins["piActiveLed"], 0)
