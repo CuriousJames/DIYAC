@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import time
 import threading
+import pigpio
 
 #
 # Input Handler
@@ -68,7 +69,7 @@ class inputHandler:
     #
     # init
     # this is mostly to ge lockout bits from settings
-    def __init__(self, systemHandler, settings, logger, tokens, outputHandler):
+    def __init__(self, systemHandler, settings, logger, tokens, outputHandler, pi, pinDef):
         # get logger
         # global l
 
@@ -78,6 +79,8 @@ class inputHandler:
         self.logger = logger
         self.tokens = tokens
         self.outputHandler = outputHandler
+        self.pi = pi
+        self.pinDef = pinDef
 
         # see if settings are set
         if self.settings.allSettings is False:
@@ -98,11 +101,11 @@ class inputHandler:
                 self.params[s] = self.settings.allSettings["inputHandling"][s]
 
         # initialise some pins for pullup and glitchfilter
-        pi.set_glitch_filter(p.pins["doorbellButton"], 100000)
-        pi.set_glitch_filter(p.pins["doorSensor"], 50000)
+        self.pi.set_glitch_filter(self.pinDef.pins["doorbellButton"], 100000)
+        self.pi.set_glitch_filter(self.pinDef.pins["doorSensor"], 50000)
 
-        pi.set_pull_up_down(p.pins["doorbellButton"], pigpio.PUD_UP)
-        pi.set_pull_up_down(p.pins["doorSensor"], pigpio.PUD_UP)
+        self.pi.set_pull_up_down(self.pinDef.pins["doorbellButton"], pigpio.PUD_UP)
+        self.pi.set_pull_up_down(self.pinDef.pins["doorSensor"], pigpio.PUD_UP)
 
         # done
         return

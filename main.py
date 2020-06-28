@@ -160,7 +160,7 @@ def init():
 
     # Input handler
     global inH
-    inH = inputHandler.inputHandler(sysH, s, l, tokens, outH)
+    inH = inputHandler.inputHandler(sysH, s, l, tokens, outH, pi, p)
 
     time.sleep(0.1)
 
