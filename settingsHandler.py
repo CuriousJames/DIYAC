@@ -10,9 +10,10 @@ class settingsHandler:
     allSettings = False
 
     # load all settings on initialisation
-    def __init__(self, logger=False):
+    def __init__(self, logger=False, notify=False):
         # sort out the logger
         self.logger = logger
+        self.notify = notify
 
         # load the stuff
         successfulLoad = self.loadFromFile()
@@ -20,9 +21,13 @@ class settingsHandler:
         # see if it worked
         if successfulLoad is False:
             self.log("ERRR", "Initial settings load was not successful, will stop execution")
+            if self.notify is not False:
+                self.notify.notify("STATUS=Failed to load settings")
             sys.exit(1)
         if self.allSettings is False:
             self.log("ERRR", "Unexpected error while initialising settigns, will stop execution")
+            if self.notify is not False:
+                self.notify.notify("STATUS=Failed to load settings")
             sys.exit(1)
 
         # work out root - set if unset

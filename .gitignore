@@ -10,3 +10,4 @@ logFile
 *.pyc
 .mypy_cache/
 .pylintrc
+diyac.service

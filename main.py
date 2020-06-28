@@ -76,10 +76,12 @@ def cleanup():
     # systemd out
     notify = sdnotify.SystemdNotifier()
     notify.notify("READY=0")
+    notify.notify("ERRNO=7")
+    notify.notify("STATUS=FailNowCleaning")
 
     # log
     l.log("ERRR", "Program shutdown cleanly")
-    sys.exit(0)
+    sys.exit(2)
 
 
 #
@@ -125,10 +127,16 @@ def sigHup_handler(sig, frame):
 # initialisation
 #
 def init():
-    # get our run mode - find out if daemon
-    global runMode
+    # systemd notifier
+    global notify
+    notify = sdnotify.SystemdNotifier()
+
+    # exit flag
     global flagExit
     flagExit = False
+
+    # get our run mode - find out if daemon
+    global runMode
     for i in sys.argv:
         if i == "--daemon":
             runMode = "daemon"
@@ -148,7 +156,7 @@ def init():
     signal.signal(signal.SIGHUP, sigHup_handler)
 
     # get all the settings
-    s = settingsHandler.settingsHandler(l)
+    s = settingsHandler.settingsHandler(l, notify)
 
     # update the logger with new settings
     l.loadSettings(s)
@@ -216,13 +224,13 @@ def init():
 
     global keepAliveCounter
     keepAliveCounter = 1
+    
     # state ready
-    global notify
-    notify = sdnotify.SystemdNotifier()
     notify.notify("READY=1")
+    notify.notify("STATUS=Running")
     l.log("NOTE", "DIYAC running")
     import getpass
-    l.log("DBUG", "Running program as", getpass.getuser())
+    l.log("DBUG", "Running program as user", getpass.getuser())
 
 
 def keepAlive():
