@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import signal  # for nice exit
-import sdnotify  # for systemd
+try:
+    import sdnotify  # For systemd
+except ImportError:
+    l.log("ERRR", "sdnotify module not installed - this is required\nPlease try this to install:\nsudo apt-get update && sudo apt-get install python3-pip -y && sudo pip3 install sdnotify")
+    exit()
 
 #
 # System Handler
