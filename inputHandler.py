@@ -93,8 +93,8 @@ class inputHandler:
         for s in settingsToGet:
             try:
                 self.settings.allSettings["inputHandling"][s]
-            except Exception as e:
-                #self.logger.log("WARN", "unable to read setting", e)
+            except Exception:
+                # self.logger.log("WARN", "unable to read setting", e)
                 pass
             else:
                 self.logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})

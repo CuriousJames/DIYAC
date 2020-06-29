@@ -46,6 +46,7 @@ import json  # for gettings settings and tokens
 #   return true if given token is in allowedTokens
 #   otherwise return false
 
+
 class tokenHandler:
     # vars
     allowedTokens = False

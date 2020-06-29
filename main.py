@@ -8,7 +8,6 @@ import tokenHandler  # our ouwn token hangling module
 import settingsHandler
 import pinDef  # our own pin definition module
 import systemHandler
-import signal  # for nice exit
 import sys  # for nice exit
 import subprocess
 import os  # used for systemd related ops
@@ -68,13 +67,13 @@ def cleanup():
         outH.setDoor("closed")
     except Exception as e:
         l.log("WARN", "Unable to close the door", e)
-        
+
     # turn off the active led
     try:
         outH.switchPiActiveLed("off")
     except Exception as e:
         l.log("WARN", "Unable to turn off active led", e)
-        
+
     # release gpio resources
     try:
         pi.stop()
@@ -93,12 +92,10 @@ def sigHup_callback():
     return
 
 
-
 #
 # initialisation
 #
 def init():
-    
     # exit flag
     global flagExit
     flagExit = False
@@ -208,12 +205,14 @@ def keepAlive():
         outH.switchPiActiveLed()
         # hit the systemd watchdog every 10 seconds
         if keepAliveCounter == 10:
-            #l.log("DBUG", "Bopity - Program still running OK")
+            # l.log("DBUG", "Bopity - Program still running OK")
             sysH.notifyUp("WATCHDOG=1")
             keepAliveCounter = 1
         else:
             keepAliveCounter += 1
     return
+
+
 #
 # callback function that is hit whenever the GPIO changes
 def cbf(gpio, level, tick):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os  # useful for file operations
-import sys
 import json  # for gettings settings and tokens
 
 

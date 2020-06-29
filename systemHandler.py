@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import signal  # for nice exit
-import sys  # for nice exit
-import sdnotify # for systemd
+import sdnotify  # for systemd
 
 #
 # System Handler
@@ -60,7 +59,6 @@ import sdnotify # for systemd
 #   just does an sdNotify
 
 
-
 class systemHandler:
 
     # vars
@@ -100,26 +98,26 @@ class systemHandler:
     def setup(self, type, _callback=False, code=False, runQuit=False):
         # not a switch statment
         if type == "quit":
-            self.logger.log("DBUG", "Setup for quit function", {"callback":_callback, "code":code})
+            self.logger.log("DBUG", "Setup for quit function", {"callback": _callback, "code": code})
             self.quitFunc["callback"] = _callback
             self.quitFunc["code"] = code
             pass
         elif type == "sigInt":
-            self.logger.log("DBUG", "Setup for sigInt", {"callback":_callback, "code":code, "runQuit":runQuit})
+            self.logger.log("DBUG", "Setup for sigInt", {"callback": _callback, "code": code, "runQuit": runQuit})
             signal.signal(signal.SIGINT, self.sigIntHandler)
             self.sigInt["callback"] = _callback
             self.sigInt["code"] = code
             self.sigInt["runQuit"] = runQuit
             pass
         elif type == "sigTerm":
-            self.logger.log("DBUG", "Setup for sigTerm", {"callback":_callback, "code":code, "runQuit":runQuit})
+            self.logger.log("DBUG", "Setup for sigTerm", {"callback": _callback, "code": code, "runQuit": runQuit})
             signal.signal(signal.SIGTERM, self.sigTermHandler)
             self.sigTerm["callback"] = _callback
             self.sigTerm["code"] = code
             self.sigTerm["runQuit"] = runQuit
             pass
         elif type == "sigHup":
-            self.logger.log("DBUG", "Setup for sigHup", {"callback":_callback, "code":code, "runQuit":runQuit})
+            self.logger.log("DBUG", "Setup for sigHup", {"callback": _callback, "code": code, "runQuit": runQuit})
             signal.signal(signal.SIGHUP, self.sigHupHandler)
             self.sigHup["callback"] = _callback
             self.sigHup["code"] = code
@@ -198,7 +196,7 @@ class systemHandler:
             self.notify.notify("READY=1")
         # done
         return
-    
+
     def quit(self, code, status=False, logLevel=False, logMessage=False, logData=False):
         # run the callback
         if self.quitFunc["callback"] is not False:
@@ -235,7 +233,7 @@ class systemHandler:
             exit(code)
             pass
         return
-    
+
     def notifyUp(self, message):
         self.notify.notify(message)
         return

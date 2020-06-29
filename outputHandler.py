@@ -112,7 +112,7 @@ class outputHandler:
 
     def switchPiActiveLed(self, state=False):
         # if state is specified
-        if state != False:
+        if state is not False:
             if state == "on":
                 self.piActiveLed = "on"
                 self.pi.write(self.pinDef.pins["piActiveLed"], 1)
