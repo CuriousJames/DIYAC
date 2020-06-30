@@ -12,3 +12,4 @@ logFile
 .pylintrc
 diyac.service
 *.org
+test/*
