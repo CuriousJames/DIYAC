@@ -43,8 +43,8 @@ class settingsHandler:
         except OSError as err:
             self.log("ERRR", "os error while opening settings file", err)
             return (False)
-        except:
-            self.log("ERRR", "unknown error while opening settings file")
+        except Exception as err:
+            self.log("ERRR", "unknown error while opening settings file", err)
             return(False)
 
         # read + decode
@@ -54,8 +54,8 @@ class settingsHandler:
             self.log("ERRR", "JSON Decode error while reading settings file", err)
 
             return(False)
-        except:
-            self.log("ERRR", "unknown error while reading settings file")
+        except Exception as err:
+            self.log("ERRR", "unknown error while reading settings file", err)
             return(False)
 
         # close
@@ -63,8 +63,8 @@ class settingsHandler:
             settingsFile.close()
         except OSError as err:
             self.log("ERRR", "os error while closing settings file", err)
-        except:
-            self.log("ERRR", "unknown error while closing settings file")
+        except Exception as err:
+            self.log("ERRR", "unknown error while closing settings file", err)
 
         return(True)
 
@@ -79,7 +79,7 @@ class settingsHandler:
         # otherwise, we're setting it
         try:
             self.allSettings["root"]
-        except:
+        except Exception:
             # print
             self.allSettings["root"] = root
 
