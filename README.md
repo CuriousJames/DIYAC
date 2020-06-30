@@ -61,6 +61,7 @@ This is the structure of the settings.json file:
 - root - str - optional, default to where reader.py is - path to project root
 - allowedTokens - obj
   - path - str - optional, default will not allow any entry - path to allowedTokens.json file, can be absolute or relative
+- wiegandLength - int - optional, default 34 - number of bits that the wiegand reader will spit out
 - modules - not used anymore
 - logging - obj
   - syslog - obj
