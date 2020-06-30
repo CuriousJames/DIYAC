@@ -11,3 +11,4 @@ logFile
 .mypy_cache/
 .pylintrc
 diyac.service
+*.org
