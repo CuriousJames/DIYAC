@@ -17,15 +17,7 @@ except ImportError:
     print("*** PiGPIO not found - please run the following command to install it ***")
     print("sudo apt-get update && sudo apt-get install pigpio python-pigpio python3-pigpio\n")
     exit()
-try:
-    import wiegand
-except ImportError:
-    print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
-    print("This should do the trick, assuming you're in the root directory now:")
-    print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
-    print("unzip wiegand_py.zip")
-    print("rm -rf wiegand_old.py wiegand_py.zip\n")
-    exit()
+
 
 #
 # file synopsis
@@ -171,12 +163,7 @@ def init():
     cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
     cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
     cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
-
-    # set the wiegand reading
-    # will call function wiegandCallback on receiving data
-    global w
-    w = wiegand.decoder(pi, p.pins["wiegand0"], p.pins["wiegand1"], inH.wiegandCallback)
-
+    
     # state ready
     sysH.notifyUp("READY=1")
     sysH.notifyUp("STATUS=Running")

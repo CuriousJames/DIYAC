@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 import time
 import threading
-import pigpio
+import pigpio # pigpio is started in main, but this is necessary here for pullup definitions
+try:
+    import wiegand
+except ImportError:
+    print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
+    print("This should do the trick, assuming you're in the root directory now:")
+    print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
+    print("unzip wiegand_py.zip")
+    print("rm -rf wiegand_old.py wiegand_py.zip\n")
+    exit()
 
 #
 # Input Handler
@@ -58,7 +67,7 @@ class inputHandler:
         "bruteforceThresholdAttempts": 3,
         "bruteforceThresholdTime": 20,
         "overspeedThresholdTime": 0.1,
-        "lockoutTime": 600,
+        "lockoutTime": 600
     }
     numpadState = "ready"
     inputBuffer = ""
@@ -106,6 +115,10 @@ class inputHandler:
 
         self.pi.set_pull_up_down(self.pinDef.pins["doorbellButton"], pigpio.PUD_UP)
         self.pi.set_pull_up_down(self.pinDef.pins["doorSensor"], pigpio.PUD_UP)
+
+        # set the wiegand reading
+        # will call function wiegandCallback on receiving data
+        w = wiegand.decoder(pi, self.pinDef.pins["wiegand0"], self.pinDef.pins["wiegand1"], self.wiegandCallback)
 
         # done
         return
@@ -354,7 +367,19 @@ class inputHandler:
             output = int(output, 2)  # change to integer - required for doing the change to hex
             output = format(output, '#010x')  # make hex string
             output = output[2:]  # trim "0x"
-            self.logger.log("DEBUG", "output from formatting", output)
+            self.logger.log("DBUG", "output from formatting", output)
+            self.checkInput(output, "card")
+        elif bits == 26:
+            # make into hex string
+            # see above
+            input = str(format(code, '#028b'))  # make binary string
+            input = input[3:]  # trim '0b' and first parity bit
+            input = input[:-1]  # trim last parity bit
+            output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
+            output = int(output, 2)  # change to integer - required for doing the change to hex
+            output = format(output, '#010x')  # make hex string
+            output = output[4:]  # trim "0x"
+            self.logger.log("DBUG", "output from formatting", output)
             self.checkInput(output, "card")
         elif bits == 4:
             # someone pressed a button

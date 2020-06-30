@@ -9,13 +9,17 @@ import json  # for gettings settings and tokens
 #  basically for getting, storing and comparing tokens
 #
 # Vars:
-#  allowedTokens - list of allowed tokens - default False
+#  allowedTokens - dict- list of allowed tokens - default False
+#  wiegandLength - int - number of bits that wiegand will read
 #
 # Functions:
 #
 #  __init__(systemHandler, settings, logger)
 #   store settigns and logger internally for later use
 #   run getAllowedTokens()
+#
+#  getWiegandLength()
+#   get from settings if the reader is 26 or 34 bit
 #
 #  getAllowedTokens()
 #   load tokens from file
@@ -39,6 +43,9 @@ import json  # for gettings settings and tokens
 #   for ultraligh and other tokens that are more than 4 bytes long
 #   becuase 24 bit wiegand won't return correct values
 #
+#  transformFor26()
+#   if wiegandLength is 26, trim the ends off all card tokens that are 8 chars long
+#
 #  removeDuplicateTokens()
 #   does exactly what it says on the tin
 #
@@ -50,16 +57,45 @@ import json  # for gettings settings and tokens
 class tokenHandler:
     # vars
     allowedTokens = False
+    wiegandLength = 36;
 
     #
     # initialisation function
     # just sets vars for settings and logger
     #
     def __init__(self, systemHandler, settings, logger):
+        # internalise everything
         self.systemHandler = systemHandler
         self.settings = settings
         self.logger = logger
+        self.getWiegandLength()
         self.getAllowedTokens()
+
+        # done
+        return
+
+    def getWiegandLength(self):
+        # see if it exists
+        try:
+            self.settings.allSettings["wiegandLength"]
+        except Exception as e:
+            return
+
+        # grab into tmp for quicker writing
+        tmp = self.settings.allSettings["wiegandLength"]
+
+        # check sanity
+        if tmp != 26 and tmp != 34:
+            self.logger.log("WARN", "Token handler: Incorrect value in settings file for wiegandLength", {"wiegandLength":tmp})
+            return
+
+        # it's sane, store it
+        self.wiegandLength = tmp
+        self.logger.log("DBUG", "Token handler: new setting", {"wiegandLength": self.wiegandLength})
+
+        # done
+        return
+            
 
     #
     # function to make var of allowed tokens
@@ -92,6 +128,7 @@ class tokenHandler:
         self.sanitiseAllowedTokens()
         self.formatTokens()
         self.transformOverlengthTokens()
+        self.transformFor26()
         self.removeDuplicateTokens()
         self.logger.log("DBUG", "AllowedTokens: list of tokens", self.allowedTokens)
         return
@@ -309,6 +346,28 @@ class tokenHandler:
 
         # done
         return
+
+    def transformFor26(self):
+        # make sure we've got tokens to act on
+        if self.allowedTokens is False:
+            return
+
+        # make sure we need to do this in the first place
+        if self.wiegandLength != 26:
+            return
+
+        # iterate
+        # if type is card and length is the length we want
+        for t in self.allowedTokens:
+            if t["type"] == "card" and len(t["token"]) == 8:
+                t["token"] = t["token"][0:6]
+                pass
+            pass
+
+        # done
+        return
+                
+                
 
     #
     # check incoming code against list of allowed tokens

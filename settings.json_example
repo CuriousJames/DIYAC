@@ -3,6 +3,7 @@
         "allowedTokens": {
                 "path":"allowedTokens.json"
         },
+	"wiegandLength": 34,
         "modules": {
                 "dir":"code/includes/"
         },
