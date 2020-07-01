@@ -376,7 +376,7 @@ class logger:
 
         # pretty-up the data and put into output string - if it's there
         if data != "NoLoggingDataGiven":
-            data = self.dataFormat("display", data)
+            data = self.dataFormat("file", data)
             outStr += " - " + data
 
         # do an output
