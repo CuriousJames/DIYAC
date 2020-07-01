@@ -64,14 +64,20 @@ This is the structure of the settings.json file:
 - wiegandLength - int - optional, default 34 - number of bits that the wiegand reader will spit out
 - modules - not used anymore
 - logging - obj
+    - redact - obj - optional, keys to redact (globally)
+      - keys to redact - str
   - syslog - obj
     - level - str - optional, default NOTE - log level for syslog
   - display - obj
     - level - str - optional, default INFO - log level for display output
     - colour - bool - optional, default FALSE - whether display output should be in colour or not
+    - redact - obj - optional, keys to redact
+      - keys to redact - str
   - file - obj
     - level - str - optional, defalt NONE - log level for file output
     - path - str - required for logging to file - path to log file
+    - redact - obj - optional, keys to redact
+      - keys to redact - str
 - pinDef - obj
   - pcbVersion - float - optional - pcb version being used, for pin assignments
   - doorStrike - int - optional - gpio number
@@ -122,6 +128,12 @@ Log levels are as follows:
 - NONE - no output (least verbose)
 
 All levels are equivalent to linux syslog levels.
+
+### Redacting ###
+
+It is possible to redact values of a specified key, by key name, in the logged 'data' (it does NOT redact the message)
+
+So if you want to redact all values of the key 'token' you can add 'token' to the global or destination (display or file) context in settings and then no token values will display -REDACTED- and nothing else, see settings.json_example for it's implementation
 
 # code notes #
 

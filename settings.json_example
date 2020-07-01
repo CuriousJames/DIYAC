@@ -8,6 +8,7 @@
                 "dir":"code/includes/"
         },
         "logging": {
+                "redact": ["token", "user"],
                 "file":{
                 "level":"INFO",
                 "path":"log/logFile"

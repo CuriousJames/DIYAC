@@ -2,6 +2,7 @@
 import datetime  # used for logging
 import json  # for outputting pretty strings from data
 import syslog
+import re  # for redacting data
 
 #
 # log
@@ -414,30 +415,42 @@ class logger:
         else:
             return False
 
+    def __dataRedact(self, redactList, data):
+        redactWord = "-REDACTED-"
+        for redactKey in redactList:
+            regex = r"\"" + redactKey + r"\":\s\"([^\"]+)\""
+            subst = "\"" + redactKey + "\": \"" + redactWord + "\""
+            data = re.sub(regex, subst, data)
+        return data
+
     #
     # format data into a nice string
     #  TODO
     #  redact things should happen here
     #
     def dataFormat(self, destination, data):
-        if destination == "syslog":
+        if destination == "display" or destination == "file":
             try:
                 data = json.dumps(data)
-            except:
-                data = format(data)
-        elif destination == "display":
-            try:
-                data = json.dumps(data)
-            except:
-                data = format(data)
-        elif destination == "file":
-            try:
-                data = json.dumps(data)
+                loggingSetting = self.settings.allSettings.get("logging")
+                # If there is a logging section in settings...
+                if loggingSetting:
+                    redactList = self.settings.allSettings["logging"].get("redact")
+                    # If there is a global redact list apply it
+                    if redactList:
+                        data = self.__dataRedact(redactList, data)
+
+                    destSetting = self.settings.allSettings["logging"].get(destination)
+                    if destSetting:
+                        redactList = destSetting.get("redact")
+                        # If destination redact list exists, apply it
+                        if redactList:
+                            data = self.__dataRedact(redactList, data)
             except:
                 data = format(data)
         else:
-            data = False
             self.log("WARN", "Logging - Unable to format data - destination not specified")
+            return False
         return data
 
     #
