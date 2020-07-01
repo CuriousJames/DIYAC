@@ -300,7 +300,7 @@ class logger:
         if lvl in self.levelTable:
             pass
         else:
-            self.log("WARN", "logging: message sent with incorrect level", {"level":lvl, "message":msg})
+            self.log("WARN", "logging: message sent with incorrect level", {"level": lvl, "message": msg})
             return
 
         # time
