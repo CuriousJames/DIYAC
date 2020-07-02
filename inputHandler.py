@@ -1,16 +1,6 @@
 #!/usr/bin/env python
 import time
 import threading
-import pigpio # pigpio is started in main, but this is necessary here for pullup definitions
-try:
-    import wiegand
-except ImportError:
-    print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
-    print("This should do the trick, assuming you're in the root directory now:")
-    print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
-    print("unzip wiegand_py.zip")
-    print("rm -rf wiegand_old.py wiegand_py.zip\n")
-    exit()
 
 #
 # Input Handler
@@ -22,7 +12,7 @@ except ImportError:
 #
 # Variables:
 #  state - [ready|reading], state of what is happen, ready for no input yet, reading for midway through a code input
-#  inputBuffer - a string of input received so far
+#  __inputBuffer - a string of input received so far
 #  lastInputTime - used for allowing a timeout and other such stuff
 #  delimiter - start/stop key - can only be # or *
 #  timeOut - seconds before timeout occurs and state should be returned to ready
@@ -61,7 +51,7 @@ except ImportError:
 class inputHandler:
     # vars
 
-    params = {
+    __params = {
         "delimiter": "#",
         "timeout": 5,
         "bruteforceThresholdAttempts": 3,
@@ -69,9 +59,9 @@ class inputHandler:
         "overspeedThresholdTime": 0.1,
         "lockoutTime": 600
     }
-    numpadState = "ready"
-    inputBuffer = ""
-    numpadLastInputTime = None
+    __numpadState = "ready"
+    __inputBuffer = ""
+    __numpadLastInputTime = None
     lockout = {"state": "unlocked"}
     previousAttempts = []
 
@@ -79,8 +69,16 @@ class inputHandler:
     # init
     # this is mostly to ge lockout bits from settings
     def __init__(self, systemHandler, settings, logger, tokens, outputHandler, pi, pinDef):
-        # get logger
-        # global l
+        import pigpio  # pigpio is started in main, but this is necessary here for pullup definitions
+        try:
+            import wiegand
+        except ImportError:
+            print("*** Wiegand.py not found - please download it and place it in the root directory for this folder ***\n")
+            print("This should do the trick, assuming you're in the root directory now:")
+            print("wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip")
+            print("unzip wiegand_py.zip")
+            print("rm -rf wiegand_old.py wiegand_py.zip\n")
+            exit()
 
         # internalise settings, tokens and logger
         self.systemHandler = systemHandler
@@ -98,7 +96,7 @@ class inputHandler:
         # the settings we're going to get are
         settingsToGet = ["delimiter", "timeout", "bruteforceThresholdTime", "bruteforceThresholdAttempts", "overspeedThresholdTime", "lockoutTime"]
         # make sure they exist
-        # if exist, update params list
+        # if exist, update __params list
         for s in settingsToGet:
             try:
                 self.settings.allSettings["inputHandling"][s]
@@ -107,7 +105,7 @@ class inputHandler:
                 pass
             else:
                 self.logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
-                self.params[s] = self.settings.allSettings["inputHandling"][s]
+                self.__params[s] = self.settings.allSettings["inputHandling"][s]
 
         # initialise some pins for pullup and glitchfilter
         self.pi.set_glitch_filter(self.pinDef.pins["doorbellButton"], 100000)
@@ -136,17 +134,17 @@ class inputHandler:
     #  update lastInputTime
     # if state = reading
     #  if later that timeout
-    #   empty inputBuffer
+    #   empty __inputBuffer
     #   set state to ready
     #   run function again
     #   return
     #  if input = start/stop delimiter
-    #   submit inputBuffer to comparator function
-    #   empty inputBuffer
+    #   submit __inputBuffer to comparator function
+    #   empty __inputBuffer
     #   set state to ready
     #   return
     #  if input is a button (basically just 'else')
-    #   throw into inputBuffer
+    #   throw into __inputBuffer
     #   update lastInputTime
     #
 
@@ -158,43 +156,43 @@ class inputHandler:
         timeNow = time.time()
 
         # if not reading and rx is not the start/stop delimiter, do nothin
-        if self.numpadState == "ready" and rx != self.params["delimiter"]:
+        if self.__numpadState == "ready" and rx != self.__params["delimiter"]:
             self.logger.log("DBUG", "key press before the start key, ignoring", {"key": rx})
             return
 
         # start of input string
-        if self.numpadState == "ready" and rx == self.params["delimiter"]:
+        if self.__numpadState == "ready" and rx == self.__params["delimiter"]:
             self.logger.log("DBUG", "new keypad string started by delimiter", {"timeNow": timeNow})
-            self.numpadState = "reading"
-            self.numpadLastInputTime = timeNow
+            self.__numpadState = "reading"
+            self.__numpadLastInputTime = timeNow
             return
 
         # if mid way through reading
-        if self.numpadState == "reading":
+        if self.__numpadState == "reading":
 
             # if over timeout
-            if self.numpadLastInputTime + self.params["timeout"] < timeNow:
+            if self.__numpadLastInputTime + self.__params["timeout"] < timeNow:
                 # log
-                logData = {"timeNow": timeNow, "lastInputTime": self.numpadLastInputTime}
+                logData = {"timeNow": timeNow, "lastInputTime": self.__numpadLastInputTime}
                 self.logger.log("DBUG", "new entry is after timeout limit, resetting and going again", logData)
                 logData = None
                 # reset
-                self.numpadState = "ready"
-                self.inputBuffer = ""
-                self.numpadLastInputTime = None
+                self.__numpadState = "ready"
+                self.__inputBuffer = ""
+                self.__numpadLastInputTime = None
                 # run the input again (just incase its a start button)
                 self.newNumpadInput(rx)
                 # done
                 return
 
             # if delimiter, we have an end of input string
-            if rx == self.params["delimiter"]:
+            if rx == self.__params["delimiter"]:
                 # run comparator
-                self.checkInput(self.inputBuffer, "code")
+                self.checkInput(self.__inputBuffer, "code")
                 # clear up
-                self.inputBuffer = ""
-                self.numpadLastInputTime = None
-                self.numpadState = "ready"
+                self.__inputBuffer = ""
+                self.__numpadLastInputTime = None
+                self.__numpadState = "ready"
                 # done
                 return
 
@@ -207,8 +205,8 @@ class inputHandler:
                 if self.lockout["type"] == "overspeed":
                     self.logger.log("DBUG", "overspeed - numpad input ignored")
                     return
-            self.inputBuffer += rx
-            self.numpadLastInputTime = timeNow
+            self.__inputBuffer += rx
+            self.__numpadLastInputTime = timeNow
             return
 
     #
@@ -242,7 +240,7 @@ class inputHandler:
     def addAttempt(self):
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
-        if len(self.previousAttempts) == self.params["bruteforceThresholdAttempts"]:
+        if len(self.previousAttempts) == self.__params["bruteforceThresholdAttempts"]:
             del self.previousAttempts[0]
         # append new time
         self.previousAttempts.append(timeNow)
@@ -273,11 +271,11 @@ class inputHandler:
         timeNow = time.time()
 
         # if not at threshold, do nothing
-        if len(self.previousAttempts) < self.params["bruteforceThresholdAttempts"]:
+        if len(self.previousAttempts) < self.__params["bruteforceThresholdAttempts"]:
             return "no change"
 
         # check by time of earliest chronological entry,
-        if self.previousAttempts[0] + self.params["bruteforceThresholdTime"] < timeNow:
+        if self.previousAttempts[0] + self.__params["bruteforceThresholdTime"] < timeNow:
             return "no change"
 
         # that must mean we're within the threshold time and attempts, initiate lockout!
@@ -298,11 +296,11 @@ class inputHandler:
         timeNow = time.time()
 
         # make sure there was already an input
-        if self.numpadLastInputTime is None:
+        if self.__numpadLastInputTime is None:
             return "no change"
 
         # test time
-        if self.numpadLastInputTime + self.params["overspeedThresholdTime"] < timeNow:
+        if self.__numpadLastInputTime + self.__params["overspeedThresholdTime"] < timeNow:
             return "no change"
 
         # lets lock it oot
@@ -321,10 +319,10 @@ class inputHandler:
         # init
         timeNow = time.time()
         # start
-        self.logger.log("INFO", "Lockout started", {"method": method, "duration": self.params["lockoutTime"]})
+        self.logger.log("INFO", "Lockout started", {"method": method, "duration": self.__params["lockoutTime"]})
         self.lockout = {"state": "locked", "type": method, "start": timeNow}
         # wait
-        time.sleep(self.params["lockoutTime"])
+        time.sleep(self.__params["lockoutTime"])
         # end
         self.logger.log("INFO", "Lockout ended")
         self.lockout = {"state": "unlocked"}

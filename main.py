@@ -1,22 +1,9 @@
 #!/usr/bin/env python
 import time
 import threading
-import logging  # our own logging module
-import inputHandler  # our own input handling module
-import outputHandler
-import tokenHandler  # our ouwn token hangling module
-import settingsHandler
-import pinDef  # our own pin definition module
-import systemHandler
 import sys  # for nice exit
 import subprocess
 import os  # used for systemd related ops
-try:
-    import pigpio
-except ImportError:
-    print("*** PiGPIO not found - please run the following command to install it ***")
-    print("sudo apt-get update && sudo apt-get install pigpio python-pigpio python3-pigpio\n")
-    exit()
 
 
 #
@@ -35,7 +22,7 @@ except ImportError:
 #  bind gpio callbacks
 #  start iwegand
 # function: keepalive()
-# function: cbf(gpio, level, tick)
+# function: __cbf(gpio, level, tick)
 # some code to actually run the program
 
 
@@ -80,10 +67,23 @@ def sigHup_callback():
 #
 # initialisation
 #
-def init():
+def __init():
+    import logging  # our own logging module
+    import outputHandler
+    import tokenHandler  # our ouwn token hangling module
+    import settingsHandler
+    import pinDef  # our own pin definition module
+    import systemHandler
+    import inputHandler  # our own input handling module
+    try:
+        import pigpio
+    except ImportError:
+        print("*** PiGPIO not found - please run the following command to install it ***")
+        print("sudo apt-get update && sudo apt-get install pigpio python-pigpio python3-pigpio\n")
+        exit()
     # exit flag
-    global flagExit
-    flagExit = False
+    global __flagExit
+    __flagExit = False
 
     # get our run mode - find out if daemon
     global runMode
@@ -98,11 +98,13 @@ def init():
     # start logging
     global l
     l = logging.logger(runMode=runMode)
+    del logging
     l.log("NOTE", "DIYAC starting")
 
     # systemHandler
     global sysH
     sysH = systemHandler.systemHandler(l)
+    del systemHandler
     sysH.setup("sigInt", runQuit=True)
     sysH.setup("sigTerm", runQuit=True)
     sysH.setup("sigHup", sigHup_callback, runQuit=False)
@@ -110,6 +112,7 @@ def init():
 
     # get all the settings
     s = settingsHandler.settingsHandler(sysH, l)
+    del settingsHandler
 
     # update the logger with new settings
     l.loadSettings(s)
@@ -142,28 +145,32 @@ def init():
     # set tokens
     global tokens
     tokens = tokenHandler.tokenHandler(sysH, s, l)
+    del tokenHandler
 
     # pin definitions
     global p
     p = pinDef.pinDef(sysH, s, l)
+    del pinDef
 
     # output handler (settings, logger, gpio, pins
     global outH
     outH = outputHandler.outputHandler(sysH, s, l, pi, p)
+    del outputHandler
 
     # Input handler
     global inH
     inH = inputHandler.inputHandler(sysH, s, l, tokens, outH, pi, p)
+    del inputHandler
 
     time.sleep(0.1)
 
-    # register these GPIO pins to run cbf on rising or falling edge
-    global cb1, cb2, cb3, cb4
-    cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, cbf)
-    cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, cbf)
-    cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, cbf)
-    cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, cbf)
-    
+    # register these GPIO pins to run __cbf on rising or falling edge
+    # global cb1, cb2, cb3, cb4
+    cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, __cbf)
+    cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, __cbf)
+    cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, __cbf)
+    cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, __cbf)
+
     # state ready
     sysH.notifyUp("READY=1")
     sysH.notifyUp("STATUS=Running")
@@ -172,10 +179,7 @@ def init():
     l.log("DBUG", "Running program as user", getpass.getuser())
 
 
-def keepAlive():
-    # init
-    global sysH
-    global outH
+def __keepAlive():
     keepAliveCounter = 0
     # GO!
     while 1:
@@ -195,7 +199,7 @@ def keepAlive():
 
 #
 # callback function that is hit whenever the GPIO changes
-def cbf(gpio, level, tick):
+def __cbf(gpio, level, tick):
     # log
     # see if we know which pin it is
     logData = {"gpio": gpio, "level": level}
@@ -215,7 +219,7 @@ def cbf(gpio, level, tick):
 #
 
 # run initialisation
-init()
+__init()
 
 # Keep the program running to wait for callbacks
-keepAlive()
+__keepAlive()

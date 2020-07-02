@@ -1,56 +1,52 @@
 #!/usr/bin/env python
 import signal  # for nice exit
-try:
-    import sdnotify  # For systemd
-except ImportError:
-    l.log("ERRR", "sdnotify module not installed - this is required\nPlease try this to install:\nsudo apt-get update && sudo apt-get install python3-pip -y && sudo pip3 install sdnotify")
-    exit()
+
 
 #
 # System Handler
 #
 # Description:
 #  Deal with signal inputs
-#    run log/systemd notify
+#    run log/systemd __notify
 #    run specified callback
 #    run quit if specified
 #  stop execution in a nice way
-#    log/systemd notify
+#    log/systemd __notify
 #    run speficied callback
 #    exit with given code
 #
 # Variables:
 #  for each signal, a dict exists with callback function, exit code and runQuit
-#  sigInt
-#  sigTerm
-#  sigHup
-#  quitFunc is similar to above, but does not contain runQuit
-#  logger - obj - for the logger
-#  notify - obj - for the sdNotify
+#  __sigInt
+#  __sigTerm
+#  __sigHup
+#  __quitFunc is similar to above, but does not contain runQuit
+#  __logger - obj - for the __logger
+#  __notify - obj - for the sdNotify
 #
 # Functions:
 #
-#  __init__(logger)
-#   saves logger inernally
+#  __init__(__logger)
+#   saves __logger inernally
 #   makes sdNotify and saves internally
 #
 #  setup(type, _callback, code, runQuit)
 #   saves settings for callback function, exit code, runQuit
-#   type must be quit, sigInt, sigTerm, sigHup
+#   type must be quit, __sigInt, __sigTerm, __sigHup
 #
-#  sigIntHandler(sig, frame)
-#   log/notify (different if going to runQuit or not)
+#  __sigIntHandler(sig, frame)
+#   log/__notify (different if going to runQuit or not)
 #   run callback function
 #   run quit if appropriate
 #
-#  sigTermHandler(sig, frame)
+#  __sigTermHandler(sig, frame)
 #   same as the last one
 #
-#  sigHupHandler(sig, frame)
+#  __sigHupHandler(sig, frame)
 #   log/Notify
-#    if not going to quit, this will notify RELOADING=1
+#    if not going to quit, this will __notify RELOADING=1
 #   run callback
-#   if not going to quit, notify READY=1
+#   if not going to quit, __notify READY=1
 #   run quit if appropriate
 #
 #  quit(code, status, logLevel, logMessage, logData)
@@ -66,34 +62,41 @@ except ImportError:
 class systemHandler:
 
     # vars
-    sigInt = {
+    __sigInt = {
         "callback": False,
         "code": 0,
         "runQuit": True
     }
-    sigTerm = {
+    __sigTerm = {
         "callback": False,
         "code": 0,
         "runQuit": True
     }
-    sigHup = {
+    __sigHup = {
         "callback": False,
         "code": 0,
         "runQuit": False
     }
-    quitFunc = {
+    __quitFunc = {
         "callback": False,
         "code": 0
     }
-    logger = False
+    __logger = False
 
     #
     # init
     #
     def __init__(self, logger=False):
+        self.__logger = logger
+        del logger
+
+        try:
+            import sdnotify  # For systemd
+        except ImportError:
+            self.__logger.log("ERRR", "sdnotify module not installed - this is required\nPlease try this to install:\nsudo apt-get update && sudo apt-get install python3-pip -y && sudo pip3 install sdnotify")
+            exit()
         # systemd notifier
-        self.notify = sdnotify.SystemdNotifier()
-        self.logger = logger
+        self.__notify = sdnotify.SystemdNotifier()
         return
 
     #
@@ -102,115 +105,115 @@ class systemHandler:
     def setup(self, type, _callback=False, code=False, runQuit=False):
         # not a switch statment
         if type == "quit":
-            self.logger.log("DBUG", "Setup for quit function", {"callback": _callback, "code": code})
-            self.quitFunc["callback"] = _callback
-            self.quitFunc["code"] = code
+            self.__logger.log("DBUG", "Setup for quit function", {"callback": _callback, "code": code})
+            self.__quitFunc["callback"] = _callback
+            self.__quitFunc["code"] = code
             pass
         elif type == "sigInt":
-            self.logger.log("DBUG", "Setup for sigInt", {"callback": _callback, "code": code, "runQuit": runQuit})
-            signal.signal(signal.SIGINT, self.sigIntHandler)
-            self.sigInt["callback"] = _callback
-            self.sigInt["code"] = code
-            self.sigInt["runQuit"] = runQuit
+            self.__logger.log("DBUG", "Setup for sigInt", {"callback": _callback, "code": code, "runQuit": runQuit})
+            signal.signal(signal.SIGINT, self.__sigIntHandler)
+            self.__sigInt["callback"] = _callback
+            self.__sigInt["code"] = code
+            self.__sigInt["runQuit"] = runQuit
             pass
         elif type == "sigTerm":
-            self.logger.log("DBUG", "Setup for sigTerm", {"callback": _callback, "code": code, "runQuit": runQuit})
-            signal.signal(signal.SIGTERM, self.sigTermHandler)
-            self.sigTerm["callback"] = _callback
-            self.sigTerm["code"] = code
-            self.sigTerm["runQuit"] = runQuit
+            self.__logger.log("DBUG", "Setup for sigTerm", {"callback": _callback, "code": code, "runQuit": runQuit})
+            signal.signal(signal.SIGTERM, self.__sigTermHandler)
+            self.__sigTerm["callback"] = _callback
+            self.__sigTerm["code"] = code
+            self.__sigTerm["runQuit"] = runQuit
             pass
         elif type == "sigHup":
-            self.logger.log("DBUG", "Setup for sigHup", {"callback": _callback, "code": code, "runQuit": runQuit})
-            signal.signal(signal.SIGHUP, self.sigHupHandler)
-            self.sigHup["callback"] = _callback
-            self.sigHup["code"] = code
-            self.sigHup["runQuit"] = runQuit
+            self.__logger.log("DBUG", "Setup for sigHup", {"callback": _callback, "code": code, "runQuit": runQuit})
+            signal.signal(signal.SIGHUP, self.__sigHupHandler)
+            self.__sigHup["callback"] = _callback
+            self.__sigHup["code"] = code
+            self.__sigHup["runQuit"] = runQuit
             pass
         else:
             # default?
-            self.logger.log("WARN", "systemHandler: invalid type passed to setCallback", type)
+            self.__logger.log("WARN", "systemHandler: invalid type passed to setCallback", type)
             pass
         return
 
     #
     # individual handler functions
     #
-    def sigIntHandler(self, sig, frame):
-        # log/systemd notify
-        if self.sigInt["runQuit"] is True:
-            self.notify.notify("STOPPING=1")
-            self.logger.log("NOTE", "SIGINT - Service Stop received, will exit")
+    def __sigIntHandler(self, sig, frame):
+        # log/systemd __notify
+        if self.__sigInt["runQuit"] is True:
+            self.__notify.notify("STOPPING=1")
+            self.__logger.log("NOTE", "SIGINT - Service Stop received, will exit")
             pass
         else:
-            self.logger.log("NOTE", "SIGINT received")
+            self.__logger.log("NOTE", "SIGINT received")
             pass
         # callback func
-        if self.sigInt["callback"] is not False:
-            self.sigInt["callback"]()
+        if self.__sigInt["callback"] is not False:
+            self.__sigInt["callback"]()
             pass
         # quit
-        if self.sigInt["runQuit"] is True:
-            self.quit(self.sigInt["code"])
+        if self.__sigInt["runQuit"] is True:
+            self.quit(self.__sigInt["code"])
             pass
         # done
         return
 
-    def sigTermHandler(self, sig, frame):
-        # log/systemd notify
-        if self.sigTerm["runQuit"] is True:
-            self.notify.notify("STOPPING=1")
-            self.logger.log("NOTE", "SIGTERM - Service Stop received, will exit")
+    def __sigTermHandler(self, sig, frame):
+        # log/systemd __notify
+        if self.__sigTerm["runQuit"] is True:
+            self.__notify.notify("STOPPING=1")
+            self.__logger.log("NOTE", "SIGTERM - Service Stop received, will exit")
             pass
         else:
-            self.logger.log("NOTE", "SIGTERM received")
+            self.__logger.log("NOTE", "SIGTERM received")
             pass
         # callback func
-        if self.sigTerm["callback"] is not False:
-            self.sigTerm["callback"]()
+        if self.__sigTerm["callback"] is not False:
+            self.__sigTerm["callback"]()
             pass
         # quit
-        if self.sigTerm["runQuit"] is True:
-            self.quit(self.sigTerm["code"])
+        if self.__sigTerm["runQuit"] is True:
+            self.quit(self.__sigTerm["code"])
             pass
         # done
         return
 
-    def sigHupHandler(self, sig=False, frame=False):
+    def __sigHupHandler(self, sig=False, frame=False):
         # if quit
-        if self.sigHup["runQuit"] is True:
-            # log/systemd notify
-            self.notify.notify("STOPPING=1")
-            self.logger.log("NOTE", "SIGHUP - will quit")
+        if self.__sigHup["runQuit"] is True:
+            # log/systemd __notify
+            self.__notify.notify("STOPPING=1")
+            self.__logger.log("NOTE", "SIGHUP - will quit")
             pass
         # if not quit
         else:
-            # log/systemd notify
-            self.notify.notify("RELOADING=1")
-            self.logger.log("NOTE", "SIGHUP - Service Reload received")
+            # log/systemd __notify
+            self.__notify.notify("RELOADING=1")
+            self.__logger.log("NOTE", "SIGHUP - Service Reload received")
             pass
         # callback
-        if self.sigHup["callback"] is not False:
-            self.sigHup["callback"]()
+        if self.__sigHup["callback"] is not False:
+            self.__sigHup["callback"]()
             pass
         # if quit
-        if self.sigHup["runQuit"] is True:
-            self.quit(self.sigHup["code"])
+        if self.__sigHup["runQuit"] is True:
+            self.quit(self.__sigHup["code"])
         else:
-            self.notify.notify("READY=1")
+            self.__notify.notify("READY=1")
         # done
         return
 
     def quit(self, code, status=False, logLevel=False, logMessage=False, logData=False):
         # run the callback
-        if self.quitFunc["callback"] is not False:
-            self.quitFunc["callback"]()
+        if self.__quitFunc["callback"] is not False:
+            self.__quitFunc["callback"]()
             pass
         # stopping to systemd
-        self.notify.notify("STOPPING=1")
+        self.__notify.notify("STOPPING=1")
         # status to systemd
         if status is not False:
-            self.notify.notify("STATUS="+status)
+            self.__notify.notify("STATUS="+status)
             pass
         # log
         if logMessage is not False or logData is not False:
@@ -224,10 +227,10 @@ class systemHandler:
                 pass
             # do it
             if logData is False:
-                self.logger.log(logLevel, logMessage)
+                self.__logger.log(logLevel, logMessage)
                 pass
             else:
-                self.logger.log(logLevel, logMessage, logData)
+                self.__logger.log(logLevel, logMessage, logData)
                 pass
         # exit
         if code is False:
@@ -239,5 +242,5 @@ class systemHandler:
         return
 
     def notifyUp(self, message):
-        self.notify.notify(message)
+        self.__notify.notify(message)
         return
