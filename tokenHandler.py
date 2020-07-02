@@ -57,7 +57,7 @@ import json  # for gettings settings and tokens
 class tokenHandler:
     # vars
     allowedTokens = False
-    wiegandLength = 36;
+    wiegandLength = 36
 
     #
     # initialisation function
@@ -78,7 +78,7 @@ class tokenHandler:
         # see if it exists
         try:
             self.settings.allSettings["wiegandLength"]
-        except Exception as e:
+        except Exception:
             return
 
         # grab into tmp for quicker writing
@@ -86,7 +86,7 @@ class tokenHandler:
 
         # check sanity
         if tmp != 26 and tmp != 34:
-            self.logger.log("WARN", "Token handler: Incorrect value in settings file for wiegandLength", {"wiegandLength":tmp})
+            self.logger.log("WARN", "Token handler: Incorrect value in settings file for wiegandLength", {"wiegandLength": tmp})
             return
 
         # it's sane, store it
@@ -95,7 +95,6 @@ class tokenHandler:
 
         # done
         return
-            
 
     #
     # function to make var of allowed tokens
@@ -152,8 +151,8 @@ class tokenHandler:
         # open / read / decode / close
         try:
             self.settings.allSettings["allowedTokens"]["path"]
-        except:
-            self.logger.log("WARN", "Allowed tokens file path not set in settings")
+        except Exception as err:
+            self.logger.log("WARN", "Allowed tokens file path not set in settings", err)
             return
 
         if self.settings.allSettings["allowedTokens"]["path"][0] != "/":
@@ -168,8 +167,8 @@ class tokenHandler:
                 allowedTokensFile = open(allowedTokensFilePath, "r")
             except OSError as err:
                 self.logger.log("WARN", "os error while opening allowedTokens file", err)
-            except:
-                self.logger.log("WARN", "unknown error while opening allowedTokens file")
+            except Exception as err:
+                self.logger.log("WARN", "unknown error while opening allowedTokens file", err)
                 return
 
             # read + decode
@@ -177,16 +176,16 @@ class tokenHandler:
                 self.allowedTokens = json.load(allowedTokensFile)
             except ValueError as err:
                 self.logger.log("WARN", "JSON Decode error while reading allowedTokens file", err)
-            except:
-                self.logger.log("WARN", "unknown error while reading/decoding allowedTokens file")
+            except Exception as err:
+                self.logger.log("WARN", "unknown error while reading/decoding allowedTokens file", err)
 
             # close
             try:
                 allowedTokensFile.close()
             except OSError as err:
                 self.logger.log("WARN", "os error while closing allowedTokens file:", err)
-            except:
-                self.logger.log("WARN", "unknown error while closing allowedTokens file")
+            except Exception as err:
+                self.logger.log("WARN", "unknown error while closing allowedTokens file", err)
         else:
             self.logger.log("WARN", "allowedTokens file does not exist")
             return
@@ -366,8 +365,6 @@ class tokenHandler:
 
         # done
         return
-                
-                
 
     #
     # check incoming code against list of allowed tokens
