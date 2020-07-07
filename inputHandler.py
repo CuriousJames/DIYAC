@@ -23,17 +23,17 @@ import threading
 #  previousAttemps - list of times of last 3 attempts
 #
 # Functions:
-#  newNumpadInput(rx)
+#  __newNumpadInput(rx)
 #   process new entry from keypad (deals with each individual key press)
 #
-#  checkInput(rx, type)
+#  __checkInput(rx, type)
 #   called when there is a full token to be checked
 #   take token and check if in allowedTokens list
 #
 #  checkLockout()
 #   see if the lock is active or not, and if it should be activated
 #
-#  addAttempt()
+#  __addAttempt()
 #   puts a new attempt and time into previousAttempts
 #
 #  getBruteForceLockoutState()
@@ -42,7 +42,7 @@ import threading
 #  calculateLockout()
 #   see if a new lockout should be activated - based on previousAttempts
 #
-#  wiegandCallback(bytes, code)
+#  __wiegandCallback(bytes, code)
 #   called by wiegand library, process & translate input from reader
 #   includes translation from incoming int to hex string
 #
@@ -67,7 +67,7 @@ class inputHandler:
 
     #
     # init
-    # this is mostly to ge lockout bits from settings
+    # this is mostly to ge lockout bits from __settings
     def __init__(self, systemHandler, settings, logger, tokens, outputHandler, pi, pinDef):
         import pigpio  # pigpio is started in main, but this is necessary here for pullup definitions
         try:
@@ -80,43 +80,50 @@ class inputHandler:
             print("rm -rf wiegand_old.py wiegand_py.zip\n")
             exit()
 
-        # internalise settings, tokens and logger
-        self.systemHandler = systemHandler
-        self.settings = settings
-        self.logger = logger
-        self.tokens = tokens
-        self.outputHandler = outputHandler
-        self.pi = pi
-        self.pinDef = pinDef
+        # internalise settings, tokens, logger, outputHandler, pi and pinDef
+        self.__systemHandler = systemHandler
+        del systemHandler
+        self.__settings = settings
+        del settings
+        self.__logger = logger
+        del logger
+        self.__tokens = tokens
+        del tokens
+        self.__outputHandler = outputHandler
+        del outputHandler
+        self.__pi = pi
+        del pi
+        self.__pinDef = pinDef
+        del pinDef
 
-        # see if settings are set
-        if self.settings.allSettings is False:
+        # see if __settings are set
+        if self.__settings.allSettings is False:
             return
 
-        # the settings we're going to get are
+        # the __settings we're going to get are
         settingsToGet = ["delimiter", "timeout", "bruteforceThresholdTime", "bruteforceThresholdAttempts", "overspeedThresholdTime", "lockoutTime"]
         # make sure they exist
         # if exist, update __params list
         for s in settingsToGet:
             try:
-                self.settings.allSettings["inputHandling"][s]
+                self.__settings.allSettings["inputHandling"][s]
             except Exception:
-                # self.logger.log("WARN", "unable to read setting", e)
+                # self.__logger.log("WARN", "unable to read setting", e)
                 pass
             else:
-                self.logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.settings.allSettings["inputHandling"][s]})
-                self.__params[s] = self.settings.allSettings["inputHandling"][s]
+                self.__logger.log("DBUG", "input handler: new setting", {"parameter": s, "value": self.__settings.allSettings["inputHandling"][s]})
+                self.__params[s] = self.__settings.allSettings["inputHandling"][s]
 
         # initialise some pins for pullup and glitchfilter
-        self.pi.set_glitch_filter(self.pinDef.pins["doorbellButton"], 100000)
-        self.pi.set_glitch_filter(self.pinDef.pins["doorSensor"], 50000)
+        self.__pi.set_glitch_filter(self.__pinDef.pins["doorbellButton"], 100000)
+        self.__pi.set_glitch_filter(self.__pinDef.pins["doorSensor"], 50000)
 
-        self.pi.set_pull_up_down(self.pinDef.pins["doorbellButton"], pigpio.PUD_UP)
-        self.pi.set_pull_up_down(self.pinDef.pins["doorSensor"], pigpio.PUD_UP)
+        self.__pi.set_pull_up_down(self.__pinDef.pins["doorbellButton"], pigpio.PUD_UP)
+        self.__pi.set_pull_up_down(self.__pinDef.pins["doorSensor"], pigpio.PUD_UP)
 
         # set the wiegand reading
-        # will call function wiegandCallback on receiving data
-        w = wiegand.decoder(pi, self.pinDef.pins["wiegand0"], self.pinDef.pins["wiegand1"], self.wiegandCallback)
+        # will call function __wiegandCallback on receiving data
+        w = wiegand.decoder(self.__pi, self.__pinDef.pins["wiegand0"], self.__pinDef.pins["wiegand1"], self.__wiegandCallback)
 
         # done
         return
@@ -125,7 +132,7 @@ class inputHandler:
     # function to be run with each incoming bit
     # will work out if input should go into buffer, be ignored, or starts the buffer
     #
-    # globalise logger
+    # globalise __logger
     # set time now
     # if state = ready AND input is not delimiter
     #  return
@@ -148,8 +155,8 @@ class inputHandler:
     #   update lastInputTime
     #
 
-    def newNumpadInput(self, rx):
-        # make logger available
+    def __newNumpadInput(self, rx):
+        # make __logger available
         # global l
 
         # set time
@@ -157,12 +164,12 @@ class inputHandler:
 
         # if not reading and rx is not the start/stop delimiter, do nothin
         if self.__numpadState == "ready" and rx != self.__params["delimiter"]:
-            self.logger.log("DBUG", "key press before the start key, ignoring", {"key": rx})
+            self.__logger.log("DBUG", "key press before the start key, ignoring", {"key": rx})
             return
 
         # start of input string
         if self.__numpadState == "ready" and rx == self.__params["delimiter"]:
-            self.logger.log("DBUG", "new keypad string started by delimiter", {"timeNow": timeNow})
+            self.__logger.log("DBUG", "new keypad string started by delimiter", {"timeNow": timeNow})
             self.__numpadState = "reading"
             self.__numpadLastInputTime = timeNow
             return
@@ -174,21 +181,21 @@ class inputHandler:
             if self.__numpadLastInputTime + self.__params["timeout"] < timeNow:
                 # log
                 logData = {"timeNow": timeNow, "lastInputTime": self.__numpadLastInputTime}
-                self.logger.log("DBUG", "new entry is after timeout limit, resetting and going again", logData)
+                self.__logger.log("DBUG", "new entry is after timeout limit, resetting and going again", logData)
                 logData = None
                 # reset
                 self.__numpadState = "ready"
                 self.__inputBuffer = ""
                 self.__numpadLastInputTime = None
                 # run the input again (just incase its a start button)
-                self.newNumpadInput(rx)
+                self.__newNumpadInput(rx)
                 # done
                 return
 
             # if delimiter, we have an end of input string
             if rx == self.__params["delimiter"]:
                 # run comparator
-                self.checkInput(self.__inputBuffer, "code")
+                self.__checkInput(self.__inputBuffer, "code")
                 # clear up
                 self.__inputBuffer = ""
                 self.__numpadLastInputTime = None
@@ -203,7 +210,7 @@ class inputHandler:
             self.calculateNewOverspeedLockout()
             if self.lockout["state"] == "locked":
                 if self.lockout["type"] == "overspeed":
-                    self.logger.log("DBUG", "overspeed - numpad input ignored")
+                    self.__logger.log("DBUG", "overspeed - numpad input ignored")
                     return
             self.__inputBuffer += rx
             self.__numpadLastInputTime = timeNow
@@ -213,22 +220,22 @@ class inputHandler:
     # check input
     # this if for a fully formed input to be checked/approved by lockout and then token checked
     #
-    def checkInput(self, rx, rxType):
+    def __checkInput(self, rx, rxType):
         # add attempt to previousAttempts
-        self.addAttempt()
+        self.__addAttempt()
 
         # check the lockout, bail if locked
         if self.checkLockout() == "locked":
-            self.logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
+            self.__logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
             return
 
         # check the token, true if approved, false if denied
-        tokenCheckOutput = self.tokens.checkToken(rx, rxType)
+        tokenCheckOutput = self.__tokens.checkToken(rx, rxType)
         if tokenCheckOutput["allow"] is True:
-            self.logger.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": tokenCheckOutput["user"]})
-            self.outputHandler.openDoor()
+            self.__logger.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": tokenCheckOutput["user"]})
+            self.__outputHandler.openDoor()
         else:
-            self.logger.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
+            self.__logger.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
 
         # done
         return
@@ -237,7 +244,7 @@ class inputHandler:
     # add attempt into previousAttempts
     # remove last value if more than 3
     #
-    def addAttempt(self):
+    def __addAttempt(self):
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
         if len(self.previousAttempts) == self.__params["bruteforceThresholdAttempts"]:
@@ -319,12 +326,12 @@ class inputHandler:
         # init
         timeNow = time.time()
         # start
-        self.logger.log("INFO", "Lockout started", {"method": method, "duration": self.__params["lockoutTime"]})
+        self.__logger.log("INFO", "Lockout started", {"method": method, "duration": self.__params["lockoutTime"]})
         self.lockout = {"state": "locked", "type": method, "start": timeNow}
         # wait
         time.sleep(self.__params["lockoutTime"])
         # end
-        self.logger.log("INFO", "Lockout ended")
+        self.__logger.log("INFO", "Lockout ended")
         self.lockout = {"state": "unlocked"}
         self.previousAttempts = []
         return
@@ -332,7 +339,7 @@ class inputHandler:
     #
     # this function is called by the wiegand library when it has read something
     #
-    def wiegandCallback(self, bits, code):
+    def __wiegandCallback(self, bits, code):
         # if bits != 4 AND bits != 34
         #  error
         #
@@ -351,7 +358,7 @@ class inputHandler:
 
         #
         # log
-        self.logger.log("DBUG", "New read", {"bits": bits, "code": code})
+        self.__logger.log("DBUG", "New read", {"bits": bits, "code": code})
 
         #
         # we have a card
@@ -365,8 +372,8 @@ class inputHandler:
             output = int(output, 2)  # change to integer - required for doing the change to hex
             output = format(output, '#010x')  # make hex string
             output = output[2:]  # trim "0x"
-            self.logger.log("DBUG", "output from formatting", output)
-            self.checkInput(output, "card")
+            self.__logger.log("DBUG", "output from formatting", output)
+            self.__checkInput(output, "card")
         elif bits == 26:
             # make into hex string
             # see above
@@ -377,8 +384,8 @@ class inputHandler:
             output = int(output, 2)  # change to integer - required for doing the change to hex
             output = format(output, '#010x')  # make hex string
             output = output[4:]  # trim "0x"
-            self.logger.log("DBUG", "output from formatting", output)
-            self.checkInput(output, "card")
+            self.__logger.log("DBUG", "output from formatting", output)
+            self.__checkInput(output, "card")
         elif bits == 4:
             # someone pressed a button
             #  sanity check - maybe wiegand connection is swapped
@@ -387,7 +394,7 @@ class inputHandler:
 
             # little check - hint that wiegand wires may not be correct way around
             if code > 11:
-                self.logger.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
+                self.__logger.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
 
             # Tidy up the input - change * and #, or convert to string
             if code == 10:
@@ -396,12 +403,12 @@ class inputHandler:
                 key = "#"
             else:
                 key = str(code)
-            self.logger.log("DBUG", "Keypad key pressed", key)
+            self.__logger.log("DBUG", "Keypad key pressed", key)
 
             # run through the keypad checker
-            self.newNumpadInput(key)
+            self.__newNumpadInput(key)
         else:
             #
             # error condition
-            self.logger.log("WARN", "unexpected number of bits", bits)
+            self.__logger.log("WARN", "unexpected number of bits", bits)
             return

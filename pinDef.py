@@ -8,23 +8,23 @@
 #
 # Variables:
 #  pins - dict of all pin names and numbers, this is what is used by other functions
-#  pcbVersion - the pcb version specified in settings file
-#  pcbVersionsAvailable - allowable values of pcbVersion
+#  __pcbVersion - the pcb version specified in __settings file
+#  __pcbVersionsAvailable - allowable values of __pcbVersion
 #  pcbPinout - what each pin definition is by PCB version
 #
 # Functions:
 #
-#  __init__(systemHandler, settings, logger)
+#  __init__(__systemHandler, __settings, __logger)
 #   setup the usable pin defs
 #   get from pcb version
 #   get from custom - this will overwrite any pcb defaults
 #   make sure all critical pins are defined
 #
-#  setByPcb()
-#   get pin definitions as shown by pcb version in settings
+#  __setByPcb()
+#   get pin definitions as shown by pcb version in __settings
 #
-#  setByCustom()
-#   get pin definitions as defined in the settings file
+#  __setByCustom()
+#   get pin definitions as defined in the __settings file
 #
 
 
@@ -47,9 +47,9 @@ class pinDef:
         "wiegand0": None,
         "wiegand1": None
     }
-    pcbVersion = None
-    pcbVersionsAvailable = [1, 2.0, 2.1]
-    pcbPinouts = {
+    __pcbVersion = None
+    __pcbVersionsAvailable = [1, 2.0, 2.1]
+    __pcbPinouts = {
         1: {
             "doorStrike": 17,
             "doorbell12": 4,
@@ -97,15 +97,18 @@ class pinDef:
     #
     def __init__(self, systemHandler, settings, logger):
 
-        # internalise settings and logger
-        self.systemHandler = systemHandler
-        self.logger = logger
-        self.settings = settings
+        # internalise __settings and logger
+        self.__systemHandler = systemHandler
+        del systemHandler
+        self.__logger = logger
+        del logger
+        self.__settings = settings
+        del settings
 
         # get pins from PCB Version
         # get any other pins that have been set
-        self.setByPcb()
-        self.setByCustom()
+        self.__setByPcb()
+        self.__setByCustom()
 
         # make sure pins are set
         # crash out if critical pins aren't set
@@ -113,10 +116,10 @@ class pinDef:
         for p in self.pins:
             if self.pins[p] is None:
                 if p in criticalPins:
-                    self.logger.log("ERRR", "Critical pin not defined", {"pin": p})
-                    self.systemHandler.quit(code=1, status="Failed - Critical pin not defined")
+                    self.__logger.log("ERRR", "Critical pin not defined", {"pin": p})
+                    self.__systemHandler.quit(code=1, status="Failed - Critical pin not defined")
                 else:
-                    self.logger.log("WARN", "pin not defined", {"pin": p})
+                    self.__logger.log("WARN", "pin not defined", {"pin": p})
 
         # done
         return
@@ -124,35 +127,35 @@ class pinDef:
     #
     # set pinout by PCB version
     #
-    def setByPcb(self):
+    def __setByPcb(self):
         # see if it's set
         try:
-            self.settings.allSettings["pinDef"]["pcbVersion"]
+            self.__settings.allSettings["pinDef"]["pcbVersion"]
         except:
             pass
         else:
             # make sure it's a valid value
-            if self.settings.allSettings["pinDef"]["pcbVersion"] in self.pcbVersionsAvailable:
+            if self.__settings.allSettings["pinDef"]["pcbVersion"] in self.__pcbVersionsAvailable:
                 # store it
-                self.pcbVersion = self.settings.allSettings["pinDef"]["pcbVersion"]
-                self.logger.log("DBUG", "pcb version found", {"version": self.pcbVersion})
+                self.__pcbVersion = self.__settings.allSettings["pinDef"]["pcbVersion"]
+                self.__logger.log("DBUG", "pcb version found", {"version": self.__pcbVersion})
 
         # if it's defined, set the values
-        if self.pcbVersion is not None:
+        if self.__pcbVersion is not None:
             for p in self.pins:
-                self.pins[p] = self.pcbPinouts[self.pcbVersion][p]
-                # self.logger.log("DBUG", "pin from PCB", self.pins[p])
+                self.pins[p] = self.__pcbPinouts[self.__pcbVersion][p]
+                # self.__logger.log("DBUG", "pin from PCB", self.pins[p])
 
         # done
         return
 
     #
-    # set individual pins from settings
+    # set individual pins from __settings
     #
-    def setByCustom(self):
+    def __setByCustom(self):
         # is it set?
         try:
-            self.settings.allSettings["pinDef"]
+            self.__settings.allSettings["pinDef"]
         except:
             pass
         else:
@@ -160,12 +163,12 @@ class pinDef:
             for p in self.pins:
                 # but first make sure it exists
                 try:
-                    self.settings.allSettings["pinDef"][p]
+                    self.__settings.allSettings["pinDef"][p]
                 except:
                     pass
                 else:
-                    self.pins[p] = self.settings.allSettings["pinDef"][p]
-                    self.logger.log("DBUG", "custom pin set", {"name": p, "pin": self.pins[p]})
+                    self.pins[p] = self.__settings.allSettings["pinDef"][p]
+                    self.__logger.log("DBUG", "custom pin set", {"name": p, "pin": self.pins[p]})
 
         # done
         return
