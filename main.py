@@ -206,6 +206,8 @@ def __cbf(gpio, level, tick):
     for pin in p.pins:
         if p.pins[pin] == gpio:
             logData["name"] = pin
+            # Break out of the for loop as soon as we've found it (if we find it)
+            break
     l.log("DBUG", "GPIO Change", logData)
 
     # if it's the doorbell button, ring the doorbell
