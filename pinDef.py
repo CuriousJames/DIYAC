@@ -45,8 +45,20 @@ class pinDef:
         "piActiveLed": None,
         "spareLed": None,
         "wiegand0": None,
-        "wiegand1": None
+        "wiegand1": None,
+        "exitbutton": None
     }
+
+    # Pins which MUST be defined in order to have basic DIYAC functionality
+    # these pins MUST be initialised as 'None' in pins above
+    __criticalPins = {
+        "wiegand0",
+        "wiegand1",
+        "doorStrike",
+        "doorbellButton",
+        "doorbell12"
+    }
+
     __pcbVersion = None
     __pcbVersionsAvailable = [1, 2.0, 2.1]
     __pcbPinouts = {
@@ -110,17 +122,18 @@ class pinDef:
         self.__setByPcb()
         self.__setByCustom()
 
-        # make sure pins are set
-        # crash out if critical pins aren't set
-        criticalPins = ["doorStrike"]
-        for p in self.pins:
+        # make sure critical pins are set
+        # crash out if critical pins are still 'None'
+        missingCriticalPins = []
+        for p in list(self.pins):
             if self.pins[p] is None:
-                if p in criticalPins:
-                    self.__logger.log("ERRR", "Critical pin not defined", {"pin": p})
-                    self.__systemHandler.quit(code=1, status="Failed - Critical pin not defined")
+                if p in self.__criticalPins:
+                    missingCriticalPins.append(p)
                 else:
+                    del self.pins[p]
                     self.__logger.log("WARN", "pin not defined", {"pin": p})
-
+        if missingCriticalPins:
+            self.__systemHandler.quit(1, "Failed - Critical pin/s not defined", "ERRR", "Critical pin/s not defined", missingCriticalPins)
         # done
         return
 
@@ -131,19 +144,22 @@ class pinDef:
         # see if it's set
         try:
             self.__settings.allSettings["pinDef"]["pcbVersion"]
-        except:
+        except KeyError:
             pass
         else:
+            self.__pcbVersion = self.__settings.allSettings["pinDef"]["pcbVersion"]
             # make sure it's a valid value
-            if self.__settings.allSettings["pinDef"]["pcbVersion"] in self.__pcbVersionsAvailable:
+            if self.__pcbVersion in self.__pcbVersionsAvailable:
                 # store it
-                self.__pcbVersion = self.__settings.allSettings["pinDef"]["pcbVersion"]
-                self.__logger.log("DBUG", "pcb version found", {"version": self.__pcbVersion})
+                self.__logger.log("DBUG", "PCB Version found", {"version": self.__pcbVersion})
+            else:
+                self.__systemHandler.quit(1, "Failed - PCB Version set, but not recognised", "ERRR", "PCB Version set, but not recognised", {"version": self.__pcbVersion})
 
         # if it's defined, set the values
         if self.__pcbVersion is not None:
             for p in self.pins:
-                self.pins[p] = self.__pcbPinouts[self.__pcbVersion][p]
+                if p in self.__pcbPinouts[self.__pcbVersion]:
+                    self.pins[p] = self.__pcbPinouts[self.__pcbVersion][p]
                 # self.__logger.log("DBUG", "pin from PCB", self.pins[p])
 
         # done
@@ -156,15 +172,15 @@ class pinDef:
         # is it set?
         try:
             self.__settings.allSettings["pinDef"]
-        except:
+        except KeyError:
             pass
         else:
             # grab it all in
             for p in self.pins:
-                # but first make sure it exists
+                # but first make sure it's been set in settings
                 try:
                     self.__settings.allSettings["pinDef"][p]
-                except:
+                except KeyError:
                     pass
                 else:
                     self.pins[p] = self.__settings.allSettings["pinDef"][p]
