@@ -164,12 +164,13 @@ def __init():
 
     time.sleep(0.1)
 
-    # register these GPIO pins to run __cbf on rising or falling edge
-    # global cb1, cb2, cb3, cb4
-    cb1 = pi.callback(p.pins["doorStrike"], pigpio.EITHER_EDGE, __cbf)
-    cb2 = pi.callback(p.pins["doorbell12"], pigpio.EITHER_EDGE, __cbf)
-    cb3 = pi.callback(p.pins["doorbellButton"], pigpio.EITHER_EDGE, __cbf)
-    cb4 = pi.callback(p.pins["doorSensor"], pigpio.EITHER_EDGE, __cbf)
+    # register these GPI pins to run __cbf on rising or falling edge
+    for pin in p.pins["input"]:
+        pi.callback(p.pins[pin], pigpio.EITHER_EDGE, __callbackInput)
+
+    # register these GPO pins to run __cbf on rising or falling edge
+    for pin in p.pins["output"]:
+        pi.callback(p.pins[pin], pigpio.EITHER_EDGE, __callbackOutput)
 
     # state ready
     sysH.notifyUp("READY=1")
@@ -199,21 +200,36 @@ def __keepAlive():
 
 #
 # callback function that is hit whenever the GPIO changes
-def __cbf(gpio, level, tick):
+def __callbackGeneral(gpio, level, tick, inputOutput):
     # log
     # see if we know which pin it is
     logData = {"gpio": gpio, "level": level}
-    for pin in p.pins:
+    for pin in p.pins[inputOutput]:
         if p.pins[pin] == gpio:
             logData["name"] = pin
             # Break out of the for loop as soon as we've found it (if we find it)
             break
     l.log("DBUG", "GPIO Change", logData)
 
+
+#
+# callback function that is hit whenever the GPI changes
+def __callbackInput(gpio, level, tick):
+    __callbackGeneral(gpio, level, tick, "input")
+
     # if it's the doorbell button, ring the doorbell
     if gpio == p.pins["doorbellButton"] and level == 0:
         ringDoorbellThread = threading.Thread(name='doorbellThread', target=outH.ringDoorbell)
         ringDoorbellThread.start()
+
+
+#
+# callback function that is hit whenever the GPO changes
+def __callbackOutput(gpio, level, tick):
+    if gpio == p.pins["piActiveLed"]:
+        # Do nothing with piActiveLed - as it really clogs up the log
+        return
+    __callbackGeneral(gpio, level, tick, "output")
 
 
 #
