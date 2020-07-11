@@ -59,6 +59,24 @@ class pinDef:
         "doorbell12"
     }
 
+    # GP Input pins - not wiegand though
+    __inputPins = {
+        "doorbellButton",
+        "doorSensor",
+        "exitbutton"
+    }
+
+    # GP Output pins
+    __outputPins = {
+        "doorStrike",
+        "doorbell12",
+        "doorbellCc",
+        "readerLed",
+        "readerBuzz",
+        "piActiveLed",
+        "spareLed"
+    }
+
     __pcbVersion = None
     __pcbVersionsAvailable = [1, 2.0, 2.1]
     __pcbPinouts = {
@@ -134,6 +152,9 @@ class pinDef:
                     self.__logger.log("WARN", "pin not defined", {"pin": p})
         if missingCriticalPins:
             self.__systemHandler.quit(1, "Failed - Critical pin/s not defined", "ERRR", "Critical pin/s not defined", missingCriticalPins)
+
+        self.__sortInputOutputPins()
+
         # done
         return
 
@@ -188,3 +209,17 @@ class pinDef:
 
         # done
         return
+
+    #
+    # Create two lists, one for input and one for output pins
+    #
+    def __sortInputOutputPins(self):
+        inputPins = {}
+        outputPins = {}
+        for pin in self.pins:
+            if pin in self.__inputPins:
+                inputPins = {**inputPins, pin: self.pins[pin]}
+            elif pin in self.__outputPins:
+                outputPins = {**outputPins, pin: self.pins[pin]}
+        self.pins["input"] = inputPins
+        self.pins["output"] = outputPins
