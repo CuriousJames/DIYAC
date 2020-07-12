@@ -48,6 +48,11 @@ import threading
 #  setDoorbellOutState(state)
 #   sets each output as described in __doorbellOutputs
 #
+# gpoCallback(gpio, level, tick, gpoName)
+#  called by __callbackOutput in main
+#  note that __callbackGeneral in main is ALSO called before gpoCallback
+#  handles gpo level changes - may be used to monitor they're
+#  doing as we expect
 
 
 class outputHandler:
@@ -234,3 +239,8 @@ class outputHandler:
             del newState
 
         return
+
+
+def gpoCallback(gpio, level, tick, gpoName):
+    # Doesn't do anything yet - but may be used for monitoring one day
+    return

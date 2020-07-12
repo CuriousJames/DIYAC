@@ -212,18 +212,20 @@ def __callbackGeneral(gpio, level, tick, inputOutput):
             logData["name"] = pin
             # Break out of the for loop as soon as we've found it (if we find it)
             break
-    l.log("DBUG", "GPIO Change", logData)
+    if inputOutput == "input":
+        logMsg = "GPI Change"
+    else:
+        logMsg = "GPO Change"
+    l.log("DBUG", logMsg, logData)
+    return logData["name"]
 
 
 #
 # callback function that is hit whenever the GPI changes
-def __callbackInput(gpio, level, tick):
-    __callbackGeneral(gpio, level, tick, "input")
+def __callbackInput(gpi, level, tick):
+    gpiName = __callbackGeneral(gpi, level, tick, "input")
 
-    # if it's the doorbell button, ring the doorbell
-    if gpio == p.pins["doorbellButton"] and level == 0:
-        ringDoorbellThread = threading.Thread(name='doorbellThread', target=outH.ringDoorbell)
-        ringDoorbellThread.start()
+    inH.gpiCallback(gpi, level, tick, gpiName)
 
 
 #
@@ -232,7 +234,9 @@ def __callbackOutput(gpio, level, tick):
     if gpio == p.pins["piActiveLed"]:
         # Do nothing with piActiveLed - as it really clogs up the log
         return
-    __callbackGeneral(gpio, level, tick, "output")
+    gpoName = __callbackGeneral(gpio, level, tick, "output")
+
+    outH.gpoCallback(gpio, level, tick, gpoName)
 
 
 #

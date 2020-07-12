@@ -46,6 +46,9 @@ import threading
 #   called by wiegand library, process & translate input from reader
 #   includes translation from incoming int to hex string
 #
+# gpiCallback(gpio, level, tick, gpiName)
+#  called by __callbackInput in main
+#  note that __callbackGeneral in main is ALSO called before gpiCallback
 
 
 class inputHandler:
@@ -412,3 +415,10 @@ class inputHandler:
             # error condition
             self.__logger.log("WARN", "unexpected number of bits", bits)
             return
+
+
+def gpiCallback(self, gpi, level, tick, gpiName):
+    # if it's the doorbell button, ring the doorbell
+    if gpiName == "doorbellButton" and level == 0:
+        ringDoorbellThread = threading.Thread(name='doorbellThread', target=self.__outputHandler.ringDoorbell)
+        ringDoorbellThread.start()
