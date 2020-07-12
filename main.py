@@ -90,8 +90,10 @@ def __init():
     for i in sys.argv:
         if i == "--daemon":
             runMode = "daemon"
+            break
         else:
             runMode = "normal"
+            break
     if os.environ.get("LAUNCHED_BY_SYSTEMD") == "1":
         runMode = "daemon"
 
@@ -175,7 +177,7 @@ def __init():
     # state ready
     sysH.notifyUp("READY=1")
     sysH.notifyUp("STATUS=Running")
-    l.log("NOTE", "DIYAC running")
+    l.log("NOTE", "DIYAC running", runMode)
     import getpass
     l.log("DBUG", "Running program as user", getpass.getuser())
 
