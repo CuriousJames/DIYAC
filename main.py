@@ -87,12 +87,13 @@ def __init():
 
     # get our run mode - find out if daemon
     global runMode
+    # Assume runMode is normal
+    runMode = "normal"
+
+    # Confirm if it's actually running as a daemon
     for i in sys.argv:
         if i == "--daemon":
             runMode = "daemon"
-            break
-        else:
-            runMode = "normal"
             break
     if os.environ.get("LAUNCHED_BY_SYSTEMD") == "1":
         runMode = "daemon"
