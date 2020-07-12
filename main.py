@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import time
-import threading
 import sys  # for nice exit
 import subprocess
 import os  # used for systemd related ops

@@ -190,8 +190,12 @@ class outputHandler:
         for pin in pinState:
             self.__pi.write(self.__pinDef.pins[pin["name"]], pin["state"])
 
-    # make the doorbell do a ringing
     def ringDoorbell(self):
+        ringDoorbellThread = threading.Thread(name='doorbellThread', target=self.__ringDoorbellThread)
+        ringDoorbellThread.start()
+
+    # make the doorbell do a ringing
+    def __ringDoorbellThread(self):
         self.__doorbellCount += 1
         self.__logger.log("DBUG", "******* Bell Count *******", self.__doorbellCount)
 
@@ -199,7 +203,18 @@ class outputHandler:
             self.__doorRinging = True
             self.__logger.log("INFO", "Start Doorbell")
 
-            self.__doorbellHit()
+            # Some kind of nice-enough doorbell ring pattern
+            self.__setDoorbellOutState(1)
+            time.sleep(0.7)
+            self.__setDoorbellOutState(0)
+            time.sleep(0.3)
+            self.__setDoorbellOutState(1)
+            time.sleep(0.4)
+            self.__setDoorbellOutState(0)
+            time.sleep(0.2)
+            self.__setDoorbellOutState(1)
+            time.sleep(0.4)
+            self.__setDoorbellOutState(0)
 
             # Wait to give a break before hearing more bell, even if the button is pressed again
             time.sleep(2)
@@ -209,20 +224,6 @@ class outputHandler:
         else:
             self.__logger.log("INFO", "NOT Ringing doorbell - it's already ringing")
         return
-
-    def __doorbellHit(self):
-        # Some kind of nice-enough doorbell ring pattern
-        self.__setDoorbellOutState(1)
-        time.sleep(0.7)
-        self.__setDoorbellOutState(0)
-        time.sleep(0.3)
-        self.__setDoorbellOutState(1)
-        time.sleep(0.4)
-        self.__setDoorbellOutState(0)
-        time.sleep(0.2)
-        self.__setDoorbellOutState(1)
-        time.sleep(0.4)
-        self.__setDoorbellOutState(0)
 
     def __setDoorbellOutState(self, state):
         if state != 1 and state != 0:
@@ -237,7 +238,6 @@ class outputHandler:
             # do the output
             self.__pi.write(self.__pinDef.pins[out["name"]], newState)
             del newState
-
         return
 
     def gpoCallback(self, gpio, level, tick, gpoName):

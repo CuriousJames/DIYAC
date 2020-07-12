@@ -419,5 +419,4 @@ class inputHandler:
     def gpiCallback(self, gpi, level, tick, gpiName):
         # if it's the doorbell button, ring the doorbell
         if gpiName == "doorbellButton" and level == 0:
-            ringDoorbellThread = threading.Thread(name='doorbellThread', target=self.__outputHandler.ringDoorbell)
-            ringDoorbellThread.start()
+            self.__outputHandler.ringDoorbell()
