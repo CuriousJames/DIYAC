@@ -416,9 +416,8 @@ class inputHandler:
             self.__logger.log("WARN", "unexpected number of bits", bits)
             return
 
-
-def gpiCallback(self, gpi, level, tick, gpiName):
-    # if it's the doorbell button, ring the doorbell
-    if gpiName == "doorbellButton" and level == 0:
-        ringDoorbellThread = threading.Thread(name='doorbellThread', target=self.__outputHandler.ringDoorbell)
-        ringDoorbellThread.start()
+    def gpiCallback(self, gpi, level, tick, gpiName):
+        # if it's the doorbell button, ring the doorbell
+        if gpiName == "doorbellButton" and level == 0:
+            ringDoorbellThread = threading.Thread(name='doorbellThread', target=self.__outputHandler.ringDoorbell)
+            ringDoorbellThread.start()

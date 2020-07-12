@@ -230,13 +230,13 @@ def __callbackInput(gpi, level, tick):
 
 #
 # callback function that is hit whenever the GPO changes
-def __callbackOutput(gpio, level, tick):
-    if gpio == p.pins["piActiveLed"]:
+def __callbackOutput(gpo, level, tick):
+    if gpo == p.pins["piActiveLed"]:
         # Do nothing with piActiveLed - as it really clogs up the log
         return
-    gpoName = __callbackGeneral(gpio, level, tick, "output")
+    gpoName = __callbackGeneral(gpo, level, tick, "output")
 
-    outH.gpoCallback(gpio, level, tick, gpoName)
+    outH.gpoCallback(gpo, level, tick, gpoName)
 
 
 #

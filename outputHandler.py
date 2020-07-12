@@ -240,7 +240,6 @@ class outputHandler:
 
         return
 
-
-def gpoCallback(gpio, level, tick, gpoName):
-    # Doesn't do anything yet - but may be used for monitoring one day
-    return
+    def gpoCallback(self, gpio, level, tick, gpoName):
+        # Doesn't do anything yet - but may be used for monitoring one day
+        return
