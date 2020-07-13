@@ -3,6 +3,7 @@ import datetime  # used for logging
 import json  # for outputting pretty strings from data
 import syslog
 import re  # for redacting data
+import sys # for stdout writing
 
 #
 # log
@@ -358,7 +359,7 @@ class logger:
             outStr = colStr + outStr + self.__ansiEscape + "0;0;0m"
 
         # do an output
-        print(outStr)
+        sys.stdout.write(outStr + "\n")
 
         # done
         return
