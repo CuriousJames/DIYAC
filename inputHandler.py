@@ -30,17 +30,17 @@ import threading
 #   called when there is a full token to be checked
 #   take token and check if in allowedTokens list
 #
-#  checkLockout()
+#  __checkLockout()
 #   see if the lock is active or not, and if it should be activated
 #
 #  __addAttempt()
-#   puts a new attempt and time into previousAttempts
+#   puts a new attempt and time into __previousAttempts
 #
 #  getBruteForceLockoutState()
 #   bool - if brute force is in action
 #
 #  calculateLockout()
-#   see if a new lockout should be activated - based on previousAttempts
+#   see if a new lockout should be activated - based on __previousAttempts
 #
 #  __wiegandCallback(bytes, code)
 #   called by wiegand library, process & translate input from reader
@@ -66,11 +66,11 @@ class inputHandler:
     __inputBuffer = ""
     __numpadLastInputTime = None
     lockout = {"state": "unlocked"}
-    previousAttempts = []
+    __previousAttempts = []
 
     #
     # init
-    # this is mostly to ge lockout bits from __settings
+    # this is mostly to get lockout bits from __settings
     def __init__(self, systemHandler, settings, logger, tokens, outputHandler, pi, pinDef):
         import pigpio  # pigpio is started in main, but this is necessary here for pullup definitions
         try:
@@ -210,7 +210,7 @@ class inputHandler:
             #  see if we need to think about lockout
             #  if locked out by overspeed - die
             #  add it onto the end of the input buffer
-            self.calculateNewOverspeedLockout()
+            self.__calculateNewOverspeedLockout()
             if self.lockout["state"] == "locked":
                 if self.lockout["type"] == "overspeed":
                     self.__logger.log("DBUG", "overspeed - numpad input ignored")
@@ -224,11 +224,11 @@ class inputHandler:
     # this if for a fully formed input to be checked/approved by lockout and then token checked
     #
     def __checkInput(self, rx, rxType):
-        # add attempt to previousAttempts
+        # add attempt to __previousAttempts
         self.__addAttempt()
 
         # check the lockout, bail if locked
-        if self.checkLockout() == "locked":
+        if self.__checkLockout() == "locked":
             self.__logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
             return
 
@@ -244,48 +244,48 @@ class inputHandler:
         return
 
     #
-    # add attempt into previousAttempts
+    # add attempt into __previousAttempts
     # remove last value if more than 3
     #
     def __addAttempt(self):
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
-        if len(self.previousAttempts) == self.__params["bruteforceThresholdAttempts"]:
-            del self.previousAttempts[0]
+        if len(self.__previousAttempts) == self.__params["bruteforceThresholdAttempts"]:
+            del self.__previousAttempts[0]
         # append new time
-        self.previousAttempts.append(timeNow)
+        self.__previousAttempts.append(timeNow)
 
     #
     # lockout
-    def checkLockout(self):
+    def __checkLockout(self):
         # if already locked, DENY
         if self.lockout["state"] == "locked":
             return "locked"
 
         # see if a new lockout should be started by bruteforce
-        if self.calculateNewBruteforceLockout() == "locked":
+        if self.__calcluateNewBruteforceLockout() == "locked":
             return "locked"
 
         # see if we need lockout from overspeed input
-        if self.calculateNewOverspeedLockout() == "locked":
+        if self.__calculateNewOverspeedLockout() == "locked":
             return "locked"
 
         # it's all easy
         return "unlocked"
 
     #
-    # calculate if there should be a lockout based on information from self.previousAttempts
+    # calculate if there should be a lockout based on information from self.__previousAttempts
     # if length of previousAttemps is below threshold, do nothing
-    def calculateNewBruteforceLockout(self):
+    def __calcluateNewBruteforceLockout(self):
         # time
         timeNow = time.time()
 
         # if not at threshold, do nothing
-        if len(self.previousAttempts) < self.__params["bruteforceThresholdAttempts"]:
+        if len(self.__previousAttempts) < self.__params["bruteforceThresholdAttempts"]:
             return "no change"
 
         # check by time of earliest chronological entry,
-        if self.previousAttempts[0] + self.__params["bruteforceThresholdTime"] < timeNow:
+        if self.__previousAttempts[0] + self.__params["bruteforceThresholdTime"] < timeNow:
             return "no change"
 
         # that must mean we're within the threshold time and attempts, initiate lockout!
@@ -301,7 +301,7 @@ class inputHandler:
     #
     # new lockout based on overspeed input?
     #
-    def calculateNewOverspeedLockout(self):
+    def __calculateNewOverspeedLockout(self):
         # time
         timeNow = time.time()
 
@@ -336,7 +336,7 @@ class inputHandler:
         # end
         self.__logger.log("INFO", "Lockout ended")
         self.lockout = {"state": "unlocked"}
-        self.previousAttempts = []
+        self.__previousAttempts = []
         return
 
     #
