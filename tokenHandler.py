@@ -37,7 +37,7 @@ import json  # for gettings settings and tokens
 #   remove any entries from allowedTokes that are not set or otherwise invalid
 #
 #  __formatTokens()
-#   remove ":" and make lowercase
+#   remove ":" and make uppercase
 #
 #  __transformOverlengthTokens()
 #   for ultraligh and other tokens that are more than 4 bytes long
@@ -102,7 +102,7 @@ class tokenHandler:
     #
     # function to make var of allowed tokens
     #  reads file
-    #  changes all hex values to lower case without ":"
+    #  changes all hex values to upper case without ":"
     #  changes mifare ultralight tokens to what will be received by reader - not implemented yet
     #
     def getAllowedTokens(self):
@@ -111,7 +111,7 @@ class tokenHandler:
         # get tokens from file
         # move "value" to "token" - backward compatibility with older version of __allowedTokens file
         # remove ":" from all tokens
-        # make all tokens lower case
+        # make all tokens upper case
         # chenge tokens that are too long for the reader
         #  TODO - this might have to be changed to be reader dependant
         #         if reader only does 26 bit wiegand for example
@@ -261,18 +261,18 @@ class tokenHandler:
     #
     # format token values
     #  remove ":"
-    #  make lowercase
+    #  make uppercase
     def __formatTokens(self):
         if self.__allowedTokens is False:
             return
-        # remove ":" and make lowercase
+        # remove ":" and make uppercase
         for tkn in self.__allowedTokens:
             # check token is there
             if "token" not in tkn:
                 continue
             # do the operation
             tkn["token"] = tkn["token"].replace(":", "")
-            tkn["token"] = tkn["token"].lower()
+            tkn["token"] = tkn["token"].upper()
         return
 
     #

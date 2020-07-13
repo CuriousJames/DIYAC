@@ -373,8 +373,8 @@ class inputHandler:
             input = input[:-1]  # trim last parity bit
             output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
             output = int(output, 2)  # change to integer - required for doing the change to hex
-            output = format(output, '#010x')  # make hex string
-            output = output[2:]  # trim "0x"
+            output = format(output, '#010X')  # make hex string
+            output = output[2:]  # trim "0X"
             self.__logger.log("DBUG", "output from formatting", {"token": output})
             self.__checkInput(output, "card")
         elif bits == 26:
@@ -385,8 +385,8 @@ class inputHandler:
             input = input[:-1]  # trim last parity bit
             output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
             output = int(output, 2)  # change to integer - required for doing the change to hex
-            output = format(output, '#010x')  # make hex string
-            output = output[4:]  # trim "0x"
+            output = format(output, '#010X')  # make hex string
+            output = output[4:]  # trim "0X"
             self.__logger.log("DBUG", "output from formatting", {"token": output})
             self.__checkInput(output, "card")
         elif bits == 4:
