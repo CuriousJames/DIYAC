@@ -375,7 +375,7 @@ class inputHandler:
             output = int(output, 2)  # change to integer - required for doing the change to hex
             output = format(output, '#010x')  # make hex string
             output = output[2:]  # trim "0x"
-            self.__logger.log("DBUG", "output from formatting", output)
+            self.__logger.log("DBUG", "output from formatting", {"token": output})
             self.__checkInput(output, "card")
         elif bits == 26:
             # make into hex string
@@ -387,7 +387,7 @@ class inputHandler:
             output = int(output, 2)  # change to integer - required for doing the change to hex
             output = format(output, '#010x')  # make hex string
             output = output[4:]  # trim "0x"
-            self.__logger.log("DBUG", "output from formatting", output)
+            self.__logger.log("DBUG", "output from formatting", {"token": output})
             self.__checkInput(output, "card")
         elif bits == 4:
             # someone pressed a button
