@@ -343,10 +343,7 @@ class inputHandler:
     # this function is called by the wiegand library when it has read something
     #
     def __wiegandCallback(self, bits, code):
-        # if bits != 4 AND bits != 34
-        #  error
-        #
-        # if bits == 34, it's a card token
+        # if bits == 34 or 26, it's a card token
         #  convert to binary string
         #  trim "0b", start parity bit, end parity bit
         #  re order bytes
@@ -354,67 +351,63 @@ class inputHandler:
         #  compare against list
         #
         # if bits == 4
-        #  if code = 0
-        #   ring doorbell
-        #  else
-        #   do something else
-
-        #
-        # log
-        self.__logger.log("DBUG", "New read", {"bits": bits, "code": code})
+        #  intrept key and pass onto __newNumpadInput
 
         #
         # we have a card
-        if bits == 34:
+        if bits == 34 or bits == 26:
             # make input into a hex string
             #
-            input = str(format(code, '#036b'))  # make binary string
-            input = input[3:]  # trim '0b' and first parity bit
-            input = input[:-1]  # trim last parity bit
-            output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
-            output = int(output, 2)  # change to integer - required for doing the change to hex
-            output = format(output, '#010X')  # make hex string
-            output = output[2:]  # trim "0X"
-            self.__logger.log("DBUG", "output from formatting", {"token": output})
+            output = self.__wiegandToHex(bits, code)
+            self.__logger.log("DBUG", "New token read", {"bits": bits, "code": code, "token": output})
             self.__checkInput(output, "card")
-        elif bits == 26:
-            # make into hex string
-            # see above
-            input = str(format(code, '#028b'))  # make binary string
-            input = input[3:]  # trim '0b' and first parity bit
-            input = input[:-1]  # trim last parity bit
-            output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
-            output = int(output, 2)  # change to integer - required for doing the change to hex
-            output = format(output, '#010X')  # make hex string
-            output = output[4:]  # trim "0X"
-            self.__logger.log("DBUG", "output from formatting", {"token": output})
-            self.__checkInput(output, "card")
+        # someone pressed a button
         elif bits == 4:
-            # someone pressed a button
-            #  sanity check - maybe wiegand connection is swapped
             #  tidy input
+            #  sanity check - maybe wiegand connection is swapped
             #  run numpadinput function
-
-            # little check - hint that wiegand wires may not be correct way around
-            if code > 11:
-                self.__logger.log("WARN", "keypad code is unexpected value - check wiegand connections are not swapped", {"input": code})
 
             # Tidy up the input - change * and #, or convert to string
             if code == 10:
                 key = "*"
             elif code == 11:
                 key = "#"
+            elif code > 11:
+                # little check - hint that wiegand wires may not be correct way around
+                self.__logger.log("WARN", "Keypad code is unexpected value - check wiegand connections are not swapped", {"bits": bits, "code": code})
+                return
             else:
                 key = str(code)
-            self.__logger.log("DBUG", "Keypad key pressed", key)
+
+            self.__logger.log("DBUG", "Keypad key pressed", {"bits": bits, "code": code, "key": key})
 
             # run through the keypad checker
             self.__newNumpadInput(key)
         else:
             #
             # error condition
-            self.__logger.log("WARN", "unexpected number of bits", bits)
+            self.__logger.log("WARN", "New read - unexpected amount of bits", {"bits": bits, "code": code})
             return
+
+    def __wiegandToHex(self, bits, code):
+        if bits == 34:
+            binaryFormatter = "#036b"
+            trimChar = 2
+        elif bits == 26:
+            binaryFormatter = "#028b"
+            trimChar = 4
+        else:
+            self.__logger.log("ERRR", "__wiegandToHex called with unexpected amount of bits", {"bits": bits, "code": code})
+            return False
+
+        input = str(format(code, binaryFormatter))  # make binary string
+        input = input[3:]  # trim '0b' and first parity bit
+        input = input[:-1]  # trim last parity bit
+        output = input[24:] + input[16:24] + input[8:16] + input[:8]  # re-order bytes
+        output = int(output, 2)  # change to integer - required for doing the change to hex
+        output = format(output, '#010X')  # make hex string
+        output = output[trimChar:]  # trim "0X" (34) or "0X00" (26)
+        return output
 
     def gpiCallback(self, gpi, level, tick, gpiName):
         # if it's the doorbell button, ring the doorbell
