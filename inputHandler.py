@@ -224,13 +224,13 @@ class inputHandler:
     # this if for a fully formed input to be checked/approved by lockout and then token checked
     #
     def __checkInput(self, rx, rxType):
-        # add attempt to __previousAttempts
-        self.__addAttempt()
-
         # check the lockout, bail if locked
         if self.__checkLockout() == "locked":
             self.__logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
             return
+
+        # add attempt to __previousAttempts
+        self.__addAttempt()
 
         # check the token, true if approved, false if denied
         tokenCheckOutput = self.__tokens.checkToken(rx, rxType)
@@ -250,7 +250,7 @@ class inputHandler:
     def __addAttempt(self):
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
-        if len(self.__previousAttempts) == self.__params["bruteforceThresholdAttempts"]:
+        if len(self.__previousAttempts) > self.__params["bruteforceThresholdAttempts"]:
             del self.__previousAttempts[0]
         # append new time
         self.__previousAttempts.append(timeNow)
