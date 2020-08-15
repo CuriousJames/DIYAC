@@ -33,14 +33,14 @@ import threading
 #  __checkLockout()
 #   see if the lock is active or not, and if it should be activated
 #
-#  __addAttempt()
-#   puts a new attempt and time into __previousAttempts
+#  __addDeniedAttempt()
+#   puts a new bad attempt and time into __previousBadAttempts
 #
 #  getBruteForceLockoutState()
 #   bool - if brute force is in action
 #
 #  calculateLockout()
-#   see if a new lockout should be activated - based on __previousAttempts
+#   see if a new lockout should be activated - based on __previousBadAttempts
 #
 #  __wiegandCallback(bytes, code)
 #   called by wiegand library, process & translate input from reader
@@ -66,7 +66,7 @@ class inputHandler:
     __inputBuffer = ""
     __numpadLastInputTime = None
     lockout = {"state": "unlocked"}
-    __previousAttempts = []
+    __previousBadAttempts = []
 
     #
     # init
@@ -229,31 +229,30 @@ class inputHandler:
             self.__logger.log("INFO", "ACCESS DENIED BY LOCKOUT", {"token": rx})
             return
 
-        # add attempt to __previousAttempts
-        self.__addAttempt()
-
         # check the token, true if approved, false if denied
         tokenCheckOutput = self.__tokens.checkToken(rx, rxType)
         if tokenCheckOutput["allow"] is True:
-            self.__logger.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": tokenCheckOutput["user"]})
             self.__outputHandler.openDoor()
+            self.__logger.log("INFO", "ACCESS ALLOWED BY TOKEN", {"token": rx, "type": rxType, "user": tokenCheckOutput["user"]})
         else:
+            # add bad attempt to __previousBadAttempts
+            self.__addBadAttempt()
             self.__logger.log("INFO", "ACCESS DENIED BY TOKEN", {"token": rx, "type": rxType})
 
         # done
         return
 
     #
-    # add attempt into __previousAttempts
+    # add attempt into __previousBadAttempts
     # remove last value if more than 3
     #
-    def __addAttempt(self):
+    def __addBadAttempt(self):
         timeNow = time.time()
         # if previous attempts is already populated, remove entry 0
-        if len(self.__previousAttempts) > self.__params["bruteforceThresholdAttempts"]:
-            del self.__previousAttempts[0]
+        if len(self.__previousBadAttempts) > self.__params["bruteforceThresholdAttempts"]:
+            del self.__previousBadAttempts[0]
         # append new time
-        self.__previousAttempts.append(timeNow)
+        self.__previousBadAttempts.append(timeNow)
 
     #
     # lockout
@@ -274,18 +273,18 @@ class inputHandler:
         return "unlocked"
 
     #
-    # calculate if there should be a lockout based on information from self.__previousAttempts
+    # calculate if there should be a lockout based on information from self.__previousBadAttempts
     # if length of previousAttemps is below threshold, do nothing
     def __calcluateNewBruteforceLockout(self):
         # time
         timeNow = time.time()
 
         # if not at threshold, do nothing
-        if len(self.__previousAttempts) < self.__params["bruteforceThresholdAttempts"]:
+        if len(self.__previousBadAttempts) < self.__params["bruteforceThresholdAttempts"]:
             return "no change"
 
         # check by time of earliest chronological entry,
-        if self.__previousAttempts[0] + self.__params["bruteforceThresholdTime"] < timeNow:
+        if self.__previousBadAttempts[0] + self.__params["bruteforceThresholdTime"] < timeNow:
             return "no change"
 
         # that must mean we're within the threshold time and attempts, initiate lockout!
@@ -336,7 +335,7 @@ class inputHandler:
         # end
         self.__logger.log("INFO", "Lockout ended")
         self.lockout = {"state": "unlocked"}
-        self.__previousAttempts = []
+        self.__previousBadAttempts = []
         return
 
     #

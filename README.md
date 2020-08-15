@@ -95,7 +95,7 @@ This is the structure of the settings.json file:
   - delimiter - str - optional, default "#" - start/stop character for keypad entry
   - timeout - float - optional, default 5 - seconds between keypad button presses before timeout
   - bruteforceThresholdTime - float - optional, default 20 - seconds for number of attempts before lockout
-  - bruteforceThresholdAttempts - int - optional, default 3 - number of attempts within threshold time that are allowed before lockout starts (so if it is 3 then the fourth attempt will be denied)
+  - bruteforceThresholdAttempts - int - optional, default 3 - number of bad (denied) token access attempts within threshold time that are allowed before lockout starts (so if it is 3 then the fourth attempt will be denied, and the lockout will start)
   - overspeedThresholdTime - float - minimum number of seconds between ench key press or card read
   - lockoutTime - float - optional, default 600 - seconds that a lockout will last (for both brute forces & overspeed inputs)
 - outputHandling - obj
