@@ -58,7 +58,7 @@ Settings are stored in settings.json which **must** be made by the user - you ma
 
 This is the structure of the settings.json file:
 
-- root - str - optional, default to where reader.py is - path to project root
+- root - str - optional, defaults to where main.py is - path to project root
 - allowedTokens - obj
   - path - str - optional, default will not allow any entry - path to allowedTokens.json file, can be absolute or relative
 - wiegandLength - int - optional, default 34 - number of bits that the wiegand reader will spit out
@@ -95,7 +95,7 @@ This is the structure of the settings.json file:
   - delimiter - str - optional, default "#" - start/stop character for keypad entry
   - timeout - float - optional, default 5 - seconds between keypad button presses before timeout
   - bruteforceThresholdTime - float - optional, default 20 - seconds for number of attempts before lockout
-  - bruteforceThresholdAttempts - int - optional, default 3 - number of attempts within threshold time that will start lockout
+  - bruteforceThresholdAttempts - int - optional, default 3 - number of attempts within threshold time that will start lockout (so for 3 the third attempt will be denied)
   - overspeedThresholdTime - float - minimum number of seconds between ench key press or card read
   - lockoutTime - float - optional, default 600 - seconds that a lockout will last (for both brute forces & overspeed inputs)
 - outputHandling - obj
