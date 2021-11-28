@@ -1,5 +1,5 @@
 {
-        "root":"/home/user/DIYAC/",
+        "root":"/home/pi/DIYAC/",
         "allowedTokens": {
                 "path":"allowedTokens.json"
         },
@@ -19,7 +19,7 @@
         }
         },
         "pinDef": {
-                "pcbVersion": 1,
+                "pcbVersion": 2.1,
                 "readerLed": 7
         },
         "inputHandling": {
