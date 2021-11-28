@@ -265,7 +265,7 @@ class logger:
             f = open(self.__filePath, "a")
         except:
             # unable to open
-            self.log("WARN", "unable to open log file - will not perform logging to file")
+            self.log("WARN", "unable to open log file (" + self.__filePath + ")- will not perform logging to file")
             self.__fileLevel = "NONE"
             return
 
