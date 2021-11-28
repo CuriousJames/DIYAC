@@ -12,7 +12,9 @@
 
 ## Warning ##
 
-This is very much a work in progress - we are still developing this as a personal hobby
+This is a work in progress as a personal hobby, however it has been running without any problems for the project owners use 24/7 for over a year.
+
+That said of course, use at your own risk.
 
 ## Purpose ##
 
