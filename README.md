@@ -93,6 +93,7 @@ This is the structure of the settings.json file:
   - spareLed - int - optional - gpio number
   - wiegand0 - int - optional - gpio number
   - wiegand1 - int - optional - gpio number
+  - exitButton - int - optional - gpio number
 - inputHandling - obj
   - delimiter - str - optional, default "#" - start/stop character for keypad entry
   - timeout - float - optional, default 5 - seconds between keypad button presses before timeout
