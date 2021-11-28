@@ -46,7 +46,7 @@ class pinDef:
         "spareLed": None,
         "wiegand0": None,
         "wiegand1": None,
-        "exitbutton": None
+        "exitButton": None
     }
 
     # Pins which MUST be defined in order to have basic DIYAC functionality
@@ -63,7 +63,7 @@ class pinDef:
     __inputPins = {
         "doorbellButton",
         "doorSensor",
-        "exitbutton"
+        "exitButton"
     }
 
     # GP Output pins
