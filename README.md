@@ -34,11 +34,11 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
     ```
   - This repository
     ```
-    sudo apt install git && git clone https://github.com/CuriousJames/DIYAC.git
+    sudo apt install git && git clone https://github.com/CuriousJames/DIYAC.git && cd DIYAC
     ```
   - Wiegand.py put in the project directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
     ```
-    wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip && unzip wiegand_py.zip && rm -rf wiegand_py.zip
+    wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip && unzip wiegand_py.zip && rm -rf wiegand_py.zip && rm -rf wiegand_old.py
     ```
   - Enable PiGPIO on the Pi (just do this once and it will start automatically on boot)
     ```
@@ -46,20 +46,18 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
     ```
   - SD Notify
     - with pip3
-      - install pip3
-        ```
-        sudo apt-get update && sudo apt-get install python3-pip
-        ```
-      - install python sdnotify
-        ```
-        pip3 install sdnotify
-        ```
+      ```
+      sudo apt-get update && sudo apt-get install python3-pip && sudo pip3 install sdnotify
+      ```
     - with apt
       ```
       sudo apt install python3-sdnotify
       ```
 - Config
-  - allow sudo group to run systemctl start pigpiod without password
+  - Create DIYAC user, diable login and add to sudoers group
+    ```
+    sudo useradd -M diyac && sudo usermod -L diyac
+    ```
 
 ## Installing the service ##
 
