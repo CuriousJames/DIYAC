@@ -27,6 +27,11 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
 - Hardware
   - Raspberry Pi (ideally 2 or up)
 - Software
+  - Install raspbian legacy 64bit lite (as you don't need a desktop env) with the raspberry pi imager
+  - Update your pi
+    ```
+    sudo apt update && sudo apt dist-upgrade
+    ```
   - This repository
     ```
     sudo apt install git && git clone https://github.com/CuriousJames/DIYAC.git
