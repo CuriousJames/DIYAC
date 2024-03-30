@@ -2,6 +2,7 @@ wiegand.py
 wiegand_old.py
 wiegand_py.zip
 allowedTokens.json
+__pycache__
 Experimental/
 .vscode/
 settings.json
