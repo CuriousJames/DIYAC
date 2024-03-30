@@ -23,7 +23,8 @@
                 "readerLed": 7
         },
         "inputHandling": {
-                "lockoutTime": 600
+                "lockoutTime": 600,
+                "doorSensorOpen": 1
         },
         "outputHandling" : {
                 "doorOpenTime": 2

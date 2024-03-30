@@ -60,7 +60,8 @@ class inputHandler:
         "bruteforceThresholdAttempts": 3,
         "bruteforceThresholdTime": 20,
         "overspeedThresholdTime": 0.1,
-        "lockoutTime": 600
+        "lockoutTime": 600,
+        "doorSensorOpen": 1
     }
     __numpadState = "ready"
     __inputBuffer = ""
@@ -104,9 +105,9 @@ class inputHandler:
             return
 
         # the __settings we're going to get are
-        settingsToGet = ["delimiter", "timeout", "bruteforceThresholdTime", "bruteforceThresholdAttempts", "overspeedThresholdTime", "lockoutTime"]
+        settingsToGet = ["delimiter", "timeout", "bruteforceThresholdTime", "bruteforceThresholdAttempts", "overspeedThresholdTime", "lockoutTime", "doorSensorOpen"]
         # make sure they exist
-        # if exist, update __params list
+        # if exist, overwrite __params list with user defined settings
         for s in settingsToGet:
             try:
                 self.__settings.allSettings["inputHandling"][s]
@@ -123,6 +124,12 @@ class inputHandler:
 
         self.__pi.set_pull_up_down(self.__pinDef.pins["doorbellButton"], pigpio.PUD_UP)
         self.__pi.set_pull_up_down(self.__pinDef.pins["doorSensor"], pigpio.PUD_UP)
+
+        doorbellState=self.__pi.read(self.__pinDef.pins["doorbellButton"])
+        self.__logger.log("DBUG", "Doorbell Initial GPI State", {"doorbellState": doorbellState})
+
+        doorSensorState=self.__pi.read(self.__pinDef.pins["doorSensor"])
+        self.__logger.log("DBUG", "Door Sensor Initial GPI State", {"doorSensorState": doorSensorState})
 
         # set the wiegand reading
         # will call function __wiegandCallback on receiving data
@@ -411,4 +418,9 @@ class inputHandler:
     def gpiCallback(self, gpi, level, tick, gpiName):
         # if it's the doorbell button, ring the doorbell
         if gpiName == "doorbellButton" and level == 0:
+            self.__logger.log("DBUG", "doorbell button pushed", {"GPI": gpi, "GPI Name": gpiName, "levl": level})
             self.__outputHandler.ringDoorbell()
+        elif gpiName == "doorSensor":
+            self.__logger.log("DBUG", "Door sensor changed state", {"GPI": gpi, "GPI Name": gpiName, "levl": level})
+        else:
+            self.__logger.log("DBUG", "Unknown GPI State changed", {"GPI": gpi, "GPI Name": gpiName, "levl": level})

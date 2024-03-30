@@ -101,6 +101,7 @@ This is the structure of the settings.json file:
   - bruteforceThresholdAttempts - int - optional, default 3 - number of bad (denied) token access attempts within threshold time that are allowed before lockout starts (so if it is 3 then the fourth attempt will be denied, and the lockout will start)
   - overspeedThresholdTime - float - minimum number of seconds between ench key press or card read
   - lockoutTime - float - optional, default 600 - seconds that a lockout will last (for both brute forces & overspeed inputs)
+  - doorSensorOpen - binary - set to 1 if level reads '1' when door is open, otherwise set to '0'
 - outputHandling - obj
   - doorOpenTime - float - optional, default 5 - seconds that the door strike will be open for on access granted
   - doorbellCcTime - float - optional, default 0.1 - seconds that doorbell contact closure will be closed/opened for
