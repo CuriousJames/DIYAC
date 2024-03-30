@@ -27,32 +27,61 @@ Also included in 'Extras' is the [Fritzing](https://fritzing.org/) pcb/breadboar
 - Hardware
   - Raspberry Pi (ideally 2 or up)
 - Software
+  - Install raspbian legacy 64bit lite (as you don't need a desktop env) with the raspberry pi imager
+  - Update your pi
+    ```
+    sudo apt update && sudo apt dist-upgrade
+    ```
+  - This repository
+    ```
+    sudo apt install git && git clone https://github.com/CuriousJames/DIYAC.git && cd DIYAC
+    ```
   - Wiegand.py put in the project directory (as obtained from: [Abyz.me.uk](http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip))
-    - `wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip`
-    - `unzip wiegand_py.zip`
+    ```
+    wget http://abyz.me.uk/rpi/pigpio/code/wiegand_py.zip && unzip wiegand_py.zip && rm -rf wiegand_py.zip && rm -rf wiegand_old.py
+    ```
   - Enable PiGPIO on the Pi (just do this once and it will start automatically on boot)
-    - `sudo systemctl enable pigpiod`
+    ```
+    sudo apt-get update && sudo apt-get install pigpio python-pigpio python3-pigpio && sudo systemctl enable pigpiod
+    ```
   - SD Notify
     - with pip3
-      - install pip3 `sudo apt-get update && sudo apt-get install python3-pip`
-      - install python sdnotify `pip3 install sdnotify`
+      ```
+      sudo apt-get update && sudo apt-get install python3-pip && sudo pip3 install sdnotify
+      ```
     - with apt
-      - `sudo apt install python3-sdnotify`
+      ```
+      sudo apt install python3-sdnotify
+      ```
 - Config
-  - allow sudo group to run systemctl start pigpiod without password
+  - Create DIYAC user, diable login and add to sudoers group
+    ```
+    sudo useradd -M diyac && sudo usermod -L diyac
+    ```
 
 ## Installing the service ##
 
 The hard way (hopefully there will be a script to do this and more soon!)
 
 1. If '/home/pi/diyac' IS your diyac folder location:
-     1. `sudo systemctl link /home/pi/diyac/diyac.service`
-2. If '/home/pi/diyac' is NOT your diyac folder location:
+   ```
+   cp /home/pi/DIYAC/diyac.service_example /home/pi/DIYAC/diyac.service && sudo systemctl link /home/pi/DIYAC/diyac.service && sudo systemctl enable diyac.service
+   ```
+1. If '/home/pi/diyac' is NOT your diyac folder location:
      1. change the 'ExecStart' line in 'diyac.service' to 'ExecStart=/usr/bin/python3 /your/diyac/folder/location/main.py'
-     2. `sudo systemctl link /your/diyac/folder/location/diyac.service`
-4. `sudo systemctl enable diyac.service`
-5. `sudo reboot`
-6. Done - The service will now run on startup of the Pi
+     2.
+     ```
+     sudo systemctl link /your/diyac/folder/location/diyac.service
+     ```
+2.
+  ```
+  sudo systemctl enable diyac.service
+  ```
+3.
+  ```
+  sudo reboot
+  ```
+4. Done - The service will now run on startup of the Pi
 
 ## Settings ##
 
