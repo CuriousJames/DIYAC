@@ -176,7 +176,7 @@ class outputHandler:
     def setDoor(self, state):
         # error state
         if state != "open" and state != "closed":
-            self.__logger.log("WARN", "No state set for changing door state")
+            self.__logger.log("WARN", "No valid state set for changing door state")
             return
         # open
         if state == "open":
